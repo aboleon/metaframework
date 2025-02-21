@@ -123,7 +123,7 @@ trait Responses
     public function responseNotice($message): static
     {
         if ($this->enabledMessages()) {
-            $this->response['messages'][]['info'] = $message;
+            $this->response[$this->messagesKey()][]['info'] = $message;
         }
 
         return $this;
