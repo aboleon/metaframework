@@ -61,7 +61,7 @@ trait Responses
         }
 
         if ($this->debugMode && ! $this->keepErrors) {
-            $this->response['error'] = false;
+            unset($this->response['error']);
         }
 
         return $this->response;
@@ -175,7 +175,9 @@ trait Responses
     protected function responseWarning($message, bool $error = true): void
     {
         if ($this->enabledMessages()) {
-            $this->response['error']                           = $error;
+            if ($error) {
+                $this->response['error']= true;
+            }
             $this->response[$this->messagesKey()][]['warning'] = $message;
         }
     }
@@ -255,7 +257,10 @@ trait Responses
             foreach ($messages as $message) {
                 $this->response[$this->messagesKey()][] = $message;
             }
-            $this->response['error'] = $object->hasErrors();
+            if ($object->hasErrors()) {
+                $this->response['error'] = true;
+            }
+
         }
 
         return $this;
