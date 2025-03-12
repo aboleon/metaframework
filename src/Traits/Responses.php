@@ -20,6 +20,19 @@ trait Responses
     protected bool $keepErrors = false;
     protected bool $restrictedToDev = false;
 
+    public function reset()
+    {
+        $this->response          = [];
+        $this->redirect_route    = null;
+        $this->redirect_to       = null;
+        $this->disable_responses = false;
+        $this->disable_redirects = false;
+        $this->ajax_mode         = false;
+        $this->debugMode         = false;
+        $this->keepErrors        = false;
+        $this->restrictedToDev   = false;
+    }
+
     public function enableAjaxMode(): static
     {
         $this->ajax_mode = true;
@@ -176,17 +189,17 @@ trait Responses
     {
         if ($this->enabledMessages()) {
             if ($error) {
-                $this->response['error']= true;
+                $this->response['error'] = true;
             }
             $this->response[$this->messagesKey()][]['warning'] = $message;
         }
     }
 
-    protected function responseDebug($message, string $notice=''): void
+    protected function responseDebug($message, string $notice = ''): void
     {
-        $this->debugMode                                 = true;
+        $this->debugMode = true;
 
-        $this->responseWarning('<b>DEBUG&nbsp;|&nbsp;</b> '. $notice, error: false);
+        $this->responseWarning('<b>DEBUG&nbsp;|&nbsp;</b> '.$notice, error: false);
         $this->response[$this->messagesKey()][]['debug'] = $message;
     }
 
@@ -260,7 +273,6 @@ trait Responses
             if ($object->hasErrors()) {
                 $this->response['error'] = true;
             }
-
         }
 
         return $this;
@@ -325,8 +337,9 @@ trait Responses
 
     public function restrictToDev(): self
     {
-        $this->restrictedToDev = true;
+        $this->restrictedToDev               = true;
         $this->response['restricted_to_dev'] = true;
+
         return $this;
     }
 
