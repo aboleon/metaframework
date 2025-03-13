@@ -19,6 +19,7 @@ trait Responses
     protected bool $debugMode = false;
     protected bool $keepErrors = false;
     protected bool $restrictedToDev = false;
+    protected bool $as_exception = false;
 
     public function reset()
     {
@@ -31,6 +32,25 @@ trait Responses
         $this->debugMode         = false;
         $this->keepErrors        = false;
         $this->restrictedToDev   = false;
+    }
+
+    public function throwException(): self
+    {
+        $this->as_exception = true;
+
+        return $this;
+    }
+
+    public function shouldBeException(): bool
+    {
+        return $this->as_exception === true;
+    }
+
+    public function disableExceptionMode(): self
+    {
+        $this->as_exception = false;
+
+        return $this;
     }
 
     public function enableAjaxMode(): static
@@ -280,7 +300,7 @@ trait Responses
 
     public function responseException(Throwable $e, string $message = ''): static
     {
-        $this->responseError(! empty($message) ? $message : "Une erreur est survenue.");
+        $this->responseError(! empty($message) ? $message : __('mfw.errors.error'));
 
         if (auth()->check() && auth()->user()->hasRole('dev')) {
             $this->responseWarning($e->getMessage());

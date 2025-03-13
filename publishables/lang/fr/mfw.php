@@ -117,7 +117,8 @@ return [
     ],
     'validation-banner' => 'Toutes les informations ne sont pas correctement remplies. Veuillez corriger.',
     'errors' => [
-        'composing_data' => "Les données n'ont pas pu être composées correctement."
+        'composing_data' => "Les données n'ont pas pu être composées correctement.",
+        'error' => "Une erreur est survenue."
     ],
     'passwords' => [
         'is' => "Le mot de passe est <strong>:password</strong>"

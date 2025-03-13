@@ -108,4 +108,8 @@ return [
         'password_confirm' => "Please enter your password to confirm the logout of all other sessions of your account, on all devices used.",
         'device' => 'This device',
     ],
+    'errors' => [
+        'composing_data' => "Data was not composed correctly.",
+        'error' => "An error occured."
+    ],
 ];
