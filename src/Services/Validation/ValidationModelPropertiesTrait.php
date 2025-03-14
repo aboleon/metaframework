@@ -31,7 +31,7 @@ trait ValidationModelPropertiesTrait
     /**
      * @throws Exception
      */
-    public function validateModelProperyEvent(
+    public function validateModelProperty(
         string $property,
         string $message = '',
     ) {
