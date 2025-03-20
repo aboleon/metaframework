@@ -1,0 +1,78 @@
+.line {
+    position: relative;
+}
+
+#configurator {
+    border: 1px dashed #999;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.alert-dismissable .close, .alert-dismissible .close {
+    top: -5px;
+}
+
+
+.module {
+    border: 1px dashed #999;
+    padding: 10px 20px 20px 20px;
+    margin-bottom: 20px;
+}
+
+#configurator-options {
+    margin-bottom: 20px;
+    button {
+        margin-bottom: 10px;
+    }
+}
+
+
+.fa-minus-square {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 26px;
+    cursor: pointer;
+}
+
+button.add {
+    margin: 10px 0 0 0;
+}
+
+.box {
+    margin: 15px 0;
+    clear: both;
+}
+
+.messages {
+    margin-top: 20px;
+}
+
+#modules {
+    position: relative;
+}
+
+.module-bloc {
+    background: white;
+    position: relative;
+    margin-bottom: 40px;
+    border: 2px dashed #96d1e8;
+    padding: 32px 20px 20px;
+
+    h6 {
+        color: white;
+        position: absolute;
+        top: -15px;
+        padding: 5px 10px;
+        cursor: move;
+        &.btn-warning {
+            color: #212529;
+        }
+    }
+    .delete-module {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
+}

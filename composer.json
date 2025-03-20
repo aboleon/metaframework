@@ -1,22 +1,31 @@
 {
-    "name": "aboleon/metaframework",
-    "description": "Meta Framework CMS",
-    "minimum-stability": "stable",
-    "license": "proprietary",
-    "keywords": [
-        "meta framework"
-    ],
-    "authors": [
-        {
-            "name": "Aboleon Media",
-            "email": "dev@aboleon.media"
-        }
-    ],
-    "require": {
-        "php": "^8.2",
-        "css-crush/css-crush": "^4.1",
-        "intervention/image": "^2.7",
-        "symfony/mime": "^6.2"
+  "name": "aboleon/metaframework",
+  "description": "Meta Framework CMS",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "keywords": [
+    "meta framework"
+  ],
+  "authors": [
+    {
+      "name": "Aboleon Media",
+      "email": "dev@aboleon.media"
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "css-crush/css-crush": "^4.1",
+    "intervention/image": "^3.11",
+    "symfony/mime": "^7.2"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^9.9",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.0.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "MetaFramework\\": "src"
     },
     "require-dev": {
         "phpstan/phpstan": "^1.10",
@@ -65,4 +74,16 @@
             "url": "../package-meta-framework"
         }
     ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../package-meta-framework"
+    }
+  ]
 }

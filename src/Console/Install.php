@@ -36,8 +36,6 @@ class Install extends Command
         }
     }
 
-
-
     private function config()
     {
         $this->newLine();
@@ -45,42 +43,110 @@ class Install extends Command
         $this->comment('------------------------------------------');
 
         $app_name = $this->ask("What is the name of your app");
-        $app_default_lg = $this->ask("What is the app default language locale (en, fr, de..) ? Default is en");
-
-        $file = config_path('app.php');
-        $lines = file($file, FILE_IGNORE_NEW_LINES);
-
-        $seek = array_filter($lines, function ($line) {
-            return strstr($line, "'name'");
-        });
-        $lines[key($seek)] = "    'name' => '" . addslashes($app_name) . "',";
-
-        $seek = array_filter($lines, function ($line) {
-            return strstr($line, "'locale'");
-        });
-        $lines[key($seek)] = "    'locale' => '" . $app_default_lg . "',";
-
-        $seek = array_filter($lines, function ($line) {
-            return strstr($line, "'fallback_locale'");
-        });
-        $lines[key($seek)] = "    'fallback_locale' => '" . $app_default_lg . "',";
-        file_put_contents($file, implode("\n", $lines));
-
+        $app_default_lg = $this->ask("What is the app default language locale (en, fr, de..) ? Default is en", 'en');
         $panel_prefix = $this->ask("What is the prefix for your back-office routes");
 
-        file_put_contents(__DIR__ . '/../../publishables/config/mfw.php', "<?php
+        // Validate input
+        if (empty($app_name) || empty($app_default_lg) || empty($panel_prefix)) {
+            $this->error('All fields are required.');
+            return;
+        }
+
+        // Update app.php configuration
+        $this->updateConfigFile(config_path('app.php'), [
+            "'name'" => "    'name' => '" . addslashes($app_name) . "',",
+            "'locale'" => "    'locale' => '" . $app_default_lg . "',",
+            "'fallback_locale'" => "    'fallback_locale' => '" . $app_default_lg . "',"
+        ]);
+
+        // Create mfw.php configuration
+        $mfwConfigPath = base_path('config/mfw.php');
+        $mfwConfigContent = "<?php
 return [
     'route' => '" . $panel_prefix . "',
     'locales' => ['" . $app_default_lg . "'],
     'active_locales' => ['" . $app_default_lg . "']
-];");
+];";
 
-        $this->replaceInFile('/dashboard', '/' . $panel_prefix . '/dashboard', app_path('Providers/RouteServiceProvider.php'));
+        if (!File::put($mfwConfigPath, $mfwConfigContent)) {
+            $this->error('Failed to write mfw configuration file.');
+            return;
+        }
 
+        // Update routes in bootstrap/app.php or routes/web.php
+        $routeFilePath = base_path('routes/web.php'); // or base_path('routes/web.php')
+        $this->replaceInFile("view('dashboard", "view('" . $panel_prefix . '/dashboard', $routeFilePath);
 
         $this->callPublishConfiguration();
     }
 
+    /**
+     * Update configuration file by replacing specific lines.
+     *
+     * @param string $filePath
+     * @param array $replacements
+     * @return void
+     */
+    private function updateConfigFile(string $filePath, array $replacements): void
+    {
+        if (!File::exists($filePath)) {
+            $this->error('Configuration file not found: ' . $filePath);
+            return;
+        }
 
+        $lines = file($filePath, FILE_IGNORE_NEW_LINES);
+        if ($lines === false) {
+            $this->error('Failed to read configuration file: ' . $filePath);
+            return;
+        }
 
+        foreach ($replacements as $search => $replace) {
+            $seek = array_filter($lines, function ($line) use ($search) {
+                return strstr($line, $search);
+            });
+            if (!empty($seek)) {
+                $lines[key($seek)] = $replace;
+            }
+        }
+
+        if (!File::put($filePath, implode("\n", $lines))) {
+            $this->error('Failed to update configuration file: ' . $filePath);
+        }
+    }
+
+    /**
+     * Replace a string in a file.
+     *
+     * @param string $search
+     * @param string $replace
+     * @param string $filePath
+     * @return void
+     */
+    private function replaceInFile(string $search, string $replace, string $filePath): void
+    {
+        if (!File::exists($filePath)) {
+            $this->error('File not found: ' . $filePath);
+            return;
+        }
+
+        $content = File::get($filePath);
+        $newContent = str_replace($search, $replace, $content);
+
+        if (!File::put($filePath, $newContent)) {
+            $this->error('Failed to update file: ' . $filePath);
+        }
+    }
+
+    /**
+     * Publish configuration files.
+     *
+     * @return void
+     */
+    private function callPublishConfiguration(): void
+    {
+        $this->call('vendor:publish', [
+            '--provider' => 'MetaFramework\ServiceProvider',
+            '--tag' => 'mfw-install'
+        ]);
+    }
 }

@@ -13,6 +13,7 @@ use MetaFramework\Mediaclass\Facades\MediaclassFacade;
 use MetaFramework\Mediaclass\Mediaclass;
 use MetaFramework\Models\Meta;
 use MetaFramework\Models\Nav;
+use MetaFramework\Console\Install;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -25,16 +26,14 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->singleton('meta', fn($app) => new Meta());
         $this->app->singleton('mediaclass', fn($app) => new Mediaclass());
 
-
         $this->app->bind('MetaFramework\Facades\NavFacade', fn($app) => new NavFacade());
         $this->app->bind('MetaFramework\Facades\MetaFacade', fn($app) => new MetaFacade());
         $this->app->bind('MetaFramework\Mediaclass\Facades\MediaclassFacade', fn($app) => new MediaclassFacade());
-
     }
 
     public function boot(): void
     {
-
+        // Load views, routes, and other resources
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
         Blade::componentNamespace('\MetaFramework\\Components', 'mfw');
 
@@ -45,16 +44,22 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/Mediaclass/Routes/panel.php');
         $this->loadRoutesFrom(__DIR__.'/Routes/web.php');
 
-
         View::share('current_locale', App::getLocale());
 
         Paginator::useBootstrapFive();
 
+        // Publish assets, configurations, and other resources
         $this->publishInstall();
         $this->publishAssets();
         $this->publishLang();
         $this->publishMediaclass();
 
+        // Register the custom Artisan command
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Install::class,
+            ]);
+        }
     }
 
     private function publishInstall(): void
@@ -64,11 +69,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__ . '/../publishables/public/' => public_path(),
             __DIR__ . '/../publishables/lang/' => base_path('lang'),
             __DIR__ . '/../publishables/database/' => database_path(),
-            __DIR__ . '/../publishables/app/' => app_path(),
+           // __DIR__ . '/../publishables/app/' => app_path(),
             __DIR__ . '/../publishables/resources/' => resource_path(),
-            __DIR__ . '/../publishables/routes/' => base_path('routes'),
+          //  __DIR__ . '/../publishables/routes/' => base_path('routes'),
         ], 'mfw-install');
-
     }
 
     private function publishAssets(): void
@@ -76,7 +80,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__ . '/../publishables/public/vendor/' => public_path('vendor/'),
         ], 'mfw-assets');
-
     }
 
     private function publishLang(): void
@@ -84,7 +87,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__ . '/../publishables/lang/' => base_path('lang'),
         ], 'mfw-lang');
-
     }
 
     private function publishMediaclass(): void
@@ -94,6 +96,5 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__ . '/../publishables/lang/fr/mediaclass.php' => base_path('lang/fr/mediaclass.php'),
             __DIR__ . '/../publishables/lang/en/mediaclass.php' => base_path('lang/en/mediaclass.php'),
         ], 'mfw-mediaclass');
-
     }
 }
