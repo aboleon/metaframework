@@ -62,6 +62,7 @@
 
             }).on('hide.bs.modal', function () {
                 jQuery_mfwSimpleModal.find('.modal-title, .modal-body, .btn-confirm, .btn-cancel').html('').end().find('.btn-confirm').attr('class', 'btn btn-confirm').removeAttr('data-model-id').removeAttr('data-identifier');
+                jQuery_mfwSimpleModal.find('button, a, input, select, textarea, [tabindex]').blur();
             });
         });
     </script>

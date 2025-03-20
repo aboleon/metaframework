@@ -15,6 +15,10 @@
                class="g_autocomplete form-control {{ $tagRequired('text_address') }}"
                id="geo_text_address_{{ $random_id }}"
                placeholder="{{ $placeholder ?:  trans('mfw.geo.type_address') }}" {{ $tagRequired('text_address') }}>
+
+        @if ($notice)
+            <small class="pt-1 d-block text-secondary">{{ $notice }}</small>
+        @endif
         <x-mfw::validation-error field="{{ $field }}[text_address]"/>
     </div>
 
@@ -70,25 +74,25 @@
         </div>
         <div class="mb-3 col-sm-8 {{ $inputable('administrative_area_level_1_short') }}">
             <x-mfw::input
-                class="field administrative_area_level_1_short {{ $tagRequired('administrative_area_level_1_short') }}"
-                :label="trans('mfw.geo.region') . $labelRequired('administrative_area_level_1_short')"
-                name="{{ $field }}[administrative_area_level_1_short]"
-                value="{{ $error ? old($field.'.administrative_area_level_1_short') : ($geo->administrative_area_level_1_short ?? '') }}"/>
+                    class="field administrative_area_level_1_short {{ $tagRequired('administrative_area_level_1_short') }}"
+                    :label="trans('mfw.geo.region') . $labelRequired('administrative_area_level_1_short')"
+                    name="{{ $field }}[administrative_area_level_1_short]"
+                    value="{{ $error ? old($field.'.administrative_area_level_1_short') : ($geo->administrative_area_level_1_short ?? '') }}"/>
         </div>
         <div class="mb-3 col-sm-2 {{ $inputable('country_code') }}">
             <x-mfw::input
-                class="field country_code {{ $tagRequired('country_code') }}"
-                :label="trans('mfw.geo.country_code') . $labelRequired('country_code')"
-                name="{{ $field }}[country_code]"
-                value="{{ $error ? old($field.'.country_code') : ($geo->country_code ?? '') }}"/>
+                    class="field country_code {{ $tagRequired('country_code') }}"
+                    :label="trans('mfw.geo.country_code') . $labelRequired('country_code')"
+                    name="{{ $field }}[country_code]"
+                    value="{{ $error ? old($field.'.country_code') : ($geo->country_code ?? '') }}"/>
         </div>
         <div class="mb-3 col-sm-5 {{ $inputable('country') }}">
             <x-mfw::input
-                class="field country {{ $tagRequired('country') }}"
-                :label="trans('mfw.geo.country') . $labelRequired('country')"
-                name="{{ $field }}[country]"
-                value="{{ $error ? old($field.'.country') : ($geo->country_code ? \MetaFramework\Accessors\Countries::getCountryNameByCode($geo->country_code) : '') }}"
-                readonly/>
+                    class="field country {{ $tagRequired('country') }}"
+                    :label="trans('mfw.geo.country') . $labelRequired('country')"
+                    name="{{ $field }}[country]"
+                    value="{{ $error ? old($field.'.country') : ($geo->country_code ? \MetaFramework\Accessors\Countries::getCountryNameByCode($geo->country_code) : '') }}"
+                    readonly/>
         </div>
         {{-- TODO: continent
         <div class="mb-3 col-sm-5 {{ $inputable('continent') }}">
@@ -105,8 +109,8 @@
            value="{{ $error ? old($field.'.lat') : ($geo->lat ?? '') }}"/>
     <input type="hidden" class="wa_geo_lon" name="{{ $field }}[lon]"
            value="{{ $error ? old($field.'.lon') : ($geo->lon ?? '') }}"/>
-    <input type="hidden" class="address_type" name="{{ $field }}[address_type]" />
-    <input type="hidden" class="continent" name="{{ $field }}[continent]" />
+    <input type="hidden" class="address_type" name="{{ $field }}[address_type]"/>
+    <input type="hidden" class="continent" name="{{ $field }}[continent]"/>
 </div>
 @if ($params)
     <span id="params_mapsbar_{{ $random_id }}" class="d-none">{!! collect($params)->toJson() !!}</span>
@@ -115,6 +119,6 @@
     @push('js')
         <script src="{{ asset('vendor/mfw/components/google-places-geolocate.js') }}"></script>
         <script
-            src="https://maps.googleapis.com/maps/api/js?key={{ config('mfw-api.google.places') }}&libraries=places&callback=initialize"></script>
+                src="https://maps.googleapis.com/maps/api/js?key={{ config('mfw-api.google.places') }}&libraries=places&callback=initialize"></script>
     @endpush
 @endonce

@@ -19,6 +19,39 @@ trait Responses
     protected bool $debugMode = false;
     protected bool $keepErrors = false;
     protected bool $restrictedToDev = false;
+    protected bool $as_exception = false;
+
+    public function reset()
+    {
+        $this->response          = [];
+        $this->redirect_route    = null;
+        $this->redirect_to       = null;
+        $this->disable_responses = false;
+        $this->disable_redirects = false;
+        $this->ajax_mode         = false;
+        $this->debugMode         = false;
+        $this->keepErrors        = false;
+        $this->restrictedToDev   = false;
+    }
+
+    public function throwException(): self
+    {
+        $this->as_exception = true;
+
+        return $this;
+    }
+
+    public function shouldBeException(): bool
+    {
+        return $this->as_exception === true;
+    }
+
+    public function disableExceptionMode(): self
+    {
+        $this->as_exception = false;
+
+        return $this;
+    }
 
     public function enableAjaxMode(): static
     {
@@ -61,7 +94,7 @@ trait Responses
         }
 
         if ($this->debugMode && ! $this->keepErrors) {
-            $this->response['error'] = false;
+            unset($this->response['error']);
         }
 
         return $this->response;
@@ -123,7 +156,7 @@ trait Responses
     public function responseNotice($message): static
     {
         if ($this->enabledMessages()) {
-            $this->response['messages'][]['info'] = $message;
+            $this->response[$this->messagesKey()][]['info'] = $message;
         }
 
         return $this;
@@ -175,16 +208,18 @@ trait Responses
     protected function responseWarning($message, bool $error = true): void
     {
         if ($this->enabledMessages()) {
-            $this->response['error']                           = $error;
+            if ($error) {
+                $this->response['error'] = true;
+            }
             $this->response[$this->messagesKey()][]['warning'] = $message;
         }
     }
 
-    protected function responseDebug($message, string $notice=''): void
+    protected function responseDebug($message, string $notice = ''): void
     {
-        $this->debugMode                                 = true;
+        $this->debugMode = true;
 
-        $this->responseWarning('<b>DEBUG&nbsp;|&nbsp;</b> '. $notice, error: false);
+        $this->responseWarning('<b>DEBUG&nbsp;|&nbsp;</b> '.$notice, error: false);
         $this->response[$this->messagesKey()][]['debug'] = $message;
     }
 
@@ -255,7 +290,9 @@ trait Responses
             foreach ($messages as $message) {
                 $this->response[$this->messagesKey()][] = $message;
             }
-            $this->response['error'] = $object->hasErrors();
+            if ($object->hasErrors()) {
+                $this->response['error'] = true;
+            }
         }
 
         return $this;
@@ -263,7 +300,7 @@ trait Responses
 
     public function responseException(Throwable $e, string $message = ''): static
     {
-        $this->responseError(! empty($message) ? $message : "Une erreur est survenue.");
+        $this->responseError(! empty($message) ? $message : __('mfw.errors.error'));
 
         if (auth()->check() && auth()->user()->hasRole('dev')) {
             $this->responseWarning($e->getMessage());
@@ -320,8 +357,9 @@ trait Responses
 
     public function restrictToDev(): self
     {
-        $this->restrictedToDev = true;
+        $this->restrictedToDev               = true;
         $this->response['restricted_to_dev'] = true;
+
         return $this;
     }
 

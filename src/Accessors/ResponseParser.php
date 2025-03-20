@@ -31,7 +31,7 @@ class ResponseParser
             foreach ($response['messages'] as $val) {
                 foreach ($val as $key => $message) {
                     $show_debug = false;
-                    $class = $key;
+                    $class      = $key;
                     if ($key == 'debug') {
                         $class = 'light';
                         if ($isConnectedAsDev || (config('app.debug') && empty($response['restricted_to_dev']))) {
@@ -49,15 +49,6 @@ class ResponseParser
 
         unset($response['error'], $response['abort']);
 
-        if ($response && $isConnectedAsDev) {
-        ob_start();
-        foreach ($response as $key => $val) {
-            d($val, $key);
-            unset($response[$key]);
-        }
-        $html .= ob_get_contents();
-        ob_end_clean();
-    }
 
         return $html;
     }
