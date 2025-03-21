@@ -23,7 +23,7 @@
   },
   "autoload": {
     "psr-4": {
-      "MetaFramework\\": "src"
+      "MetaFramework\\": "src/"
     },
     "files": [
       "src/Functions/loader.php",

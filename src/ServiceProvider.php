@@ -22,6 +22,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         /**
          * Façades
          */
+
         $this->app->singleton('nav', fn($app) => new Nav());
         $this->app->singleton('meta', fn($app) => new Meta());
         $this->app->singleton('mediaclass', fn($app) => new Mediaclass());
@@ -29,20 +30,29 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->bind('MetaFramework\Facades\NavFacade', fn($app) => new NavFacade());
         $this->app->bind('MetaFramework\Facades\MetaFacade', fn($app) => new MetaFacade());
         $this->app->bind('MetaFramework\Mediaclass\Facades\MediaclassFacade', fn($app) => new MediaclassFacade());
+
     }
 
     public function boot(): void
     {
+        Blade::directive('role', function ($arguments) {
+            return "<?php if (auth()->check() && auth()->user()->hasRole({$arguments})) { ?>";
+        });
+        Blade::directive('endrole', function () {
+            return "<?php } ?>";
+        });
 
-        Blade::component('mfw-notice', \MetaFramework\Components\Notice::class);
+
+
+        //Blade::component('mfw-notice', \MetaFramework\Components\Notice::class);
         // Load views, routes, and other resources
-        /*
+
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
-        Blade::componentNamespace('\MetaFramework\\Components', 'mfw');
+        Blade::componentNamespace('MetaFramework\Components', 'mfw');
 
 
         $this->loadViewsFrom(__DIR__ . '/Mediaclass/Views', 'mediaclass');
-        Blade::componentNamespace('MetaFramework\Mediaclass\\Components', 'mediaclass');
+        Blade::componentNamespace('MetaFramework\Mediaclass\Components', 'mediaclass');
 
         $this->loadRoutesFrom(__DIR__.'/Mediaclass/Routes/public.php');
         $this->loadRoutesFrom(__DIR__.'/Mediaclass/Routes/panel.php');
@@ -54,6 +64,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         // Publish assets, configurations, and other resources
         $this->publishInstall();
+        $this->publishAuth();
         $this->publishAssets();
         $this->publishLang();
         $this->publishMediaclass();
@@ -64,7 +75,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 Install::class,
             ]);
         }
-        */
     }
 
     private function publishInstall(): void

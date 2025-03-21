@@ -2,9 +2,9 @@
 
 namespace MetaFramework\Components;
 
-use MetaFramework\Models\Forms;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\View\Component;
+use MetaFramework\Models\Forms;
 
 class Form extends Component
 {

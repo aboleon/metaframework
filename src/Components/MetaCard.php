@@ -2,10 +2,10 @@
 
 namespace MetaFramework\Components;
 
-use MetaFramework\Abstract\MetaModel;
-use MetaFramework\Models\Meta;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\View\Component;
+use MetaFramework\Abstract\MetaModel;
+use MetaFramework\Models\Meta;
 
 class MetaCard extends Component
 {
