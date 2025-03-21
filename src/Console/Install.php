@@ -4,7 +4,6 @@ namespace MetaFramework\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Schema;
 
 class Install extends Command
 {
@@ -32,7 +31,7 @@ class Install extends Command
         if (method_exists($this, $this->argument('argument'))) {
             $this->{$this->argument('argument')}();
         } else {
-            $this->error("MetaFramework: unknown console command '" . $this->argument('argument') . "'");
+            $this->error("MetaFramework: unknown console command '".$this->argument('argument')."'");
         }
     }
 
@@ -42,61 +41,103 @@ class Install extends Command
         $this->comment('Publishing configuration...');
         $this->comment('------------------------------------------');
 
-        $app_name = $this->ask("What is the name of your app");
+        $app_name       = $this->ask("What is the name of your app");
         $app_default_lg = $this->ask("What is the app default language locale (en, fr, de..) ? Default is en", 'en');
-        $panel_prefix = $this->ask("What is the prefix for your back-office routes");
+        $panel_prefix   = $this->ask("What is the prefix for your back-office routes");
 
         // Validate input
         if (empty($app_name) || empty($app_default_lg) || empty($panel_prefix)) {
             $this->error('All fields are required.');
+
             return;
         }
 
         // Update app.php configuration
         $this->updateConfigFile(config_path('app.php'), [
-            "'name'" => "    'name' => '" . addslashes($app_name) . "',",
-            "'locale'" => "    'locale' => '" . $app_default_lg . "',",
-            "'fallback_locale'" => "    'fallback_locale' => '" . $app_default_lg . "',"
+            "'name'"            => "    'name' => '".addslashes($app_name)."',",
+            "'timezone'"        => "    'timezone' => 'Europe/Paris',",
+            "'locale'"          => "    'locale' => '".$app_default_lg."',",
+            "'fallback_locale'" => "    'fallback_locale' => '".$app_default_lg."',",
         ]);
 
         // Create mfw.php configuration
-        $mfwConfigPath = base_path('config/mfw.php');
+        $mfwConfigPath    = base_path('config/mfw.php');
         $mfwConfigContent = "<?php
 return [
-    'route' => '" . $panel_prefix . "',
-    'locales' => ['" . $app_default_lg . "'],
-    'active_locales' => ['" . $app_default_lg . "']
+    'route' => '".$panel_prefix."',
+    'locales' => ['".$app_default_lg."'],
+    'active_locales' => ['".$app_default_lg."']
 ];";
 
-        if (!File::put($mfwConfigPath, $mfwConfigContent)) {
+        if ( ! File::put($mfwConfigPath, $mfwConfigContent)) {
             $this->error('Failed to write mfw configuration file.');
+
             return;
         }
 
         // Update routes in bootstrap/app.php or routes/web.php
         $routeFilePath = base_path('routes/web.php'); // or base_path('routes/web.php')
-        $this->replaceInFile("view('dashboard", "view('" . $panel_prefix . '/dashboard', $routeFilePath);
+        $this->replaceInFile("view('dashboard", "view('".$panel_prefix.'/dashboard', $routeFilePath);
 
         $this->callPublishConfiguration();
+    }
+
+    private function auth()
+    {
+        $this->newLine();
+        $this->comment('Publishing Auth Package...');
+        $this->comment('------------------------------------------');
+
+        $routeFilePath = base_path('routes/web.php');
+
+        $auth_routes     = <<<'PHP'
+            Route::get('/dashboard', function () {
+                return view('dashboard');
+            })->middleware(['auth', 'verified'])->name('dashboard');
+            
+            require __DIR__.'/auth.php';
+            PHP;
+        $existingContent = File::get($routeFilePath);
+
+        $pattern = "/^use .*?;/m";
+        preg_match_all($pattern, $existingContent, $matches);
+
+        if ( ! empty($matches[0])) {
+            $lastUseStatement = end($matches[0]);
+            $position         = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
+
+            $newContent = substr($existingContent, 0, $position).PHP_EOL.PHP_EOL.$auth_routes.substr($existingContent, $position);
+
+            File::put($routeFilePath, $newContent);
+        } else {
+            File::append($routeFilePath, "\n".$auth_routes);
+        }
+
+        $this->callAuthPackage();
+
+        $this->comment('Auth Package published successfully.');
     }
 
     /**
      * Update configuration file by replacing specific lines.
      *
-     * @param string $filePath
-     * @param array $replacements
+     * @param  string  $filePath
+     * @param  array   $replacements
+     *
      * @return void
      */
     private function updateConfigFile(string $filePath, array $replacements): void
     {
-        if (!File::exists($filePath)) {
-            $this->error('Configuration file not found: ' . $filePath);
+        if ( ! File::exists($filePath)) {
+            $this->error('Configuration file not found: '.$filePath);
+
             return;
         }
 
         $lines = file($filePath, FILE_IGNORE_NEW_LINES);
         if ($lines === false) {
-            $this->error('Failed to read configuration file: ' . $filePath);
+            $this->error('Failed to read configuration file: '.$filePath);
+
             return;
         }
 
@@ -104,36 +145,38 @@ return [
             $seek = array_filter($lines, function ($line) use ($search) {
                 return strstr($line, $search);
             });
-            if (!empty($seek)) {
+            if ( ! empty($seek)) {
                 $lines[key($seek)] = $replace;
             }
         }
 
-        if (!File::put($filePath, implode("\n", $lines))) {
-            $this->error('Failed to update configuration file: ' . $filePath);
+        if ( ! File::put($filePath, implode("\n", $lines))) {
+            $this->error('Failed to update configuration file: '.$filePath);
         }
     }
 
     /**
      * Replace a string in a file.
      *
-     * @param string $search
-     * @param string $replace
-     * @param string $filePath
+     * @param  string  $search
+     * @param  string  $replace
+     * @param  string  $filePath
+     *
      * @return void
      */
     private function replaceInFile(string $search, string $replace, string $filePath): void
     {
-        if (!File::exists($filePath)) {
-            $this->error('File not found: ' . $filePath);
+        if ( ! File::exists($filePath)) {
+            $this->error('File not found: '.$filePath);
+
             return;
         }
 
-        $content = File::get($filePath);
+        $content    = File::get($filePath);
         $newContent = str_replace($search, $replace, $content);
 
-        if (!File::put($filePath, $newContent)) {
-            $this->error('Failed to update file: ' . $filePath);
+        if ( ! File::put($filePath, $newContent)) {
+            $this->error('Failed to update file: '.$filePath);
         }
     }
 
@@ -146,7 +189,20 @@ return [
     {
         $this->call('vendor:publish', [
             '--provider' => 'MetaFramework\ServiceProvider',
-            '--tag' => 'mfw-install'
+            '--tag'      => 'mfw-install',
+        ]);
+    }
+
+    /**
+     * Publish auth files.
+     *
+     * @return void
+     */
+    private function callAuthPackage(): void
+    {
+        $this->call('vendor:publish', [
+            '--provider' => 'MetaFramework\ServiceProvider',
+            '--tag'      => 'mfw-auth',
         ]);
     }
 }

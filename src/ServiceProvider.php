@@ -33,9 +33,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
     public function boot(): void
     {
+
+        Blade::component('mfw-notice', \MetaFramework\Components\Notice::class);
         // Load views, routes, and other resources
+        /*
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
         Blade::componentNamespace('\MetaFramework\\Components', 'mfw');
+
 
         $this->loadViewsFrom(__DIR__ . '/Mediaclass/Views', 'mediaclass');
         Blade::componentNamespace('MetaFramework\Mediaclass\\Components', 'mediaclass');
@@ -60,6 +64,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 Install::class,
             ]);
         }
+        */
     }
 
     private function publishInstall(): void
@@ -73,6 +78,17 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__ . '/../publishables/resources/' => resource_path(),
           //  __DIR__ . '/../publishables/routes/' => base_path('routes'),
         ], 'mfw-install');
+    }
+
+    /**
+     * Publishes the Auth package
+     * @return void
+     */
+    private function publishAuth(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../publishables/auth/' => base_path(),
+        ], 'mfw-auth');
     }
 
     private function publishAssets(): void
