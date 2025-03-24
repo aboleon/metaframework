@@ -13,14 +13,22 @@ class VatAccessor
         return self::rate($vat_id);
     }
 
-    public static function vatForPrice(float|int $price, int $vat_id): float|int
+    public static function vatForPrice(null|float|int $price = 0, int $vat_id): float|int
     {
+        if (!$price) {
+            return 0;
+        }
+
         $vat_rate = VatAccessor::fetchVatRate($vat_id);
         return round($price / (100 + $vat_rate) * $vat_rate, 2);
     }
 
-    public static function netPriceFromVatPrice(float|int $price, int $vat_id): float|int
+    public static function netPriceFromVatPrice(null|float|int $price = 0, int $vat_id): float|int
     {
+        if (!$price) {
+            return 0;
+        }
+
         return round($price - VatAccessor::vatForPrice($price, $vat_id), 2);
     }
 
