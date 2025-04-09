@@ -5,7 +5,11 @@
            name="{{ $name }}"
            id="{{ $id }}" {{ isset($affected) && $affected !== '' ? ($affected == $value ? 'checked' : '') : ($default && $default == $value ? 'checked' : '') }}
     @foreach($params as $param => $setting)
-        {{ $param }}="{!! $setting !!}"
+        @if (is_string($param))
+            {{ $param }}="{!! $setting !!}"
+        @else
+            {!! $setting !!}
+        @endif
     @endforeach
     />
     <label class="form-check-label" for="{{ $id }}">

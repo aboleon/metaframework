@@ -21,6 +21,6 @@ class BackendLayout extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('layouts.backend');
+        return view('components.backend-layout');
     }
 }
