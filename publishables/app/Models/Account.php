@@ -11,12 +11,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne};
 use Illuminate\Database\Eloquent\SoftDeletes;
+use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 use MetaFramework\Mediaclass\Traits\Mediaclass;
 use MetaFramework\Traits\DateManipulator;
-use Spatie\Image\Enums\Fit;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property string                      $type
@@ -25,16 +22,15 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property Collection|AccountAddress[] $address
  * @property string                      $access_key
  */
-class Account extends Model implements CreatorInterface, HasMedia
+class Account extends Model implements CreatorInterface, MediaclassInterface
 {
     use HasFactory;
     use HasCustomFields;
     use DateManipulator;
     use Locale;
-    use InteractsWithMedia;
     use Users;
     use SoftDeletes;
-  //  use Mediaclass;
+    use Mediaclass;
 
     protected $table = 'users';
 
@@ -78,15 +74,6 @@ class Account extends Model implements CreatorInterface, HasMedia
             $model->type = UserType::ACCOUNT->value;
         });
     }
-
-    public function registerMediaConversions(Media $media = null): void
-    {
-        $this
-            ->addMediaConversion('preview')
-            ->fit(Fit::Contain, 300, 300)
-            ->nonQueued();
-    }
-
 
     public function getCompanyAttribute(): string
     {

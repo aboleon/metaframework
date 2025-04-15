@@ -44,7 +44,7 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="ajax-route" content="{{route('ajax')}}"/>
 
-    @mediaLibraryStyles
+
 
     <style>
         body {

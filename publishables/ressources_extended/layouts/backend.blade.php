@@ -29,7 +29,7 @@
 
     <link rel="stylesheet" href="{{asset('vendor/spatie/media-library-pro/styles.css')}}">
 
-    @mediaLibraryStyles
+
 
     {!! csscrush_tag(public_path('css/panel.css')) !!}
 

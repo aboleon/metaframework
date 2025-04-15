@@ -25,12 +25,15 @@ class Uploadable extends Component
          * ex 500KB, 5MB (default is 16MB)
          */
         public ?string $maxfilesize = null,
-        public array $settings = []
+        public array $settings = [],
+        public string $icon = 'bi bi-card-image',
+        public string $nomedia = ''
     )
     {
         $this->group = $this->settings['group'] ?? $this->group;
         $this->label = $this->settings['label'] ?? $this->label;
         $this->description = $this->description ? 1 : 0;
+        $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
     }
 
 

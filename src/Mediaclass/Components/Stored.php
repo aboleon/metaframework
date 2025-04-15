@@ -23,13 +23,17 @@ class Stored extends Component
         public bool       $positions = false,
         public int|bool   $description = true,
         public ?string $cropable = null,
+        public string $nomedia = '',
     )
     {
         $this->description = $this->description ? 1 : 0;
         $this->medias = $this->model->media->where('group', $this->group);
+
         if ($this->subgroup) {
             $this->medias = $this->medias->where('subgroup', $this->subgroup);
         }
+
+        $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
     }
 
     public function isFile(Media $media): bool

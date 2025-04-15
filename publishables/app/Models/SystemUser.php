@@ -9,23 +9,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{HasOne};
 use Illuminate\Database\Eloquent\SoftDeletes;
+use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 use MetaFramework\Traits\DateManipulator;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property string                      $type
  * @property AccountProfile|null         $profile
  */
-class SystemUser extends Model
+class SystemUser extends Model implements MediaclassInterface
 {
     use HasFactory;
     use HasCustomFields;
     use DateManipulator;
     use Locale;
-    use InteractsWithMedia;
     use Users;
     use SoftDeletes;
-  //  use Mediaclass;
+    use Mediaclass;
 
     protected $table = 'users';
 

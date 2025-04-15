@@ -13,12 +13,18 @@
      data-cropable="{{ $cropable }}"
 >
     <div class="controls d-flex justify-between align-items-center" style="background: #EFEFEF">
-        <span class="subcontrol mediaclass-uploader"><i class="fa fa-image"></i> {{ $label }}</span>
+        <span class="subcontrol mediaclass-uploader"><i class="{{ $icon }}"></i> {{ $label }}</span>
         <span class="subcontrol" style="font-size: 14px;font-weight: 700">{{ array_key_exists('sizes', $settings) ? current($settings['sizes']).' x '. end($settings['sizes']): '' }}</span>
     </div>
     <div class="mediaclass-upload-container"></div>
     <div class="uploaded">
-        <x-mediaclass::stored :cropable="$cropable" :positions="$positions" :model="$model" :group="$group" :subgroup="$settings['subgroup'] ?? null " :description="$description"/>
+        <x-mediaclass::stored :cropable="$cropable"
+                              :positions="$positions"
+                              :model="$model"
+                              :nomedia="$nomedia"
+                              :group="$group"
+                              :subgroup="$settings['subgroup'] ?? null "
+                              :description="$description"/>
     </div>
 </div>
 @once

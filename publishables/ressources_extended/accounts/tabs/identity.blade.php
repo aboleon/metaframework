@@ -103,22 +103,8 @@
                     <h4>Photo</h4>
                     <div class="row">
                         <div class="col-lg-12 mb-3">
-                            <x-media-library-attachment
-                                collection="photo"
-                                name="photo"
-                            />
                         </div>
                     </div>
-                    @if($account->getFirstMediaUrl('photo'))
-                        <div class="row">
-                            <div class="col-lg-12 mb-3">
-                                <img src="{{ $account->getFirstMediaUrl('photo') }}"
-                                     alt="Photo de profil"
-                                     width="150">
-                            </div>
-                        </div>
-
-                    @endif
                 </div>
             </div>
         </div>

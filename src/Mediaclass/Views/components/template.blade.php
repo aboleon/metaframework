@@ -5,9 +5,9 @@
         <div class="mediaclass-messages"></div>
         <div class="mediaclass-fileupload">
             <div class="d-none ui-messages">
-                <span class="maxNumberOfFiles"><?= __('mediaclass.errors.maxNumberOfFiles');?></span>
-                <span class="maxFileSize"><?= __('mediaclass.errors.maxFileSize');?></span>
-                <span class="dimensions"><?= __('mediaclass.img_dimensions_constraint');?></span>
+                <span class="maxNumberOfFiles"><?= __('mediaclass.errors.maxNumberOfFiles'); ?></span>
+                <span class="maxFileSize"><?= __('mediaclass.errors.maxFileSize'); ?></span>
+                <span class="dimensions"><?= __('mediaclass.img_dimensions_constraint'); ?></span>
             </div>
 
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
@@ -16,17 +16,17 @@
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="btn btn-success btn-sm fileinput-button">
                 <i class="glyphicon glyphicon-plus"></i>
-                <span><?= __('mediaclass.buttons.select');?></span>
+                <span><?= __('mediaclass.buttons.select'); ?></span>
                 <input type="file" name="files[]" multiple>
             </span>
 
                     <button type="submit" class="btn btn-info btn-sm start mx-2">
                         <i class="glyphicon glyphicon-upload"></i>
-                        <span><?= __('mediaclass.buttons.download');?></span>
+                        <span><?= __('mediaclass.buttons.download'); ?></span>
                     </button>
                     <button type="reset" class="btn btn-warning btn-sm cancel">
                         <i class="glyphicon glyphicon-ban-circle"></i>
-                        <span><?= __('mediaclass.buttons.cancel');?></span>
+                        <span><?= __('mediaclass.buttons.cancel'); ?></span>
                     </button>
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
@@ -38,27 +38,27 @@
             </div>
             <!-- The template to display files available for upload -->
             <script id="template-upload" type="text/x-tmpl">
-        {% for (var i=0, file; file=o.files[i]; i++) { %}
-        <div class="template-upload">
-            <div class="row">
-                <div class="col-sm-3 impImg">
-                    <span class="preview"></span>
-                </div>
-                <div class="col-sm-9 impFileName">
-                    <div class="row infos">
-                        <div class="col-sm-7">
-                            <p class="name">{%=file.name%}</p>
-                            <strong class="error text-danger"></strong>
+                {% for (var i=0, file; file=o.files[i]; i++) { %}
+                <div class="template-upload">
+                    <div class="row">
+                        <div class="col-sm-3 impImg">
+                            <span class="preview"></span>
                         </div>
-                        <div class="col-sm-2">
-                            <p class="size">Processing...</p>
-                            <div class="mediaclass-progress progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                                <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            {% if (!i && !o.options.autoUpload) { %}
-                            <button class="btn btn-info btn-xs start" disabled>{{ __('mediaclass.buttons.download') }}</button>
+                        <div class="col-sm-9 impFileName">
+                            <div class="row infos">
+                                <div class="col-sm-7">
+                                    <p class="name">{%=file.name%}</p>
+                                    <strong class="error text-danger"></strong>
+                                </div>
+                                <div class="col-sm-2">
+                                    <p class="size">Processing...</p>
+                                    <div class="mediaclass-progress progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    {% if (!i && !o.options.autoUpload) { %}
+                                    <button class="btn btn-info btn-xs start" disabled>{{ __('mediaclass.buttons.download') }}</button>
                             {% } %}
                             {% if (!i) { %}
                             <button class="btn btn-warning btn-xs cancel">{{ __('mediaclass.buttons.cancel') }}</button>
@@ -66,9 +66,10 @@
                         </div>
                     </div>
 
-            @foreach(\MetaFramework\Accessors\Locale::projectLocales() as $locale)
+                @foreach(\MetaFramework\Accessors\Locale::projectLocales() as $locale)
                     <div class="row params mt-2">
-                        <div class="col-sm-7 description {{ \MetaFramework\Accessors\Locale::multilang() ? '' :'no-multilang' }}"><b>Description <span class="lang">{{ __('lang.'.$locale.'.label') }}</span></b>
+                        <div class="col-sm-7 description {{ \MetaFramework\Accessors\Locale::multilang() ? '' :'no-multilang' }}
+                    "><b>Description <span class="lang">{{ __('lang.'.$locale.'.label') }}</span></b>
                             <textarea name="description[{{ $locale }}]" type="text" class="mt-2 form-control description"></textarea>
                         </div>
                         <div class="col-sm-5 positions text-center ps-2">
