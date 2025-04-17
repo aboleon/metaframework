@@ -13,7 +13,17 @@
    data-btn-confirm-class="{!! $confirmclass !!}"
    data-btn-cancel="{!! $cancel !!}"
 >
-    {!! $text !!}
+    @if($linktitle)
+        <span
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-bs-title="{{ $linktitle }}"
+        >
+            @endif
+            {!! $text !!}
+            @if($linktitle)
+        </span>
+    @endif
 </a>
 
 @pushonce('js')
