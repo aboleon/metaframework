@@ -6,10 +6,13 @@
        class="form-control {{ $class ?? ''  }}"
        id="{{ $id }}"
        value="{{ $value }}"
-@forelse($params as $param => $setting)
-    {{ $param }}="{!! $setting !!}"
-@empty
-@endforelse
+@foreach($params as $param => $setting)
+    @if (is_string($param))
+        {{ $param }}="{!! $setting !!}"
+    @else
+        {!! $setting !!}
+    @endif
+@endforeach
 @if($required)
     required
 @endif

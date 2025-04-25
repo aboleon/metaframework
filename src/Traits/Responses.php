@@ -363,4 +363,17 @@ trait Responses
         return $this;
     }
 
+    public function isAjaxMode(): bool
+    {
+        return $this->ajax_mode;
+    }
+
+    public function shouldBeAjax(bool $ajax): static
+    {
+        if ($ajax) {
+            $this->ajaxMode();
+        }
+        return $this;
+    }
+
 }

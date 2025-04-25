@@ -39,19 +39,6 @@
                 @endif
                 <div class="col-lg-6">
                     <h4>Photo</h4>
-
-                    <x-media-library-attachment
-                            name="profile_photo"
-                    />
-                    @if($account->profile?->getFirstMediaUrl('profile_photo'))
-                        <div class="row mt-2">
-                            <div class="col-lg-12 mb-3">
-                                <img src="{{ $account->profile->getFirstMediaUrl('profile_photo') }}" alt="Photo de profil"
-                                     width="150">
-                            </div>
-                        </div>
-
-                    @endif
 {{--                    @if ($subclass->mediaSettings())--}}
 {{--                        @foreach($subclass->mediaSettings() as $media)--}}
 {{--                            <x-mediaclass::uploadable :model="$account" :settings="$media" :description="false" limit="1"/>--}}

@@ -8,7 +8,11 @@
         @endif
         class="{{ $class }}"
 @foreach($params as $param => $setting)
-    {{ $param }}="{!! $setting !!}"
+    @if (is_string($param))
+        {{ $param }}="{!! $setting !!}"
+    @else
+        {!! $setting !!}
+    @endif
 @endforeach
 >
     @if (is_array($values))

@@ -12,8 +12,19 @@
    data-onshow="{{ $onshow }}"
    data-btn-confirm-class="{!! $confirmclass !!}"
    data-btn-cancel="{!! $cancel !!}"
+   data-modalsize="{{ $modalsize }}"
 >
-    {!! $text !!}
+    @if($linktitle)
+        <span
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-bs-title="{{ $linktitle }}"
+        >
+            @endif
+            {!! $text !!}
+            @if($linktitle)
+        </span>
+    @endif
 </a>
 
 @pushonce('js')
@@ -46,7 +57,7 @@
                     callback = button.data('callback'),
                     onshow = button.data('onshow');
 
-                jQuery_mfwSimpleModal.find('.modal-title').html(button.data('title')).end().find('.modal-body').html(button.data('body')).end().find('.btn-cancel').html(button.data('btn-cancel')).end().find('.btn-confirm')
+                jQuery_mfwSimpleModal.find('.modal-dialog').addClass(button.data('modalsize')).end().find('.modal-title').html(button.data('title')).end().find('.modal-body').html(button.data('body')).end().find('.btn-cancel').html(button.data('btn-cancel')).end().find('.btn-confirm')
                     .addClass(button.data('btn-confirm-class'))
                     .addClass(button.data('modal-id'))
                     .attr('data-model-id', button.data('model-id'))

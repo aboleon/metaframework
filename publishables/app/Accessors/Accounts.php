@@ -213,10 +213,7 @@ class Accounts
 
     public static function getPhotoByAccount(Account $account, bool $useDefault = true): string|null
     {
-        $photo = $account->getFirstMediaUrl('photo');
-        if ($photo) {
-            return $photo;
-        }
+
         if ($useDefault) {
             return url('media/logo-black.png');
         }

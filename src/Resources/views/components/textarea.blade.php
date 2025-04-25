@@ -8,7 +8,11 @@
           id="{{ $id }}"
 {!! !empty($height) ? 'style="height:'.$height.'px"' : '' !!}
 @forelse($params as $param => $setting)
-    {{ $param }}="{!! $setting !!}"
+    @if (is_string($param))
+        {{ $param }}="{!! $setting !!}"
+    @else
+        {!! $setting !!}
+    @endif
 @empty
 @endforelse
 @if($required)
