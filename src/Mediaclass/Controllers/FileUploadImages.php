@@ -182,35 +182,26 @@ class FileUploadImages
     {
         $this->dimensions = config('mediaclass.dimensions');
 
-        // V3: Use ImageManager->read() instead of Image::make()
         $this->image = $this->imageManager->read($this->uploadedFile);
 
         $this->urls = [];
 
-        // V3: Get MIME type from the uploaded file directly
         $mimeType = $this->uploadedFile->getMimeType();
 
         $this->mime_type = (str_contains($mimeType, 'png') ? 'png' : 'jpg');
         $this->response['fileicon'] = asset('vendor/mfw/mediaclass/images/files/jpg.png');
 
-        // V3: Use width() and height() methods directly
         $ratio = ($this->image->width() / $this->image->height()) > 1 ? 'h' : 'v';
         $this->response['ratio'] = $ratio;
 
         foreach ($this->dimensions as $key => $dimensions) {
             $file = $this->folder_name . '/' . $dimensions['width'] . '_' . $this->filename . '.' . $this->mime_type;
 
-            // V3: Updated resize method - no closure callback needed for basic aspect ratio preservation
-            $resizedImage = $this->image->resize(
+            $resizedImage = $this->image->scaleDown(
                 $dimensions['width'],
-                $dimensions['height'],
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                }
+                $dimensions['height']
             );
 
-            // V3: Use the appropriate encoder method instead of encode() with string
             $encodedImage = $this->mime_type === 'png'
                 ? $resizedImage->toPng()
                 : $resizedImage->toJpeg(75);

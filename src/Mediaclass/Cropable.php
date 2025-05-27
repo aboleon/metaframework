@@ -42,6 +42,8 @@ class Cropable
             return '';
         }
 
+        de($this->cropable_settings);
+
         $html = '<div class="crop-actions-bar">';
 
         foreach ($this->cropable_settings as $key => $dimensions) {
@@ -172,7 +174,7 @@ class Cropable
 
     public function setCropableFromComponent(?string $cropable): self
     {
-        if ( ! $cropable) {
+        if ( ! trim($cropable,'"')) {
             return $this;
         }
 
@@ -186,6 +188,7 @@ class Cropable
             if (trim($cropable) === '[object Object]') {
                 throw new \InvalidArgumentException('Mediaclass: Invalid cropable data - object was not properly serialized');
             }
+
             // Old format - single crop dimensions
             $settings                = explode(',', $cropable);
             $this->cropable_settings = [
