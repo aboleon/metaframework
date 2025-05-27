@@ -59,36 +59,34 @@
                                 <div class="col-sm-3">
                                     {% if (!i && !o.options.autoUpload) { %}
                                     <button class="btn btn-info btn-xs start" disabled>{{ __('mediaclass.buttons.download') }}</button>
-                            {% } %}
-                            {% if (!i) { %}
-                            <button class="btn btn-warning btn-xs cancel">{{ __('mediaclass.buttons.cancel') }}</button>
-                            {% } %}
-                        </div>
+                    {% } %}
+                    {% if (!i) { %}
+                    <button class="btn btn-warning btn-xs cancel">{{ __('mediaclass.buttons.cancel') }}</button>
+                    {% } %}
+                </div>
+            </div>
+            <div class="row params mt-3">
+                <div class="col-12 positions text-center ps-2">
+                    <b>Positions par rapport au contenu</b>
+                    <div class="choices pt-2">
+                        <i class="bi bi-arrow-left-square-fill active" data-position="left"></i>
+                        <i class="bi bi-arrow-up-square-fill" data-position="up"></i>
+                        <i class="bi bi-arrow-down-square-fill" data-position="down"></i>
+                        <i class="bi bi-arrow-right-square-fill" data-position="right"></i>
+                        <input type="hidden" name="position" value="left"/>
                     </div>
-
+                </div>
                 @foreach(\MetaFramework\Accessors\Locale::projectLocales() as $locale)
-                    <div class="row params mt-2">
-                        <div class="col-sm-7 description {{ \MetaFramework\Accessors\Locale::multilang() ? '' :'no-multilang' }}
-                    "><b>Description <span class="lang">{{ __('lang.'.$locale.'.label') }}</span></b>
-                            <textarea name="description[{{ $locale }}]" type="text" class="mt-2 form-control description"></textarea>
-                        </div>
-                        <div class="col-sm-5 positions text-center ps-2">
-                            <b>Positions par rapport au contenu</b>
-                            <div class="choices pt-2">
-                                <i class="bi bi-arrow-left-square-fill active" data-position="left"></i>
-                                <i class="bi bi-arrow-up-square-fill" data-position="up"></i>
-                                <i class="bi bi-arrow-down-square-fill" data-position="down"></i>
-                                <i class="bi bi-arrow-right-square-fill" data-position="right"></i>
-                                <input type="hidden" name="position" value="left"/>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-lg-6 col-12 description">
+                        <b>Description <span class="lang">{{ __('lang.'.$locale.'.label') }}</span></b>
+                    <textarea name="description[{{ $locale }}]" type="text" class="mt-2 form-control description"></textarea>
+                </div>
                 @endforeach
                 </div>
             </div>
-                </div>
-                {% } %}
-
+        </div>
+    </div>
+    {% } %}
             </script>
 
             <!-- The template to display files available for download -->

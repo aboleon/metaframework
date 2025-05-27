@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Interfaces\ImageInterface;
+use MetaFramework\Accessors\Locale;
 use MetaFramework\Mediaclass\Config;
 use MetaFramework\Mediaclass\Cropable;
 use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;

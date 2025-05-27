@@ -38,9 +38,6 @@ const MediaclassUploader = {
   },
   // Constants
   defaultFileSize: 16000000,
-  langs: {
-    'fr': 'Français',
-  },
   positions_tags: ['left', 'up', 'down', 'right'],
 
   // Helper methods
@@ -306,52 +303,35 @@ const MediaclassUploader = {
     const {uploaded, filetype, preview, link, cropable_links, has_positions} = data;
 
     let html = `
-  <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
+<div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
     <span class="unlink"><i class="bi bi-x-circle-fill"></i></span>
     <div class="row m-0">
-      <div class="col-sm-3 impImg p-0 position-relative preview ${filetype}" style="background-image: url(${preview}); background-repeat: no-repeat">
-        <div class="actions">
-          <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
+        <div class="col-xl-3 pe-xl-4 col-12 impImg position-relative preview ${filetype}">
+            <div class="w-100 h-100" style="background-image: url(${preview}); background-size: contain;background-repeat: no-repeat;background-position: center;">
+                <div class="actions">
+                    <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-sm-9 impFileName">
-        <div class="row infos">
-          <div class="col-sm-12">
-            <p class="name">
-              <span class="rounded-1 py-1 px-2 text-bg-secondary">${uploaded.original_filename}</span>
-              <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
-                Uploadé le ${new Date(uploaded.created_at).toLocaleDateString('fr-FR')} à ${new Date(uploaded.created_at).toLocaleTimeString('fr-FR', {
+        <div class="col-xl-9 col-12 impFileName">
+            <div class="row infos">
+                <div class="col-sm-12">
+                    <p class="name">
+                        <span class="rounded-1 py-1 px-2 text-bg-secondary">${uploaded.original_filename}</span>
+                        <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
+                            Uploadé le ${new Date(uploaded.created_at).toLocaleDateString('fr-FR')} à ${new Date(uploaded.created_at).toLocaleTimeString('fr-FR', {
       hour: '2-digit',
       minute: '2-digit'
     })}
-              </span>
-            </p>
-          </div>
-        </div>
-        ${filetype === 'image' && cropable_links ? cropable_links : ''}
-        <div class="row params mt-3">
-          <div class="col-sm-7 description ${hideDescription ? ' d-none' : ''}">
-`;
-
-    // Add descriptions - handle case where description might be null/undefined
-    const descriptions = uploaded.description || {};
-    for (const [key, value] of Object.entries(this.langs)) {
-      html += `
-            <div class="mt-2">
-              <label class="form-label">Description (${key})</label>
-              <textarea name="mediaclass[${uploaded.id}][description][${key}]"
-                       class="form-control description"
-                       rows="3">${descriptions[key] || ''}</textarea>
+                        </span>
+                    </p>
+                </div>
             </div>
-        `;
-    }
-
-    html += `
-          </div>
-          <div class="col-sm-5 positions text-center ps-2${has_positions === true ? '' : ' d-none'}">
-            <b>Positions par rapport au contenu</b>
-            <div class="choices pt-2">
-`;
+            ${filetype === 'image' && cropable_links ? cropable_links : ''}
+            <div class="row params mt-3">
+                <div class="col-12 positions text-center ps-2${has_positions === true ? '' : ' d-none'}">
+                    <b>Positions par rapport au contenu</b>
+                    <div class="choices pt-2">`;
 
     // Add position buttons
     for (const position of this.positions_tags) {
@@ -360,14 +340,29 @@ const MediaclassUploader = {
     }
 
     html += `
-              <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position || 'left'}">
+                        <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position || 'left'}">
+                    </div>
+                </div>`;
+
+    // Add descriptions - using the safe descriptions variable
+    const descriptions = uploaded.description || {};
+    for (const [key, value] of Object.entries(descriptions)) {
+      html += `
+                <div class="col-lg-6 col-12 description ${hideDescription ? ' d-none' : ''}">
+                    <div class="mt-2">
+                        <label class="form-label">Description (${key})</label>
+                        <textarea name="mediaclass[${uploaded.id}][description][${key}]"
+                                class="form-control description"
+                                rows="3">${value || ''}</textarea>
+                    </div>
+                </div>`;
+    }
+
+    html += `
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
-`;
+</div>`;
 
     return html;
   },
