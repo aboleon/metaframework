@@ -47,7 +47,7 @@ return [
     'role' => 'rôle|rôles',
     'should_i_delete_user' => "Voulez-vous supprimer ce compte ?",
     'should_i_delete_record' => "Voulez-vous supprimer cet enregistrement ?",
-    'delete_user' => 'Suppression de compte',
+    'delete_user' => 'Supression de compte',
     'record_updated' => 'Mise à jour réussie.',
     'record_deleted' => "L'enregistrement a été supprimé.",
     'select_photo' => "Sélectionner une image",
@@ -70,8 +70,8 @@ return [
     'published' => [
         'online' => 'En ligne',
         'offline' => 'Hors ligne',
-        'publish' => 'Mettre en ligne',
-        'unpublish' => 'Mettre hors ligne',
+        'closed' => 'Clôturée',
+        'open' => 'Ouverte',
     ],
     'geo' => [
         'street_number' => 'Numéro',

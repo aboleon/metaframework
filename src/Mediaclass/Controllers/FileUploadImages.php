@@ -6,13 +6,13 @@ use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\Interfaces\ImageInterface;
 use MetaFramework\Mediaclass\Config;
 use MetaFramework\Mediaclass\Cropable;
 use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
-use MetaFramework\Mediaclass\Mediaclass;
 use MetaFramework\Mediaclass\Models\Media;
 use MetaFramework\Mediaclass\Path;
 use MetaFramework\Traits\Responses;
@@ -23,7 +23,7 @@ class FileUploadImages
 {
     use Responses;
 
-    protected object $image;
+    protected ImageInterface $image;
     protected MediaclassInterface $model;
     protected array $dimensions;
     protected array $urls = [];
@@ -32,13 +32,13 @@ class FileUploadImages
     protected string $filename;
     protected object $uploadedFile;
 
-
     private Media $media;
     private ?string $temp;
     private ?int $model_id;
     private string $folder_name = '';
 
     private Filesystem $disk;
+    private ImageManager $imageManager;
 
     public function __construct()
     {
@@ -48,6 +48,9 @@ class FileUploadImages
         $this->response['filetype'] = 'image';
 
         $this->disk = Config::getDisk();
+
+        // Initialize ImageManager with GD driver (you can switch to ImagickDriver if needed)
+        $this->imageManager = new ImageManager(new GdDriver());
     }
 
     public function setModel(?string $model = null): static
@@ -60,12 +63,10 @@ class FileUploadImages
         try {
             $this->model = (new ReflectionClass($model))->newInstance();
 
-
             if ($this->model_id) {
                 $this->model = $this->model->find($this->model_id);
             }
             $this->folder_name = Path::mediaFolderName($this->model);
-
 
         } catch (Throwable $e) {
             $this->responseException($e, "Unknown " . $model . " class in " . static::class);
@@ -176,28 +177,44 @@ class FileUploadImages
         return $this;
     }
 
-
     private function processImage(): static
     {
         $this->dimensions = config('mediaclass.dimensions');
-        $this->image = Image::make($this->uploadedFile);
+
+        // V3: Use ImageManager->read() instead of Image::make()
+        $this->image = $this->imageManager->read($this->uploadedFile);
+
         $this->urls = [];
 
-        $this->mime_type = (str_replace('image/', '', $this->image->mime()) == 'png' ? 'png' : 'jpg');
+        // V3: Get MIME type from the uploaded file directly
+        $mimeType = $this->uploadedFile->getMimeType();
+
+        $this->mime_type = (str_contains($mimeType, 'png') ? 'png' : 'jpg');
         $this->response['fileicon'] = asset('vendor/mfw/mediaclass/images/files/jpg.png');
+
+        // V3: Use width() and height() methods directly
         $ratio = ($this->image->width() / $this->image->height()) > 1 ? 'h' : 'v';
         $this->response['ratio'] = $ratio;
 
-
         foreach ($this->dimensions as $key => $dimensions) {
-
             $file = $this->folder_name . '/' . $dimensions['width'] . '_' . $this->filename . '.' . $this->mime_type;
 
-            $this->disk->put($file,
-                $this->image->resize($dimensions['width'], $dimensions['height'], function ($constraint) {
+            // V3: Updated resize method - no closure callback needed for basic aspect ratio preservation
+            $resizedImage = $this->image->resize(
+                $dimensions['width'],
+                $dimensions['height'],
+                function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
-                })->stream($this->mime_type, 75));
+                }
+            );
+
+            // V3: Use the appropriate encoder method instead of encode() with string
+            $encodedImage = $this->mime_type === 'png'
+                ? $resizedImage->toPng()
+                : $resizedImage->toJpeg(75);
+
+            $this->disk->put($file, $encodedImage);
 
             if (in_array($key, ['xl', 'sm'])) {
                 $this->urls[$key] = $this->disk->url($file . '?' . time());
@@ -263,5 +280,4 @@ class FileUploadImages
         $this->responseElement('count_files', request('count_files'));
         return $this;
     }
-
 }
