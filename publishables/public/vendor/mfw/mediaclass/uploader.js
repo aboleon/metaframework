@@ -75,7 +75,7 @@ const MediaclassUploader = {
   // Delete media
   unlinkable() {
     // Use event delegation to avoid re-binding issues
-    $(document).off('click.unlink').on('click.unlink', '.unlink', function(e) {
+    $(document).off('click.unlink').on('click.unlink', '.unlink', function (e) {
       e.preventDefault();
       e.stopPropagation();
 
@@ -96,14 +96,14 @@ const MediaclassUploader = {
       MediaclassUploader.confirmDeleteModal().modal('show');
 
       // Handle confirm button click
-      MediaclassUploader.confirmDeleteBtn().off('click').on('click', function() {
+      MediaclassUploader.confirmDeleteBtn().off('click').on('click', function () {
         // Hide the modal first
         MediaclassUploader.confirmDeleteModal().modal('hide');
 
         // Perform the deletion
         ajax(deleteData.formData, MediaclassUploader.template());
 
-        $(document).off('ajaxSuccess.mediaclassDelete').on('ajaxSuccess.mediaclassDelete', function() {
+        $(document).off('ajaxSuccess.mediaclassDelete').on('ajaxSuccess.mediaclassDelete', function () {
           deleteData.selector.remove();
 
           if (deleteData.container.find('.unlinkable').length < 1) {
@@ -289,7 +289,7 @@ const MediaclassUploader = {
         {name: 'model_id', value: uploadable.data('model-id')},
         {name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? ''},
         {name: 'count_files', value: validFiles},
-        {name: 'cropable', value: uploadable.data('cropable')}
+        {name: 'cropable', value: JSON.stringify(uploadable.data('cropable'))}
       ];
 
       // Add form fields
@@ -303,57 +303,55 @@ const MediaclassUploader = {
   },
 
   buildUploadedFileHTML(data, hideDescription) {
-    const {uploaded, filetype, preview, link, cropable_link, cropable_links, sizes, has_positions} = data;
+    const {uploaded, filetype, preview, link, cropable_links, has_positions} = data;
 
     let html = `
-      <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
-        <span class="unlink"><i class="bi bi-x-circle-fill"></i></span>
-        <div class="row m-0">
-          <div class="col-sm-3 impImg p-0 position-relative preview ${filetype}" style="background-image: url(${preview}); background-repeat: no-repeat">
-            <div class="actions">
-              <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
-              ${filetype === 'image' && cropable_link ? cropable_link : ''}
-            </div>
-            ${filetype === 'image' && sizes ? `<div class="sizes">${sizes}</div>` : ''}
-          </div>
-          <div class="col-sm-9 impFileName">
-            <div class="row infos">
-              <div class="col-sm-12">
-                <p class="name">
-                  <span class="rounded-1 py-1 px-2 text-bg-secondary">${uploaded.original_filename}</span>
-                  <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
-                    Uploadé le ${new Date(uploaded.created_at).toLocaleDateString('fr-FR')} à ${new Date(uploaded.created_at).toLocaleTimeString('fr-FR', {
+  <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
+    <span class="unlink"><i class="bi bi-x-circle-fill"></i></span>
+    <div class="row m-0">
+      <div class="col-sm-3 impImg p-0 position-relative preview ${filetype}" style="background-image: url(${preview}); background-repeat: no-repeat">
+        <div class="actions">
+          <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
+        </div>
+      </div>
+      <div class="col-sm-9 impFileName">
+        <div class="row infos">
+          <div class="col-sm-12">
+            <p class="name">
+              <span class="rounded-1 py-1 px-2 text-bg-secondary">${uploaded.original_filename}</span>
+              <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
+                Uploadé le ${new Date(uploaded.created_at).toLocaleDateString('fr-FR')} à ${new Date(uploaded.created_at).toLocaleTimeString('fr-FR', {
       hour: '2-digit',
       minute: '2-digit'
     })}
-                  </span>
-                </p>
-              </div>
-            </div>
-            ${filetype === 'image' && cropable_links ? cropable_links : ''}
-            <div class="row params mt-3">
-              <div class="col-sm-7 description ${hideDescription ? ' d-none' : ''}">
-    `;
+              </span>
+            </p>
+          </div>
+        </div>
+        ${filetype === 'image' && cropable_links ? cropable_links : ''}
+        <div class="row params mt-3">
+          <div class="col-sm-7 description ${hideDescription ? ' d-none' : ''}">
+`;
 
     // Add descriptions - handle case where description might be null/undefined
     const descriptions = uploaded.description || {};
     for (const [key, value] of Object.entries(this.langs)) {
       html += `
-                <div class="mt-2">
-                  <label class="form-label">Description (${key})</label>
-                  <textarea name="mediaclass[${uploaded.id}][description][${key}]"
-                           class="form-control description"
-                           rows="3">${descriptions[key] || ''}</textarea>
-                </div>
-            `;
+            <div class="mt-2">
+              <label class="form-label">Description (${key})</label>
+              <textarea name="mediaclass[${uploaded.id}][description][${key}]"
+                       class="form-control description"
+                       rows="3">${descriptions[key] || ''}</textarea>
+            </div>
+        `;
     }
 
     html += `
-              </div>
-              <div class="col-sm-5 positions text-center ps-2${has_positions === true ? '' : ' d-none'}">
-                <b>Positions par rapport au contenu</b>
-                <div class="choices pt-2">
-    `;
+          </div>
+          <div class="col-sm-5 positions text-center ps-2${has_positions === true ? '' : ' d-none'}">
+            <b>Positions par rapport au contenu</b>
+            <div class="choices pt-2">
+`;
 
     // Add position buttons
     for (const position of this.positions_tags) {
@@ -362,14 +360,14 @@ const MediaclassUploader = {
     }
 
     html += `
-                  <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position || 'left'}">
-                </div>
-              </div>
+              <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position || 'left'}">
             </div>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  </div>
+`;
 
     return html;
   },
@@ -502,11 +500,6 @@ const MediaclassUploader = {
 
         // Re-initialize the crop actions for the new buttons
         this.initCropActions();
-      }
-
-      // Update sizes display if provided
-      if (result.sizes) {
-        $mediaElement.find('.sizes').html(result.sizes);
       }
 
       // Update the preview image if new URL provided

@@ -182,6 +182,10 @@ class Cropable
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             $this->cropable_settings = $decoded;
         } else {
+            // Check if it's the [object Object] case
+            if (trim($cropable) === '[object Object]') {
+                throw new \InvalidArgumentException('Mediaclass: Invalid cropable data - object was not properly serialized');
+            }
             // Old format - single crop dimensions
             $settings                = explode(',', $cropable);
             $this->cropable_settings = [
