@@ -27,6 +27,15 @@ const MediaclassUploader = {
   deleteCropForm() {
     return $('#mediaclass-delete-crop-form');
   },
+  confirmDeleteModal() {
+    return $('#mediaclass-confirm-delete');
+  },
+  confirmDeleteBtn() {
+    return $('#confirm-delete-btn');
+  },
+  alerts() {
+    return $('.mediaclass-alerts');
+  },
   // Constants
   defaultFileSize: 16000000,
   langs: {
@@ -63,28 +72,52 @@ const MediaclassUploader = {
     return currentCount >= limit;
   },
 
-  // Event handlers
+  // Delete media
   unlinkable() {
-    $('.unlink').off().on('click', function () {
-      const selector = $(this).closest('.unlinkable');
+    // Use event delegation to avoid re-binding issues
+    $(document).off('click.unlink').on('click.unlink', '.unlink', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const $unlinkBtn = $(this);
+      const selector = $unlinkBtn.closest('.unlinkable');
+      const uploadable = MediaclassUploader.uploadable($unlinkBtn);
       const container = selector.closest('.uploaded');
-      const uploadable = container.closest('.mediaclass-uploadable');
-      const formData = `action=delete&id=${selector.attr('data-id')}&model=${uploadable.attr('data-model')}`;
 
-      ajax(formData, MediaclassUploader.template());
+      // Store the delete data for use in the modal
+      const deleteData = {
+        selector: selector,
+        container: container,
+        uploadable: uploadable,
+        formData: `action=delete&id=${selector.attr('data-id')}&model=${uploadable.attr('data-model')}`
+      };
 
-      $(document).ajaxSuccess(function () {
-        selector.remove();
-        if (container.find('.unlinkable').length < 1) {
-          const $alerts = $('.mediaclass-alerts');
-          $alerts.html(`<div class="alert alert-info">${$alerts.data('msg')}</div>`);
-        }
+      // Show the confirmation modal
+      MediaclassUploader.confirmDeleteModal().modal('show');
 
-        // Re-enable uploader button if we're now below the limit
-        const uploadableParent = container.closest('.mediaclass-uploadable');
-        if (!MediaclassUploader.isLimitReached(uploadableParent)) {
-          uploadableParent.find('span.mediaclass-uploader').removeClass('disabled');
-        }
+      // Handle confirm button click
+      MediaclassUploader.confirmDeleteBtn().off('click').on('click', function() {
+        // Hide the modal first
+        MediaclassUploader.confirmDeleteModal().modal('hide');
+
+        // Perform the deletion
+        ajax(deleteData.formData, MediaclassUploader.template());
+
+        $(document).off('ajaxSuccess.mediaclassDelete').on('ajaxSuccess.mediaclassDelete', function() {
+          deleteData.selector.remove();
+
+          if (deleteData.container.find('.unlinkable').length < 1) {
+            MediaclassUploader.alerts().html(`<div class="alert alert-info">${MediaclassUploader.alerts().data('msg')}</div>`);
+          }
+
+          // Re-enable uploader button if we're now below the limit
+          if (!MediaclassUploader.isLimitReached(deleteData.uploadable)) {
+            deleteData.uploadable.find('span.mediaclass-uploader').removeClass('disabled');
+          }
+
+          // Remove this specific success handler
+          $(document).off('ajaxSuccess.mediaclassDelete');
+        });
       });
     });
   },

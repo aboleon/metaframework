@@ -40,6 +40,7 @@
 
 @once
     <x-mediaclass::crop-modal/>
+    <x-mediaclass::confirm-delete-modal/>
 @endonce
 
 
