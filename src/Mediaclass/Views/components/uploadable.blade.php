@@ -14,7 +14,8 @@
 >
     <div class="controls d-flex justify-between align-items-center" style="background: #EFEFEF">
         <span class="subcontrol mediaclass-uploader"><i class="{{ $icon }}"></i> {{ $label }}</span>
-        <span class="subcontrol" style="font-size: 14px;font-weight: 700">{{ array_key_exists('sizes', $settings) ? current($settings['sizes']).' x '. end($settings['sizes']): '' }}</span>
+        <span class="subcontrol"
+              style="font-size: 14px;font-weight: 700">{{ array_key_exists('sizes', $settings) ? current($settings['sizes']).' x '. end($settings['sizes']): '' }}</span>
     </div>
     <div class="mediaclass-upload-container"></div>
     <div class="uploaded">
@@ -32,10 +33,13 @@
         <input type="hidden" name="mediaclass_temp_id" value="{{ Str::random(32) }}">
     @endif
     @include('mediaclass::fileupload_scripts')
-    <x-mediaclass::template />
+    <x-mediaclass::template/>
+    <x-mediaclass::crop-template/>
 @endonce
 
 
 @once
     <x-mediaclass::crop-modal/>
 @endonce
+
+

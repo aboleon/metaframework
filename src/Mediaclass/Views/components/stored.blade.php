@@ -1,10 +1,10 @@
 @if ($medias->isNotEmpty())
     @foreach($medias as $media)
         @php
-            $is_image = $isImage($media);
-            $cropableImg = new \MetaFramework\Mediaclass\Cropable($media);
-            $cropableImg->setCropableFromComponent($cropable);
-            $preview = $is_image ? $media->url($cropableImg->isCropped ? 'cropped': 'sm') : asset('vendor/mfw/mediaclass/images/files/' . $media->extension().'.png');
+                $is_image = $isImage($media);
+                $cropableImg = new \MetaFramework\Mediaclass\Cropable($media);
+                $cropableImg->setCropableFromComponent($cropable);
+                $preview = $is_image ? $media->url($cropableImg->isCropped() ? 'cropped': 'sm') : asset('vendor/mfw/mediaclass/images/files/' . $media->extension().'.png');
         @endphp
         <div class="mediaclass unlinkable uploaded-image my-2" data-id="{{ $media->id }}"
              id="mediaclass-{{$media->id}}">
@@ -16,26 +16,25 @@
                         <a target="_blank" href="{{ $media->url() }}" class="zoom">
                             <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
                         </a>
-                        @if($is_image)
-                            {!! $cropableImg->link() !!}
-                        @endif
                     </div>
-                    @if($is_image)
-                        <div class="sizes">{!! $cropableImg->printSizes() !!}</div>
-                    @endif
                 </div>
                 <div class="col-sm-9 impFileName">
                     <div class="row infos">
                         <div class="col-sm-12">
                             <p class="name">
                                 <span
-                                    class="rounded-1 py-1 px-2 text-bg-secondary">{{ $media->original_filename }}</span>
+                                        class="rounded-1 py-1 px-2 text-bg-secondary">{{ $media->original_filename }}</span>
                                 <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
                                 {{ __('mediaclass.uploaded_at', ['date' => $media->created_at->format('d/m/Y'), 'time' => $media->created_at->format('H:i')]) }}
                                 </span>
                             </p>
                         </div>
                     </div>
+
+                    @if($is_image)
+                        {!! $cropableImg->links() !!}
+                    @endif
+
                     <div class="row params mt-3">
                         <div class="col-sm-7 description {{ !$description ? 'd-none' :'' }}">
                             @foreach(\MetaFramework\Accessors\Locale::projectLocales() as $locale)
@@ -60,6 +59,7 @@
                 </div>
             </div>
         </div>
+
     @endforeach
 @endif
 
@@ -68,7 +68,3 @@
         <x-mfw::alert type="warning" :message="$nomedia"/>
     @endif
 </div>
-
-@once
-    <x-mediaclass::crop-modal/>
-@endonce

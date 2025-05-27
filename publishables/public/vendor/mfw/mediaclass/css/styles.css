@@ -185,6 +185,7 @@ canvas {
         top: 10px;
         right: 10px;
         cursor: pointer;
+        z-index: 10;
         i {
             font-size: 20px;
             color: var(--ab-blue);
@@ -226,4 +227,162 @@ canvas {
         width: 100%;
     }
 
+}
+
+/* Crop Actions Bar Styles */
+.crop-actions-bar {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.crop-actions-bar::before {
+    content: 'Recadrages :';
+    font-weight: 600;
+    color: #495057;
+    margin-right: 10px;
+}
+
+.crop-actions-bar .crop,
+.crop-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #495057;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+.crop-badge {
+    background: #f9f9f9;
+}
+
+.crop-actions-bar .crop:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #212529;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.crop-actions-bar .crop.cropped {
+    background: #d1e7dd;
+    border-color: #a3cfbb;
+    color: #0a3622;
+}
+
+.crop-actions-bar .crop.cropped:hover {
+    background: #c3e6cb;
+    border-color: #8bc4a0;
+}
+
+.crop-actions-bar .crop i {
+    font-size: 1rem;
+}
+
+.crop-actions-bar .crop .check-icon {
+    color: #198754;
+    margin-left: 4px;
+    font-size: 0.875rem;
+}
+
+.crop-label {
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* Hide the old crop action in the image overlay */
+.mediaclass .impImg .actions .crop {
+    display: none;
+}
+
+/* Crop sizes display */
+.crop-sizes {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    color: #6c757d;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.crop-size-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.crop-size-item i {
+    color: #198754;
+    font-size: 0.75rem;
+}
+
+/* Modal enhancements */
+#mediaclass-crop .crop-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#mediaclass-crop .crop-info h5 {
+    margin: 0;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#mediaclass-crop .crop-info .dimensions {
+    color: rgba(255,255,255,0.9);
+    font-size: 0.95rem;
+    margin-top: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .crop-actions-bar {
+        padding: 10px;
+    }
+
+    .crop-actions-bar::before {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .crop-actions-bar .crop {
+        font-size: 0.8125rem;
+        padding: 5px 10px;
+    }
+}
+
+/* Animation for crop completion */
+@keyframes cropSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.crop-actions-bar .crop.just-cropped {
+    animation: cropSuccess 0.4s ease;
 }

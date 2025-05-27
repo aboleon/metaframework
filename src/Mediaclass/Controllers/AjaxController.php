@@ -3,7 +3,6 @@
 namespace MetaFramework\Mediaclass\Controllers;
 
 
-
 use MetaFramework\Accessors\Users;
 use MetaFramework\Controllers\Controller;
 use MetaFramework\Traits\Ajax;
@@ -16,7 +15,7 @@ class AjaxController extends Controller
 
     public function __construct()
     {
-        $users = (new Users());
+        $users          = (new Users());
         $this->uploader = new FileUploadImages;
     }
 
@@ -29,6 +28,12 @@ class AjaxController extends Controller
     {
         return Cropper::crop();
     }
+
+    public function deleteCrop(): array
+    {
+        return Cropper::deleteCrop();
+    }
+
 
     public function delete(): array
     {

@@ -9,6 +9,7 @@ use MetaFramework\Mediaclass\Config;
 use MetaFramework\Mediaclass\Cropable;
 use MetaFramework\Mediaclass\Models\Media;
 use MetaFramework\Mediaclass\Path;
+use MetaFramework\Traits\Ajax;
 use MetaFramework\Traits\Responses;
 use Throwable;
 
@@ -27,17 +28,19 @@ class Cropper
     public static function crop(): array
     {
         $cropper = new Cropper;
+        $cropper->enableAjaxMode();
 
         try {
             $media = Media::query()->findOrFail(request('object_id'));
             $file = $media->file('xl');
+            $cropKey = request('crop_key', 'default');
 
-            // V3: Use ImageManager->read() instead of Image::make()
             $image = $cropper->imageManager->read($file);
 
-            $filename = Path::mediaFolderName($media->bindedModel()) . '/cropped_' . $media->filename . '.' . $media->extension();
+            // Create filename with crop key
+            $filename = Path::mediaFolderName($media->bindedModel()) . '/' . $cropKey . '_' . $media->filename . '.' . $media->extension();
 
-            // V3: Chain crop and resize operations, then encode
+            // Chain crop and resize operations, then encode
             $processedImage = $image
                 ->crop(
                     (int)request('wimage'),
@@ -45,16 +48,11 @@ class Cropper
                     (int)request('x1image'),
                     (int)request('y1image')
                 )
-                ->resize(
+                ->scaleDown(
                     request('wiimage'),
-                    request('heimage'),
-                    function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    }
+                    request('heimage')
                 );
 
-            // V3: Use the appropriate encoder method instead of encode() with string
             $encodedImage = str_contains($media->mime, 'png')
                 ? $processedImage->toPng()
                 : $processedImage->toJpeg(80);
@@ -62,15 +60,18 @@ class Cropper
             Config::getDisk()->put($filename, $encodedImage);
 
             $cropable = new Cropable($media);
+            $cropable->setCurrentCropKey($cropKey);
             $cropable->setWidth((int)request('wiimage'));
             $cropable->setHeight((int)request('heimage'));
 
             $img = Storage::disk('media')->url($filename);
             $cropper->responseElement('sizes', $cropable->printSizes());
-            $cropper->responseElement('cropable_link', $cropable->link());
+            $cropper->responseElement('cropable_links', $cropable->links());
             $cropper->responseElement('uploaded', $media);
-            $cropper->responseElement('callback', 'cropped');
+            $cropper->responseElement('callback', 'mediaclassCropped');
+            $cropper->responseElement('crop_key', $cropKey);
             $cropper->responseElement('urls', ['xl' => $img, 'sm' => $img]);
+            $cropper->responseSuccess('Image recadrée avec succès');
 
         } catch (Throwable $e) {
             $cropper->responseException($e);
@@ -78,5 +79,42 @@ class Cropper
         } finally {
             return $cropper->fetchResponse();
         }
+    }
+
+    public static function deleteCrop(): array
+    {
+        $cropper = new Cropper;
+        $cropper->enableAjaxMode();
+
+        try {
+            $mediaId = request('media_id');
+            $cropKey = request('crop_key');
+
+            $media = Media::query()->findOrFail($mediaId);
+
+            // Build the crop filename
+            $filename = $cropKey . '_' . $media->filename . '.' . $media->extension();
+            $path = Path::mediaFolderName($media->bindedModel()) . '/' . $filename;
+
+            // Delete the cropped file
+            if (Config::getDisk()->exists($path)) {
+                Config::getDisk()->delete($path);
+            }
+
+            // Get updated cropable instance for regenerating links
+            $cropable = new Cropable($media);
+
+            $cropper->responseElement('success', true);
+            $cropper->responseElement('crop_key', $cropKey);
+            $cropper->responseElement('media_id', $mediaId);
+            $cropper->responseElement('cropable_links', $cropable->links());
+            $cropper->responseElement('callback', 'mediaclassDeletedCrop');
+            $cropper->responseSuccess(__('Recadrage supprimé avec succès'));
+
+        } catch (Throwable $e) {
+            $cropper->responseException($e);
+        }
+
+        return $cropper->fetchResponse();
     }
 }

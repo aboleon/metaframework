@@ -7,7 +7,7 @@
             MediaclassUploader.cropped(result);
         } else {
             $('#mediaclas-loader').addClass('d-none');
-            $('#mediaclas-loader').removeClass('d-none');
+            $('#mediaclass-crop-btn').removeClass('d-none');
         }
     }
 
@@ -25,10 +25,31 @@
         padding: .375rem .75rem;
         border-radius: 6px !important;
     }
+
+    .crop-info {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .crop-info h5 {
+        margin: 0;
+        color: #495057;
+        font-size: 1.1rem;
+    }
+
+    .crop-info .dimensions {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
 </style>
 @php
     $url = $media->url(size:'xl');
     list($current_w, $current_h) = getimagesize($url);
+    $cropKey = $crop_key ?? 'default';
 @endphp
 
 <form id="mediaclass-cropable-form" data-ajax="{{ route('mediaclass.ajax') }}">
@@ -37,10 +58,17 @@
     <input type="hidden" id="y1" name="y1image"/>
     <input type="hidden" id="wi" name="wiimage" value="{!! $cropable->width() !!}"/>
     <input type="hidden" id="he" name="heimage" value="{!! $cropable->height() !!}"/>
+    <input type="hidden" name="crop_key" value="{{ $cropKey }}"/>
 
     <input type=hidden name=object_id value="{{ $media->id }}">
     <input type=hidden name=resized_temp_h value="{!! $current_h!!}">
     <input type=hidden name=resized_temp_w value="{!! $current_w !!}">
+
+    <div class="crop-info">
+        <h5>Recadrage : {{ ucfirst($cropKey) }}</h5>
+        <div class="dimensions">Dimensions cibles : {{ $cropable->width() }} x {{ $cropable->height() }} px</div>
+    </div>
+
     <div style="padding: 10px;margin:0 auto;">
         <img alt="" src="{{ $url }}" id="crop_image"/>
     </div>

@@ -27,7 +27,7 @@ class Media extends Model
 
     protected $guarded = [];
     protected $casts = [
-        'description' => 'array'
+        'description' => 'array',
     ];
 
     public function model(): MorphTo
@@ -48,9 +48,22 @@ class Media extends Model
         };
     }
 
-    public function url(string $size = 'sm'): string
+    /**
+     * @param string $size
+     * @param string|null $cropKey
+     * @return string
+     */
+    public function url(string $size = 'sm', ?string $cropKey = null): string
     {
-        return Storage::disk('media')->url(Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: $size) . $this->filename .'.'. $this->extension());
+        // If a crop key is provided and exists, return the cropped URL
+        if ($cropKey && $this->isCroppedForKey($cropKey)) {
+            return $this->getCroppedUrl($cropKey);
+        }
+
+        // Otherwise, use the original url logic
+        return Storage::disk('media')->url(
+            Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: $size) . $this->filename . '.' . $this->extension()
+        );
     }
 
     public function file(string $size = 'sm'): string
@@ -58,10 +71,22 @@ class Media extends Model
         return Storage::disk('media')->get(Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: $size) . $this->filename .'.'. $this->extension());
     }
 
-    public function isCropped(): bool
-    {
-        return Storage::disk('media')->exists(Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: 'cropped') . $this->filename .'.'. $this->extension());
 
+    /**
+     * @param string|null $key
+     * @return bool
+     */
+    public function isCropped(?string $key = null): bool
+    {
+        if ($key === null) {
+            // Original behavior - check for cropped_ prefix
+            return Storage::disk('media')->exists(
+                Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: 'cropped') . $this->filename . '.' . $this->extension()
+            );
+        }
+
+        // Check for specific crop key
+        return $this->isCroppedForKey($key);
     }
 
     public function dimensionPrefix(string $prefix = 'sm'): string
@@ -79,6 +104,65 @@ class Media extends Model
         }
 
         return '';
+    }
+
+    /**
+     * Check if a specific crop exists
+     *
+     * @param string $key The crop key (e.g., 'banner', 'thumbnail')
+     * @return bool
+     */
+    public function isCroppedForKey(string $key): bool
+    {
+        return Storage::disk('media')->exists(
+            Path::mediaFolderName($this->model) . '/' . $key . '_' . $this->filename . '.' . $this->extension()
+        );
+    }
+
+
+    /**
+     * Get URL for a specific crop
+     *
+     * @param string $key The crop key
+     * @return string|null
+     */
+    public function getCroppedUrl(string $key): ?string
+    {
+        if (!$this->isCroppedForKey($key)) {
+            return null;
+        }
+
+        return Storage::disk('media')->url(
+            Path::mediaFolderName($this->model) . '/' . $key . '_' . $this->filename . '.' . $this->extension()
+        );
+    }
+
+    /**
+     * Get all existing cropped images
+     * This scans the filesystem for crops based on the settings
+     *
+     * @return array
+     */
+    public function getCroppedImages(): array     // replaces the old one
+    {
+        $cropable = $this->settings()['cropable'] ?? [];
+
+        // force associative form: ['thumb'=>[200,200], …]
+        if (!is_array($cropable) || isset($cropable[0])) {
+            $cropable = ['default' => $cropable];
+        }
+
+        $out = [];
+        foreach ($cropable as $key => $dim) {
+            if ($this->isCroppedForKey($key)) {               // purely FS check
+                $out[$key] = [
+                    'width'  => $dim[0],
+                    'height' => $dim[1],
+                    'filename' => "{$key}_{$this->filename}.{$this->extension()}"
+                ];
+            }
+        }
+        return $out;
     }
 
 }

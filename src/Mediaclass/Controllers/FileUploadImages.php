@@ -234,8 +234,19 @@ class FileUploadImages
         $this->media->model = $this->model;
         $cropable = new Cropable($this->media);
         $cropable->setCropableFromComponent((string)request('cropable'));
-        $this->responseElement('sizes', $cropable->printSizes());
-        $this->responseElement('cropable_link', $cropable->link());
+
+        // If we have multiple crops, show the links bar instead of single link
+        if (count($cropable->getCropableSettings()) > 1) {
+            $this->responseElement('sizes', $cropable->printSizes());
+            $this->responseElement('cropable_links', $cropable->links());
+        } else {
+            // Single crop - maintain backwards compatibility
+            $this->responseElement('sizes', $cropable->printSizes());
+            $this->responseElement('cropable_link', $cropable->link());
+        }
+
+        // Also update the response to include crop settings for the JavaScript
+        $this->responseElement('cropable_settings', json_encode($cropable->getCropableSettings()));
 
         $this->mediaResponse();
 

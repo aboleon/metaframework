@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('filename',6);
             $table->string('mime');
             $table->string('temp')->nullable()->index();
+            $table->json('cropped_images')->nullable();
             $table->timestamps();
         });
     }

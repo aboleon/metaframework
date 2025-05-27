@@ -24,7 +24,9 @@ const MediaclassUploader = {
   progress() {
     return $('.mediaclass-progress');
   },
-
+  deleteCropForm() {
+    return $('#mediaclass-delete-crop-form');
+  },
   // Constants
   defaultFileSize: 16000000,
   langs: {
@@ -63,7 +65,7 @@ const MediaclassUploader = {
 
   // Event handlers
   unlinkable() {
-    $('.unlink').off().on('click', function() {
+    $('.unlink').off().on('click', function () {
       const selector = $(this).closest('.unlinkable');
       const container = selector.closest('.uploaded');
       const uploadable = container.closest('.mediaclass-uploadable');
@@ -71,7 +73,7 @@ const MediaclassUploader = {
 
       ajax(formData, MediaclassUploader.template());
 
-      $(document).ajaxSuccess(function() {
+      $(document).ajaxSuccess(function () {
         selector.remove();
         if (container.find('.unlinkable').length < 1) {
           const $alerts = $('.mediaclass-alerts');
@@ -88,7 +90,7 @@ const MediaclassUploader = {
   },
 
   uploaderCall() {
-    $('span.mediaclass-uploader').off().on('click', function() {
+    $('span.mediaclass-uploader').off().on('click', function () {
       const instantiator = $(this).closest('.mediaclass-uploadable');
       const uploadContainer = MediaclassUploader.uploadableContainer($(this));
 
@@ -112,7 +114,7 @@ const MediaclassUploader = {
     });
 
     // Immediately disable uploader buttons where limit is already reached
-    $('.mediaclass-uploadable').each(function() {
+    $('.mediaclass-uploadable').each(function () {
       const $this = $(this);
       if (MediaclassUploader.isLimitReached($this)) {
         $this.find('span.mediaclass-uploader').addClass('disabled');
@@ -144,7 +146,7 @@ const MediaclassUploader = {
   },
 
   positions(uploadable) {
-    uploadable.find('.positions i').off().on('click', function() {
+    uploadable.find('.positions i').off().on('click', function () {
       const $this = $(this);
       const positionsContainer = $this.closest('.positions');
 
@@ -167,7 +169,7 @@ const MediaclassUploader = {
     // Your original event handler for fileuploadadd
     fileuploadContainer.off('fileuploadadd fileuploadsubmit');
 
-    fileuploadContainer.on('fileuploadadd', function() {
+    fileuploadContainer.on('fileuploadadd', function () {
       fileuploadContainer.find('.uploadables').removeClass('d-none');
 
       setTimeout(() => {
@@ -197,7 +199,7 @@ const MediaclassUploader = {
         }
 
         // Remove old files display
-        uploadable.find('.files').delay(500).fadeOut(function() {
+        uploadable.find('.files').delay(500).fadeOut(function () {
           $(this).html('').show();
         });
 
@@ -237,7 +239,7 @@ const MediaclassUploader = {
 
       // Count valid files
       let validFiles = 0;
-      uploadable.find('.files > div').each(function() {
+      uploadable.find('.files > div').each(function () {
         if ($(this).find('.error').first().text().length < 1) {
           validFiles += 1;
         }
@@ -245,20 +247,20 @@ const MediaclassUploader = {
 
       // Set form data
       data.formData = [
-        { name: '_token', value: token() },
-        { name: 'action', value: 'upload' },
-        { name: 'group', value: uploadable.data('group') },
-        { name: 'subgroup', value: uploadable.data('subgroup') },
-        { name: 'positions', value: uploadable.data('positions') },
-        { name: 'model', value: uploadable.data('model') },
-        { name: 'model_id', value: uploadable.data('model-id') },
-        { name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? '' },
-        { name: 'count_files', value: validFiles },
-        { name: 'cropable', value: uploadable.data('cropable') }
+        {name: '_token', value: token()},
+        {name: 'action', value: 'upload'},
+        {name: 'group', value: uploadable.data('group')},
+        {name: 'subgroup', value: uploadable.data('subgroup')},
+        {name: 'positions', value: uploadable.data('positions')},
+        {name: 'model', value: uploadable.data('model')},
+        {name: 'model_id', value: uploadable.data('model-id')},
+        {name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? ''},
+        {name: 'count_files', value: validFiles},
+        {name: 'cropable', value: uploadable.data('cropable')}
       ];
 
       // Add form fields
-      data.context.find('textarea, input').each(function() {
+      data.context.find('textarea, input').each(function () {
         data.formData.push({
           name: $(this).attr('name'),
           value: $(this).val()
@@ -268,7 +270,7 @@ const MediaclassUploader = {
   },
 
   buildUploadedFileHTML(data, hideDescription) {
-    const { uploaded, filetype, preview, link, cropable_link, sizes, has_positions } = data;
+    const {uploaded, filetype, preview, link, cropable_link, cropable_links, sizes, has_positions} = data;
 
     let html = `
       <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
@@ -277,25 +279,40 @@ const MediaclassUploader = {
           <div class="col-sm-3 impImg p-0 position-relative preview ${filetype}" style="background-image: url(${preview}); background-repeat: no-repeat">
             <div class="actions">
               <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
-              ${filetype === 'image' ? cropable_link : ''}
+              ${filetype === 'image' && cropable_link ? cropable_link : ''}
             </div>
-            ${filetype === 'image' ? `<div class="sizes">${sizes}</div>` : ''}
+            ${filetype === 'image' && sizes ? `<div class="sizes">${sizes}</div>` : ''}
           </div>
           <div class="col-sm-9 impFileName">
             <div class="row infos">
-              <div class="col-sm-12"><p class="name">${uploaded.original_filename}</p></div>
+              <div class="col-sm-12">
+                <p class="name">
+                  <span class="rounded-1 py-1 px-2 text-bg-secondary">${uploaded.original_filename}</span>
+                  <span class="rounded-1 py-1 px-2 bg-light-subtle text-dark opacity-75">
+                    Uploadé le ${new Date(uploaded.created_at).toLocaleDateString('fr-FR')} à ${new Date(uploaded.created_at).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}
+                  </span>
+                </p>
+              </div>
             </div>
-            <div class="row params mt-2">
-              <div class="col-sm-7 description no-multilang${hideDescription ? ' d-none' : ''}">
+            ${filetype === 'image' && cropable_links ? cropable_links : ''}
+            <div class="row params mt-3">
+              <div class="col-sm-7 description ${hideDescription ? ' d-none' : ''}">
     `;
 
     // Add descriptions - handle case where description might be null/undefined
     const descriptions = uploaded.description || {};
-    for (const [key, value] of Object.entries(descriptions)) {
+    for (const [key, value] of Object.entries(this.langs)) {
       html += `
-        <b>Description <span class="lang">${this.langs[key]}</span></b>
-        <textarea name="mediaclass[${uploaded.id}][description][${key}]" type="text" class="mt-2 form-control description">${value !== null ? value : ''}</textarea>
-      `;
+                <div class="mt-2">
+                  <label class="form-label">Description (${key})</label>
+                  <textarea name="mediaclass[${uploaded.id}][description][${key}]"
+                           class="form-control description"
+                           rows="3">${descriptions[key] || ''}</textarea>
+                </div>
+            `;
     }
 
     html += `
@@ -307,11 +324,12 @@ const MediaclassUploader = {
 
     // Add position buttons
     for (const position of this.positions_tags) {
-      html += `<i class="bi bi-arrow-${position}-square-fill active" data-position="${position}"></i>`;
+      const isActive = uploaded.position === position ? ' active' : '';
+      html += `<i class="bi bi-arrow-${position}-square-fill${isActive}" data-position="${position}"></i>`;
     }
 
     html += `
-                  <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position}">
+                  <input type="hidden" name="mediaclass[${uploaded.id}][position]" value="${uploaded.position || 'left'}">
                 </div>
               </div>
             </div>
@@ -324,44 +342,202 @@ const MediaclassUploader = {
   },
 
   modalCrop() {
-    const $modalCrop = $('#mediaclass-crop');
+    const $modal = $('#mediaclass-crop');
+    const ajaxUrl = this.template().data('ajax');
 
-    $modalCrop.off().on('show.bs.modal', function(e) {
-      const link = $(e.relatedTarget);
-      $(this).find('.modal-body').load(link.attr('href'));
+    // Clean up any existing event handlers
+    $modal.off('shown.bs.modal');
+    $modal.off('hidden.bs.modal');
+    $(document).off('ajaxSuccess.mediaclassCrop');
+
+    // Handle crop button clicks
+    $(document).on('click', '.crop-actions-bar .crop', function (e) {
+      e.preventDefault();
+      const $btn = $(this);
+      const isView = $btn.hasClass('cropped');
+
+      // Clear previous modal content
+      $modal.find('.modal-body').empty();
+
+      if (isView) {
+        // Clone the template content
+        const template = $('#mediaclass-crop-view-template').html();
+        $modal.find('.modal-body').html(template);
+
+        // Set timeout to ensure DOM is ready
+        setTimeout(() => {
+          // Populate modal content
+          $modal.find('.crop-key-title, .crop-key-label')
+              .text($btn.data('crop-key'));
+          $modal.find('.crop-dimensions-text, .crop-dimensions-label')
+              .text($btn.data('crop-w') + ' x ' + $btn.data('crop-h'));
+          $modal.find('.crop-preview-image')
+              .attr('src', $btn.data('preview-url'));
+
+          // Get filename from parent element
+          const filename = $btn.closest('.mediaclass').find('.name span:first').text();
+          $modal.find('.crop-filename').text($btn.data('crop-key') + '_' + filename);
+
+          // Set form values
+          const $form = $modal.find('#mediaclass-delete-crop-form');
+          $form.attr('data-ajax', ajaxUrl);
+          $form.attr('data-media-id', $btn.data('media-id'));
+          $form.attr('data-crop-key', $btn.data('crop-key'));
+        }, 50);
+
+        $modal.modal('show');
+      } else {
+        // Load crop editor
+        $modal.find('.modal-body').load($btn.attr('href'), function () {
+          $modal.modal('show');
+        });
+      }
     });
 
-    $('body').on('hidden.bs.modal', '.modal', function() {
-      $modalCrop.find('.modal-body').html('');
+    // Handle delete button click
+    $modal.on('click', '#mediaclass-delete-crop-btn', function () {
+      let c = MediaclassUploader.deleteCropForm();
+      ajax('action=deleteCrop&media_id=' + c.attr('data-media-id') + '&crop_key=' + c.attr('data-crop-key'), $(c));
+    });
+
+    // Handle AJAX success
+    $(document).on('ajaxSuccess.mediaclassCrop', function (_e, xhr) {
+      const ct = (xhr.getResponseHeader('Content-Type') || '').toLowerCase();
+      if (!ct.includes('application/json')) return;
+
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (res.action === 'delete_crop') {
+          MediaclassUploader.deletedCrop(res);
+        }
+      } catch (e) {
+        console.error('Error parsing JSON response', e);
+      }
+    });
+
+    // Clean up on modal close
+    $modal.on('hidden.bs.modal', function () {
+      $(this).find('.modal-body').empty();
     });
   },
+
 
   hideModal() {
     setTimeout(() => {
       const $modalCrop = $('#mediaclass-crop');
       $modalCrop.modal('hide');
 
-      $('body').on('hidden.bs.modal', '.modal', function() {
+      $('body').on('hidden.bs.modal', '.modal', function () {
         $modalCrop.find('.modal-body').html('');
       });
     }, 1500);
   },
+  cropped: function (result) {
+    // Update the UI after cropping
+    if (result.uploaded && result.uploaded.id) {
+      var $mediaElement = $('#mediaclass-' + result.uploaded.id);
 
-  cropped(result) {
-    const { uploaded, urls, sizes } = result;
-    const media = $(`#mediaclass-${uploaded.id}`);
+      // If we have a crop_key in the result, update that specific button
+      if (result.crop_key) {
+        const $cropButton = $mediaElement.find(`.crop[data-crop-key="${result.crop_key}"]`);
 
-    media.find('.preview').attr('style', `background:url(${urls.xl}); background-repeat: no-repeat; background-size: contain;`);
-    media.find('.sizes').html(sizes);
-    media.find('.zoom').attr('href', urls.xl);
-    media.find('.crop').remove();
+        if ($cropButton.length) {
+          // Add the 'cropped' class to indicate it's now cropped
+          $cropButton.addClass('cropped');
 
-    this.hideModal();
+          // Change the icon to the filled crop icon
+          $cropButton.find('i').first()
+              .removeClass('fa-solid fa-crop')
+              .addClass('fa-solid fa-crop-simple');
+
+          // Add the check mark icon if it doesn't exist
+          if (!$cropButton.find('.fa-circle-check').length) {
+            $cropButton.append(' <i class="fa-solid fa-circle-check check-icon"></i>');
+          }
+
+          // Update the preview URL data attribute if we have the new URL
+          if (result.urls && result.urls.xl) {
+            $cropButton.attr('data-preview-url', result.urls.xl);
+          }
+        }
+      }
+
+      // Original code for updating other elements
+      if (result.cropable_links) {
+        // Replace the entire crop actions bar with the updated one
+        $mediaElement.find('.crop-actions-bar').replaceWith(result.cropable_links);
+
+        // Re-initialize the crop actions for the new buttons
+        this.initCropActions();
+      }
+
+      // Update sizes display if provided
+      if (result.sizes) {
+        $mediaElement.find('.sizes').html(result.sizes);
+      }
+
+      // Update the preview image if new URL provided
+      if (result.urls && result.urls.xl) {
+        $mediaElement.find('.preview').css('background-image', `url(${result.urls.xl})`);
+        $mediaElement.find('.zoom').attr('href', result.urls.xl);
+      }
+    }
+
+    MediaclassUploader.hideModal();
+
   },
+
+  // Method called after deleting a crop
+  deletedCrop: function (result) {
+    if (result.success && result.media_id && result.crop_key) {
+      const $mediaElement = $('#mediaclass-' + result.media_id);
+
+      // Find the specific crop button for this crop_key
+      const $cropButton = $mediaElement.find(`.crop[data-crop-key="${result.crop_key}"]`);
+
+      if ($cropButton.length) {
+        // Remove the 'cropped' class to reset to uncropped state
+        $cropButton.removeClass('cropped');
+
+        // Change the icon from filled to regular crop icon
+        $cropButton.find('i').first()
+            .removeClass('fa-solid fa-crop-simple')
+            .addClass('fa-solid fa-crop');
+
+        // Remove the check mark icon if it exists
+        $cropButton.find('.fa-circle-check').remove();
+
+        // Clear the preview URL data attribute
+        $cropButton.attr('data-preview-url', '');
+
+        // Update the href to point to the crop editor instead of just modal
+        const baseHref = $cropButton.attr('href');
+        if (baseHref && !baseHref.includes('?')) {
+          const width = $cropButton.attr('data-crop-w');
+          const height = $cropButton.attr('data-crop-h');
+          $cropButton.attr('href', `${baseHref}?w=${width}&h=${height}&crop_key=${result.crop_key}`);
+        }
+      }
+    }
+
+    MediaclassUploader.hideModal();
+
+  },
+
+  initCropActions: function () {
+    // Modal already handles the loading via href, just ensure it's properly initialized
+    var $modalCrop = $('#mediaclass-crop');
+
+    // Ensure modal content is cleared when hidden
+    $modalCrop.off('hidden.bs.modal').on('hidden.bs.modal', function () {
+      $(this).find('.modal-body').empty();
+    });
+  },
+
 
   init() {
     // Initialize positions for all uploadable elements
-    $('.mediaclass-uploadable').each(function() {
+    $('.mediaclass-uploadable').each(function () {
       MediaclassUploader.positions($(this));
     });
 
@@ -369,8 +545,18 @@ const MediaclassUploader = {
     this.uploaderCall();
     this.unlinkable();
     this.modalCrop();
+    this.initCropActions();
   },
 };
 
 // Initialize the module
 MediaclassUploader.init();
+
+// Callbacks
+function mediaclassDeletedCrop(result) {
+  MediaclassUploader.deletedCrop(result);
+}
+
+function mediaclassCropped(result) {
+  MediaclassUploader.cropped(result);
+}
