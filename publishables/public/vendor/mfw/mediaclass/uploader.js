@@ -275,6 +275,15 @@ const MediaclassUploader = {
         }
       });
 
+      // Get cropable data
+      let cropableData = uploadable.data('cropable');
+
+      // If it's already a string (JSON), use it as is
+      // If it's an object, stringify it
+      if (typeof cropableData === 'object' && cropableData !== null) {
+        cropableData = JSON.stringify(cropableData);
+      }
+
       // Set form data
       data.formData = [
         {name: '_token', value: token()},
@@ -286,7 +295,7 @@ const MediaclassUploader = {
         {name: 'model_id', value: uploadable.data('model-id')},
         {name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? ''},
         {name: 'count_files', value: validFiles},
-        {name: 'cropable', value: JSON.stringify(uploadable.data('cropable'))}
+        {name: 'cropable', value: cropableData || ''}
       ];
 
       // Add form fields

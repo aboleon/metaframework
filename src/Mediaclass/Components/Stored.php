@@ -11,7 +11,7 @@ use MetaFramework\Mediaclass\Models\Media;
 class Stored extends Component
 {
     protected array $positionning = [
-      'left','up','down','right'
+        'left','up','down','right'
     ];
 
     public Collection $medias;
@@ -22,7 +22,7 @@ class Stored extends Component
         public ?string $subgroup = null,
         public bool       $positions = false,
         public int|bool   $description = true,
-        public ?string $cropable = null,
+        public array|string|null $cropable = null, // Changed to accept array
         public string $nomedia = '',
     )
     {
@@ -34,6 +34,11 @@ class Stored extends Component
         }
 
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
+
+        // Convert array to JSON for data attribute
+        if (is_array($this->cropable)) {
+            $this->cropable = json_encode($this->cropable);
+        }
     }
 
     public function isFile(Media $media): bool

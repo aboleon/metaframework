@@ -170,37 +170,49 @@ class Cropable
         return $this;
     }
 
-    public function setCropableFromComponent(?string $cropable): self
+    public function setCropableFromComponent(array|string|null $cropable): self
     {
-        if ( ! trim($cropable,'"')) {
+        if (!$cropable) {
             return $this;
         }
 
-        // Try to decode as JSON first (new format)
-        $decoded = json_decode($cropable, true);
-
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $this->cropable_settings = $decoded;
+        // If it's already an array, use it directly
+        if (is_array($cropable)) {
+            $this->cropable_settings = $cropable;
         } else {
-            // Check if it's the [object Object] case
-            if (trim($cropable) === '[object Object]') {
-                throw new \InvalidArgumentException('Mediaclass: Invalid cropable data - object was not properly serialized');
+            // If it's a string, try to decode as JSON
+            $trimmed = trim($cropable, '"');
+
+            if (!$trimmed) {
+                return $this;
             }
 
-            // Old format - single crop dimensions
-            $settings                = explode(',', $cropable);
-            $this->cropable_settings = [
-                'default' => [
-                    (int)current($settings),
-                    (int)end($settings),
-                ],
-            ];
+            // Try to decode as JSON first (for backwards compatibility)
+            $decoded = json_decode($trimmed, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $this->cropable_settings = $decoded;
+            } else {
+                // Check if it's the [object Object] case
+                if ($trimmed === '[object Object]') {
+                    throw new \InvalidArgumentException('Mediaclass: Invalid cropable data - object was not properly serialized');
+                }
+
+                // Old format - single crop dimensions
+                $settings = explode(',', $trimmed);
+                $this->cropable_settings = [
+                    'default' => [
+                        (int)current($settings),
+                        (int)end($settings),
+                    ],
+                ];
+            }
         }
 
         // Set default dimensions from first crop
-        if ( ! empty($this->cropable_settings)) {
-            $firstKey              = array_key_first($this->cropable_settings);
-            $this->cropable_width  = (int)$this->cropable_settings[$firstKey][0];
+        if (!empty($this->cropable_settings)) {
+            $firstKey = array_key_first($this->cropable_settings);
+            $this->cropable_width = (int)$this->cropable_settings[$firstKey][0];
             $this->cropable_height = (int)$this->cropable_settings[$firstKey][1];
         }
 

@@ -225,7 +225,17 @@ class FileUploadImages
 
         $this->media->model = $this->model;
         $cropable = new Cropable($this->media);
-        $cropable->setCropableFromComponent((string)request('cropable'));
+
+        // Handle cropable from request - could be array or JSON string
+        $cropableData = request('cropable');
+        if (is_string($cropableData)) {
+            // Try to decode if it's JSON
+            $decoded = json_decode($cropableData, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $cropableData = $decoded;
+            }
+        }
+        $cropable->setCropableFromComponent($cropableData);
 
         $this->responseElement('cropable_links', $cropable->links());
         $this->responseElement('cropable_settings', json_encode($cropable->getCropableSettings()));

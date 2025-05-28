@@ -14,7 +14,7 @@ class Uploadable extends Component
         public string $size = '',
         public string $label = 'Médias',
         public int|bool $description = true,
-        public ?string $cropable = null,
+        public array|string|null $cropable = null,
         /**
          * @var int
          * max number of files to be uploaded
@@ -34,12 +34,14 @@ class Uploadable extends Component
         $this->label = $this->settings['label'] ?? $this->label;
         $this->description = $this->description ? 1 : 0;
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
-    }
 
+        if (is_array($this->cropable)) {
+            $this->cropable = json_encode($this->cropable);
+        }
+    }
 
     public function render(): Renderable
     {
         return view('mediaclass::components.uploadable');
     }
-
 }
