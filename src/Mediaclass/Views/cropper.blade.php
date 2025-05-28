@@ -49,7 +49,7 @@
 @php
     $url = $media->url(size:'xl');
     list($current_w, $current_h) = getimagesize($url);
-    $cropKey = $crop_key ?? 'default';
+    $cropKey = $crop_key ?? 'cropped';
 @endphp
 
 <form id="mediaclass-cropable-form" data-ajax="{{ route('mediaclass.ajax') }}">

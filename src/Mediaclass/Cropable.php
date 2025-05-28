@@ -25,7 +25,7 @@ class Cropable
 
     public static function form(Media $media)
     {
-        $cropKey  = request('crop_key', 'default');
+        $cropKey  = request('crop_key', 'cropped');
         $cropable = new Cropable($media);
         $cropable->setCurrentCropKey($cropKey);
 
@@ -79,12 +79,14 @@ class Cropable
 
     public function link(): string
     {
-        // Backwards compatibility - returns first crop link
         if (empty($this->cropable_settings)) {
             return '';
         }
 
-        $firstKey   = array_key_first($this->cropable_settings);
+        $firstKey = array_key_exists('cropped', $this->cropable_settings)
+            ? 'cropped'
+            : array_key_first($this->cropable_settings);
+
         $dimensions = $this->cropable_settings[$firstKey];
         $width      = (int)$dimensions[0];
         $height     = (int)$dimensions[1];
@@ -96,14 +98,14 @@ class Cropable
         $isCropped = $this->isCroppedForKey($firstKey);
 
         return '<a class="crop"
-                   data-crop-key="'.$firstKey.'"
-                   data-crop-w="'.$width.'"
-                   data-crop-h="'.$height.'"
-                   data-bs-toggle="modal"
-                   data-bs-target="#mediaclass-crop"
-                   href="'.route('mediaclass.cropable', $this->media).'?w='.$width.'&h='.$height.'&crop_key='.$firstKey.'">
-                    <i class="fa-solid fa-crop"></i>
-                </a>';
+               data-crop-key="'.$firstKey.'"
+               data-crop-w="'.$width.'"
+               data-crop-h="'.$height.'"
+               data-bs-toggle="modal"
+               data-bs-target="#mediaclass-crop"
+               href="'.route('mediaclass.cropable', $this->media).'?w='.$width.'&h='.$height.'&crop_key='.$firstKey.'">
+                <i class="fa-solid fa-crop"></i>
+            </a>';
     }
 
     public function settings(): self
@@ -113,18 +115,16 @@ class Cropable
         if (array_key_exists('cropable', $this->settings)) {
             $cropable = $this->settings['cropable'];
 
-            // Check if it's the new format (associative array)
-            if (is_array($cropable) && ! isset($cropable[0])) {
+            if (is_array($cropable) && !isset($cropable[0])) {
                 $this->cropable_settings = $cropable;
             } else {
-                // Old format - convert to new format
-                $this->cropable_settings = ['default' => $cropable];
+                $this->cropable_settings = ['cropped' => $cropable];
             }
         }
 
         // Handle route parameters
         if (Route::currentRouteName() == 'mediaclass.cropable') {
-            $cropKey                = request('crop_key', 'default');
+            $cropKey                = request('crop_key', 'cropped'); // Changed default
             $this->current_crop_key = $cropKey;
 
             if (isset($this->cropable_settings[$cropKey])) {
@@ -176,9 +176,19 @@ class Cropable
             return $this;
         }
 
-        // If it's already an array, use it directly
         if (is_array($cropable)) {
-            $this->cropable_settings = $cropable;
+            if (isset($cropable[0]) && isset($cropable[1]) && count($cropable) === 2) {
+                $this->cropable_settings = [
+                    'cropped' => [
+                        (int)$cropable[0],
+                        (int)$cropable[1],
+                    ],
+                ];
+                $this->filterEmptyDefaults();
+            } else {
+                // Associative array - use as is
+                $this->cropable_settings = $cropable;
+            }
         } else {
             // If it's a string, try to decode as JSON
             $trimmed = trim($cropable, '"');
@@ -191,21 +201,35 @@ class Cropable
             $decoded = json_decode($trimmed, true);
 
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                $this->cropable_settings = $decoded;
+                // Check if decoded array is simple numeric format
+                if (isset($decoded[0]) && isset($decoded[1]) && count($decoded) === 2) {
+                    $this->cropable_settings = [
+                        'cropped' => [
+                            (int)$decoded[0],
+                            (int)$decoded[1],
+                        ],
+                    ];
+                    $this->filterEmptyDefaults();
+                } else {
+                    $this->cropable_settings = $decoded;
+                }
             } else {
                 // Check if it's the [object Object] case
                 if ($trimmed === '[object Object]') {
                     throw new \InvalidArgumentException('Mediaclass: Invalid cropable data - object was not properly serialized');
                 }
 
-                // Old format - single crop dimensions
+                // Old format - single crop dimensions with comma
                 $settings = explode(',', $trimmed);
-                $this->cropable_settings = [
-                    'default' => [
-                        (int)current($settings),
-                        (int)end($settings),
-                    ],
-                ];
+                if (count($settings) === 2) {
+                    $this->cropable_settings = [
+                        'cropped' => [
+                            (int)current($settings),
+                            (int)end($settings),
+                        ],
+                    ];
+                }
+                $this->filterEmptyDefaults();
             }
         }
 
@@ -217,6 +241,13 @@ class Cropable
         }
 
         return $this;
+    }
+
+    private function filterEmptyDefaults(): void
+    {
+        if (!array_filter($this->cropable_settings['cropped'])) {
+            $this->cropable_settings = [];
+        }
     }
 
     public function width(): int

@@ -95,7 +95,7 @@ class Media extends Model
             return '';
         }
 
-        if ($prefix == 'cropped') {
+        if ($prefix == 'cropped' || $prefix == 'cropped_') {
             return 'cropped_';
         }
 
