@@ -42,8 +42,6 @@ class Cropable
             return '';
         }
 
-        de($this->cropable_settings);
-
         $html = '<div class="crop-actions-bar">';
 
         foreach ($this->cropable_settings as $key => $dimensions) {
