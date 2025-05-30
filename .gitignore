@@ -1,8 +1,8 @@
 /vendor
 .idea
-/_docs
 /.phpunit.result.cache
 /TODO.md
 *.csscrush
 *.crush.css
 composer.lock
+/docs/*/*.pdf
