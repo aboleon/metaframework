@@ -35,6 +35,25 @@ class Stored extends Component
 
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
 
+        // Check if model has mediaclassSettings for this group
+        if ($this->cropable === null && method_exists($this->model, 'mediaclassSettings')) {
+            $modelSettings = $this->model->mediaclassSettings();
+
+            if (isset($modelSettings[$this->group])) {
+                $groupSettings = $modelSettings[$this->group];
+
+                // Set cropable if defined in group settings
+                if (isset($groupSettings['cropable']) && $groupSettings['cropable'] === true) {
+                    $this->cropable = [
+                        $this->group => [
+                            $groupSettings['width'],
+                            $groupSettings['height']
+                        ]
+                    ];
+                }
+            }
+        }
+
         // Convert array to JSON for data attribute
         if (is_array($this->cropable)) {
             $this->cropable = json_encode($this->cropable);

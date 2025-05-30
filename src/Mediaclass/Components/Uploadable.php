@@ -35,6 +35,32 @@ class Uploadable extends Component
         $this->description = $this->description ? 1 : 0;
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
 
+        // Check if model has mediaclassSettings for this group
+        if ($this->cropable === null && method_exists($this->model, 'mediaclassSettings')) {
+            $modelSettings = $this->model->mediaclassSettings();
+
+            if (isset($modelSettings[$this->group])) {
+                $groupSettings = $modelSettings[$this->group];
+
+                // Set label from group settings if available
+                if (isset($groupSettings['label'])) {
+                    $this->label = $groupSettings['label'];
+                }
+
+                // Set cropable if defined in group settings
+                // Note: cropable will be dynamically determined based on uploaded image dimensions
+                // This is just a fallback for the component initialization
+                if (isset($groupSettings['cropable']) && $groupSettings['cropable'] === true) {
+                    $this->cropable = [
+                        $this->group => [
+                            $groupSettings['width'],
+                            $groupSettings['height']
+                        ]
+                    ];
+                }
+            }
+        }
+
         if (is_array($this->cropable)) {
             $this->cropable = json_encode($this->cropable);
         }

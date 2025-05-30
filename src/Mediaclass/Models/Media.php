@@ -62,11 +62,20 @@ class Media extends Model
             return $this->getCroppedUrl($cropKey);
         }
 
-        // Otherwise, use the original url logic
+        if ($size === 'cropped' && $this->isCropped()) {
+            // Return the first available crop
+            $crops = $this->getCroppedImages();
+            if (!empty($crops)) {
+                $firstKey = array_key_first($crops);
+                return $this->getCroppedUrl($firstKey);
+            }
+        }
+
         return Storage::disk('media')->url(
             Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension(),
         );
     }
+
 
     public function file(string $size = 'sm'): string
     {
@@ -82,9 +91,19 @@ class Media extends Model
     public function isCropped(?string $key = null): bool
     {
         if ($key === null) {
-            return Storage::disk('media')->exists(
-                Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: 'cropped').$this->filename.'.'.$this->extension(),
-            );
+            // Check if any crop exists by looking for files with cropped_ prefix
+            $path = Path::mediaFolderName($this->model);
+
+            // Get all files in the media folder
+            $files = Storage::disk('media')->files($path);
+
+            // Check if any file matches the cropped pattern
+            foreach ($files as $file) {
+                if (preg_match('/cropped_.*_'.$this->filename.'\.'. $this->extension().'$/', $file)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Check for specific crop key
@@ -121,10 +140,9 @@ class Media extends Model
     public function isCroppedForKey(string $key): bool
     {
         return Storage::disk('media')->exists(
-            Path::mediaFolderName($this->model).'/'.$key.'_'.$this->filename.'.'.$this->extension(),
+            Path::mediaFolderName($this->model).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
-
 
     /**
      * Get URL for a specific crop
@@ -135,12 +153,12 @@ class Media extends Model
      */
     public function getCroppedUrl(string $key): ?string
     {
-        if ( ! $this->isCroppedForKey($key)) {
+        if (!$this->isCroppedForKey($key)) {
             return null;
         }
 
         return Storage::disk('media')->url(
-            Path::mediaFolderName($this->model).'/'.$key.'_'.$this->filename.'.'.$this->extension(),
+            Path::mediaFolderName($this->model).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
 
@@ -150,22 +168,22 @@ class Media extends Model
      *
      * @return array
      */
-    public function getCroppedImages(): array     // replaces the old one
+    public function getCroppedImages(): array
     {
         $cropable = $this->settings()['cropable'] ?? [];
 
         // force associative form: ['thumb'=>[200,200], …]
-        if ( ! is_array($cropable) || isset($cropable[0])) {
+        if (!is_array($cropable) || isset($cropable[0])) {
             $cropable = ['default' => $cropable];
         }
 
         $out = [];
         foreach ($cropable as $key => $dim) {
-            if ($this->isCroppedForKey($key)) {               // purely FS check
+            if ($this->isCroppedForKey($key)) {
                 $out[$key] = [
                     'width'    => $dim[0],
                     'height'   => $dim[1],
-                    'filename' => "{$key}_{$this->filename}.{$this->extension()}",
+                    'filename' => "cropped_{$key}_{$this->filename}.{$this->extension()}",
                 ];
             }
         }

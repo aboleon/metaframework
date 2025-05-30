@@ -7,7 +7,7 @@
             <div class="d-none ui-messages">
                 <span class="maxNumberOfFiles"><?= __('mediaclass.errors.maxNumberOfFiles'); ?></span>
                 <span class="maxFileSize"><?= __('mediaclass.errors.maxFileSize'); ?></span>
-                <span class="dimensions"><?= __('mediaclass.img_dimensions_constraint'); ?></span>
+                <span class="dimensions"><?= __('mediaclass.errors.dimensions'); ?></span>
             </div>
 
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->

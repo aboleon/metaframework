@@ -23,6 +23,61 @@ class Cropable
         $this->checkIfCropped();
     }
 
+    public function settings(): self
+    {
+        $this->settings = $this->media->settings();
+
+        // Handle the case where dimensions are defined in the group settings
+        if (isset($this->settings['width']) && isset($this->settings['height'])) {
+            // Check if cropable is enabled
+            if (isset($this->settings['cropable']) && $this->settings['cropable'] === true) {
+                // Use the group name as the crop key with the dimensions from settings
+                $this->cropable_settings = [
+                    $this->media->group => [
+                        $this->settings['width'],
+                        $this->settings['height']
+                    ]
+                ];
+            }
+        }
+        // Original handling for cropable array
+        elseif (array_key_exists('cropable', $this->settings)) {
+            $cropable = $this->settings['cropable'];
+
+            if (is_array($cropable) && !isset($cropable[0])) {
+                // Associative array like ['thumbnail' => [200, 200]]
+                $this->cropable_settings = $cropable;
+            } elseif (is_array($cropable) && isset($cropable[0])) {
+                // Simple array like [200, 200]
+                $this->cropable_settings = ['cropped' => $cropable];
+            } elseif ($cropable === true && isset($this->settings['width']) && isset($this->settings['height'])) {
+                // Boolean true with dimensions in parent settings
+                $this->cropable_settings = [
+                    'cropped' => [
+                        $this->settings['width'],
+                        $this->settings['height']
+                    ]
+                ];
+            }
+        }
+
+        // Handle route parameters
+        if (Route::currentRouteName() == 'mediaclass.cropable') {
+            $cropKey = request('crop_key', 'cropped');
+            $this->current_crop_key = $cropKey;
+
+            if (isset($this->cropable_settings[$cropKey])) {
+                $this->cropable_width  = (int)$this->cropable_settings[$cropKey][0];
+                $this->cropable_height = (int)$this->cropable_settings[$cropKey][1];
+            } else {
+                $this->cropable_width  = (int)request('w');
+                $this->cropable_height = (int)request('h');
+            }
+        }
+
+        return $this;
+    }
+
     public static function form(Media $media)
     {
         $cropKey  = request('crop_key', 'cropped');
@@ -36,25 +91,126 @@ class Cropable
         ]);
     }
 
+    /**
+     * Get the actual dimensions of the uploaded image
+     *
+     * @return array|null [width, height] or null if cannot be determined
+     */
+    private function getActualImageDimensions(): ?array
+    {
+        try {
+            // First check if we have custom group settings - this tells us which file to check
+            $groupSettings = Config::getGroupSetings($this->media->model, $this->media->group);
+
+            if (!empty($groupSettings) && isset($groupSettings[$this->media->group])) {
+                // For custom group settings, the file is stored with the group's width prefix
+                $width = $groupSettings[$this->media->group]['width'];
+                $filename = $width . '_' . $this->media->filename . '.' . $this->media->extension();
+            } else {
+                // For default sizes, get the largest size
+                $sizesReversed = Config::getSizesInReverseOrder();
+                $largestSizeKey = array_key_first($sizesReversed);
+
+                if ($largestSizeKey) {
+                    $width = $sizesReversed[$largestSizeKey]['width'];
+                    $filename = $width . '_' . $this->media->filename . '.' . $this->media->extension();
+                } else {
+                    // Fallback to original file without size prefix
+                    $filename = $this->media->filename . '.' . $this->media->extension();
+                }
+            }
+
+            $path = Path::mediaFolderName($this->media->model) . '/' . $filename;
+
+            if (Config::getDisk()->exists($path)) {
+                $fullPath = Config::getDisk()->path($path);
+                if (file_exists($fullPath) && $dimensions = getimagesize($fullPath)) {
+                    return [$dimensions[0], $dimensions[1]];
+                }
+            }
+
+            return null;
+
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Check if we should show the crop button
+     * Returns true if crop button should be shown, false if it should be hidden
+     *
+     * @param string $cropKey
+     * @param int $requiredWidth
+     * @param int $requiredHeight
+     * @return bool
+     */
+    private function shouldShowCropButton(string $cropKey, int $requiredWidth, int $requiredHeight): bool
+    {
+        // Always show if a crop already exists (to allow viewing/deleting)
+        if ($this->isCroppedForKey($cropKey)) {
+            return true;
+        }
+
+        // Get actual image dimensions
+        $actualDimensions = $this->getActualImageDimensions();
+
+        if (!$actualDimensions) {
+            // If we can't determine dimensions, show the button
+            return true;
+        }
+
+        list($actualWidth, $actualHeight) = $actualDimensions;
+
+        // Hide button only if actual image dimensions exactly match required dimensions
+        if ($actualWidth === $requiredWidth && $actualHeight === $requiredHeight) {
+            return false;
+        }
+
+        // Show button in all other cases (image is larger, smaller, or different aspect ratio)
+        return true;
+    }
+
+    /**
+     * Updated links() method
+     */
     public function links(): string
     {
         if (empty($this->cropable_settings)) {
             return '';
         }
 
-        $html = '<div class="crop-actions-bar">';
+        $buttons = [];
 
         foreach ($this->cropable_settings as $key => $dimensions) {
             $width  = (int)$dimensions[0];
             $height = (int)$dimensions[1];
 
             if ($width > 0 && $height > 0) {
+                // Check if we should show this crop button
+                if (!$this->shouldShowCropButton($key, $width, $height)) {
+                    continue;
+                }
+
+                // Get label from settings if available
+                $label = ucfirst($key); // Default to capitalized key
+
+                // Check if we have custom group settings with a label
+                $groupSettings = Config::getGroupSetings($this->media->model, $this->media->group);
+                if (!empty($groupSettings) && isset($groupSettings[$this->media->group]['label'])) {
+                    $label = $groupSettings[$this->media->group]['label'];
+                }
+                // Also check in the direct settings (for backwards compatibility)
+                elseif (isset($this->settings['label'])) {
+                    $label = $this->settings['label'];
+                }
+
                 $isCropped  = $this->isCroppedForKey($key);
                 $cropClass  = $isCropped ? 'crop cropped' : 'crop';
                 $iconClass  = $isCropped ? 'fa-solid fa-crop-simple' : 'fa-solid fa-crop';
-                $previewUrl = $isCropped ? $this->media->url('xl', $key) : '';
+                $previewUrl = $isCropped ? $this->media->getCroppedUrl($key) : '';
 
-                $html .= '<a class="'.$cropClass.'"
+                $buttons[] = '<a class="'.$cropClass.'"
            data-crop-key="'.$key.'"
            data-crop-w="'.$width.'"
            data-crop-h="'.$height.'"
@@ -64,17 +220,20 @@ class Cropable
            data-bs-target="#mediaclass-crop"
            href="'.route('mediaclass.cropable', $this->media)
                     .'?w='.$width.'&h='.$height.'&crop_key='.$key.'"
-           title="'.ucfirst($key).' ('.$width.'x'.$height.')">
+           title="'.$label.' ('.$width.'x'.$height.')">
            <i class="'.$iconClass.'"></i>
-           <span class="crop-label">'.ucfirst($key).'</span>
+           <span class="crop-label">'.$label.'</span>
            '.($isCropped ? '<i class="fa-solid fa-circle-check check-icon"></i>' : '').'
          </a>';
             }
         }
 
-        $html .= '</div>';
+        // If no buttons to show, return empty string
+        if (empty($buttons)) {
+            return '';
+        }
 
-        return $html;
+        return '<div class="crop-actions-bar">' . implode('', $buttons) . '</div>';
     }
 
     public function link(): string
@@ -106,37 +265,6 @@ class Cropable
                href="'.route('mediaclass.cropable', $this->media).'?w='.$width.'&h='.$height.'&crop_key='.$firstKey.'">
                 <i class="fa-solid fa-crop"></i>
             </a>';
-    }
-
-    public function settings(): self
-    {
-        $this->settings = $this->media->settings();
-
-        if (array_key_exists('cropable', $this->settings)) {
-            $cropable = $this->settings['cropable'];
-
-            if (is_array($cropable) && !isset($cropable[0])) {
-                $this->cropable_settings = $cropable;
-            } else {
-                $this->cropable_settings = ['cropped' => $cropable];
-            }
-        }
-
-        // Handle route parameters
-        if (Route::currentRouteName() == 'mediaclass.cropable') {
-            $cropKey                = request('crop_key', 'cropped'); // Changed default
-            $this->current_crop_key = $cropKey;
-
-            if (isset($this->cropable_settings[$cropKey])) {
-                $this->cropable_width  = (int)$this->cropable_settings[$cropKey][0];
-                $this->cropable_height = (int)$this->cropable_settings[$cropKey][1];
-            } else {
-                $this->cropable_width  = (int)request('w');
-                $this->cropable_height = (int)request('h');
-            }
-        }
-
-        return $this;
     }
 
     public function setCurrentCropKey(string $key): self

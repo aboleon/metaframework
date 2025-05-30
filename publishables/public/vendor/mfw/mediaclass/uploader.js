@@ -160,7 +160,17 @@ const MediaclassUploader = {
     const maxFileSize = this.calculateMaxFileSize(inputFileSize);
     const messagesUI = uploadable.find('.ui-messages');
 
-    fileuploadContainer.fileupload('option', {
+    // Get dimensions from data attributes if available
+    const groupSettings = uploadable.data('group-settings');
+    let minWidth = null;
+    let minHeight = null;
+
+    if (groupSettings && groupSettings.width && groupSettings.height) {
+      minWidth = groupSettings.width;
+      minHeight = groupSettings.height;
+    }
+
+    const options = {
       previewMaxWidth: 220,
       previewMaxHeight: 220,
       acceptFileTypes: /(\.|\/)(jpe?g|png|svg|pdf)$/i,
@@ -172,7 +182,26 @@ const MediaclassUploader = {
         acceptFileTypes: 'Type de fichier non autorisé',
         maxFileSize: `${messagesUI.find('.maxFileSize').first().text()} ${inputFileSize || ((this.defaultFileSize / 1024 / 1024) + 'MB')}`,
       },
-    });
+    };
+
+    // Add dimension validation if needed
+    if (minWidth && minHeight) {
+      options.messages.minImageWidth = `Largeur minimale requise : ${minWidth}px`;
+      options.messages.minImageHeight = `Hauteur minimale requise : ${minHeight}px`;
+
+      // Add process callback for dimension validation
+      options.processQueue = [
+        {
+          action: 'validate',
+          always: true,
+          acceptFileTypes: '@',
+          maxFileSize: '@',
+          maxNumberOfFiles: '@'
+        }
+      ];
+    }
+
+    fileuploadContainer.fileupload('option', options);
   },
 
   positions(uploadable) {
@@ -223,8 +252,31 @@ const MediaclassUploader = {
       success: (data) => {
         const $alerts = $('.mediaclass-alerts').html('');
 
-        if (data.hasOwnProperty('errors')) {
-          notificator(data.errors, 'danger', MediaclassUploader.messages());
+        // Check for errors FIRST before doing anything else
+        if (data.hasOwnProperty('errors') || data.hasOwnProperty('error')) {
+
+          const errorData = data.ajax_messages ?? data.messages;
+
+          // Call notificator with correct parameters: status, data, messages, keepMessages, printerOptions
+          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+
+          // Clean up the upload UI
+          uploadable.find('.files .template-upload').fadeOut(function() {
+            $(this).remove();
+
+            // If no more files in queue, hide the uploadables section
+            if (uploadable.find('.files .template-upload').length === 0) {
+              uploadable.find('.uploadables').addClass('d-none');
+            }
+          });
+
+          return;
+        }
+
+        // Only proceed if we have uploaded data
+        if (!data.uploaded) {
+          console.error('No uploaded data in response', data);
+          notificator('Erreur lors du téléchargement', 'danger', MediaclassUploader.messages());
           return;
         }
 
@@ -256,7 +308,31 @@ const MediaclassUploader = {
       },
       error: (xhr, ajaxOptions, thrownError) => {
         console.error('Upload error:', xhr, thrownError);
-        MediaclassUploader.messages().html('<div class="alert alert-danger">Une erreur est survenu lors du téléchargement de votre fichier</div>');
+
+        // Check if it's a dimension error from the response
+        if (xhr.responseJSON && xhr.responseJSON.errors) {
+          // Format the error for notificator
+          const errorData = {
+            danger: [xhr.responseJSON.errors]
+          };
+          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+        } else {
+          // Generic error message
+          const errorData = {
+            danger: ['Une erreur est survenue lors du téléchargement de votre fichier']
+          };
+          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+        }
+
+        // Clean up the upload UI
+        uploadable.find('.files .template-upload').fadeOut(function() {
+          $(this).remove();
+
+          // If no more files in queue, hide the uploadables section
+          if (uploadable.find('.files .template-upload').length === 0) {
+            uploadable.find('.uploadables').addClass('d-none');
+          }
+        });
       },
       start: () => {
         MediaclassUploader.messages().html('');

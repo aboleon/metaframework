@@ -43,6 +43,7 @@ class FileUploadImages
 
     public function __construct()
     {
+        $this->enableAjaxMode();
         $this->model_id    = (int)request('model_id') ?: null;
         $this->temp        = request('mediaclass_temp_id') ?: null;
         $this->media_group = request('group') ?: MediaclassConfig::defaultGroup();
@@ -116,6 +117,43 @@ class FileUploadImages
             return $this;
         }
 
+        // Early dimension check for images (non-SVG)
+        if (strstr($this->uploadedFile->getMimeType(), '/', true) == 'image' &&
+            !str_contains($this->uploadedFile->getMimeType(), 'svg')) {
+
+            // Get group settings if available
+            $groupSettings = MediaclassConfig::getGroupSetings($this->model, $this->media_group);
+
+            if (!empty($groupSettings)) {
+                $groupKey = array_key_first($groupSettings);
+                $requiredWidth = $groupSettings[$groupKey]['width'] ?? null;
+                $requiredHeight = $groupSettings[$groupKey]['height'] ?? null;
+
+                if ($requiredWidth && $requiredHeight) {
+                    // Get image dimensions
+                    $imageInfo = @getimagesize($this->uploadedFile->getPathname());
+
+                    if ($imageInfo) {
+                        $imageWidth = $imageInfo[0];
+                        $imageHeight = $imageInfo[1];
+
+                        if ($imageWidth < $requiredWidth || $imageHeight < $requiredHeight) {
+                            $this->responseError(
+                                __('mediaclass.errors.dimensions', [
+                                    'width' => $requiredWidth,
+                                    'height' => $requiredHeight,
+                                    'uploaded_width' => $imageWidth,
+                                    'uploaded_height' => $imageHeight
+                                ])
+                            );
+
+                            return $this;
+                        }
+                    }
+                }
+            }
+        }
+
         // documents
         if (strstr($this->uploadedFile->getMimeType(), '/', true) != 'image') {
             // Move non-image files
@@ -185,9 +223,42 @@ class FileUploadImages
 
     private function processImage(): static
     {
-        // Load default dimensions from project
-        $this->dimensions = MediaclassConfig::getGroupSetings($this->model, $this->media_group) ?: MediaclassConfig::getSizes();
+        // Get group settings if available
+        $groupSettings = MediaclassConfig::getGroupSetings($this->model, $this->media_group);
+
+        // Load dimensions from group settings or default
+        $this->dimensions = $groupSettings ?: MediaclassConfig::getSizes();
+
         $this->image = $this->imageManager->read($this->uploadedFile);
+
+        // Check dimensions if group settings exist
+        if (!empty($groupSettings)) {
+            $groupKey = array_key_first($groupSettings);
+            $requiredWidth = $groupSettings[$groupKey]['width'] ?? null;
+            $requiredHeight = $groupSettings[$groupKey]['height'] ?? null;
+
+            $imageWidth = $this->image->width();
+            $imageHeight = $this->image->height();
+
+            // Validate dimensions
+            if ($requiredWidth && $requiredHeight) {
+                if ($imageWidth < $requiredWidth || $imageHeight < $requiredHeight) {
+                    $this->responseError(
+                        __('mediaclass.errors.dimensions', [
+                            'width' => $requiredWidth,
+                            'height' => $requiredHeight,
+                            'uploaded_width' => $imageWidth,
+                            'uploaded_height' => $imageHeight
+                        ])
+                    );
+
+                    // Clean up the image resource
+                    unset($this->image);
+
+                    return $this;
+                }
+            }
+        }
 
         $this->urls = [];
 
@@ -202,10 +273,40 @@ class FileUploadImages
         foreach ($this->dimensions as $key => $dimensions) {
             $file = $this->folder_name.'/'.$dimensions['width'].'_'.$this->filename.'.'.$this->mime_type;
 
-            $resizedImage = $this->image->scaleDown(
-                $dimensions['width'],
-                $dimensions['height'],
-            );
+            $targetWidth = $dimensions['width'];
+            $targetHeight = $dimensions['height'];
+            $imageWidth = $this->image->width();
+            $imageHeight = $this->image->height();
+
+            $resizedImage = null;
+
+            // For group settings (single dimension), apply special logic
+            if (!empty($groupSettings) && $key === array_key_first($groupSettings)) {
+                // Determine which is the main dimension (the larger one)
+                $isWidthMain = $targetWidth >= $targetHeight;
+                $mainDimension = $isWidthMain ? $targetWidth : $targetHeight;
+                $currentMainDimension = $isWidthMain ? $imageWidth : $imageHeight;
+
+                // If main dimension is exact, keep original image
+                if ($currentMainDimension === $mainDimension) {
+                    $resizedImage = clone $this->image;
+                } else {
+                    // Main dimension is larger, resize to exact main dimension and scale the other proportionally
+                    $scaleRatio = $mainDimension / $currentMainDimension;
+                    $newWidth = (int)($imageWidth * $scaleRatio);
+                    $newHeight = (int)($imageHeight * $scaleRatio);
+                    $resizedImage = $this->image->resize($newWidth, $newHeight);
+                }
+            } else {
+                // For default dimensions, use standard scaling (don't upsize)
+                $widthRatio = $targetWidth / $imageWidth;
+                $heightRatio = $targetHeight / $imageHeight;
+                $scaleRatio = min($widthRatio, $heightRatio, 1);
+
+                $newWidth = (int)($imageWidth * $scaleRatio);
+                $newHeight = (int)($imageHeight * $scaleRatio);
+                $resizedImage = $this->image->resize($newWidth, $newHeight);
+            }
 
             $encodedImage = $this->mime_type === 'png'
                 ? $resizedImage->toPng()
@@ -214,7 +315,6 @@ class FileUploadImages
             $this->disk->put($file, $encodedImage);
 
             $this->urls[$key] = $this->disk->url($file.'?'.time());
-
         }
 
         $this->responseElement('link', $this->urls[array_key_first($this->urls)] ?? MediaclassConfig::defaultImgUrl());
@@ -230,8 +330,36 @@ class FileUploadImages
         $this->media->model = $this->model;
         $cropable           = new Cropable($this->media);
 
-        // Handle cropable from request - could be array or JSON string
+        // Handle cropable settings
         $cropableData = request('cropable');
+
+        // If no cropable data from request but group has cropable setting
+        if (!$cropableData && !empty($groupSettings)) {
+            $groupKey = array_key_first($groupSettings);
+            $requiredWidth = $groupSettings[$groupKey]['width'] ?? null;
+            $requiredHeight = $groupSettings[$groupKey]['height'] ?? null;
+
+            // Check if image dimensions match exactly
+            $imageWidth = $this->image->width();
+            $imageHeight = $this->image->height();
+
+            $isExactMatch = ($imageWidth == $requiredWidth && $imageHeight == $requiredHeight);
+
+            // Only set cropable if cropable is true AND dimensions don't match exactly
+            if (isset($groupSettings[$groupKey]['cropable']) &&
+                $groupSettings[$groupKey]['cropable'] === true &&
+                !$isExactMatch) {
+                // Set cropable dimensions from group settings
+                $label = $groupSettings[$groupKey]['label'] ?? ucfirst($groupKey);
+                $cropableData = [
+                    $groupKey => [
+                        $requiredWidth,
+                        $requiredHeight
+                    ]
+                ];
+            }
+        }
+
         if (is_string($cropableData)) {
             // Try to decode if it's JSON
             $decoded = json_decode($cropableData, true);
@@ -239,6 +367,7 @@ class FileUploadImages
                 $cropableData = $decoded;
             }
         }
+
         $cropable->setCropableFromComponent($cropableData);
 
         $this->responseElement('cropable_links', $cropable->links());
@@ -287,5 +416,71 @@ class FileUploadImages
         $this->responseElement('count_files', request('count_files'));
 
         return $this;
+    }
+    /**
+     * Check if there are errors in the upload process
+     * This should be added to FileUploadImages.php
+     */
+    private function hasErrors(): bool
+    {
+        // Check if file upload failed
+        if (!request()->hasFile('files') || !request()->file('files')[0]->isValid()) {
+            $this->responseError(__('mediaclass.errors.upload_failed'));
+            return true;
+        }
+
+        // Check file size
+        $file = request()->file('files')[0];
+        $maxSize = $this->calculateMaxFileSize(request('maxfilesize'));
+
+        if ($file->getSize() > $maxSize) {
+            $this->responseError(__('mediaclass.errors.maxFileSize') . ' ' . $this->formatBytes($maxSize));
+            return true;
+        }
+
+        // Check file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'application/pdf'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            $this->responseError(__('mediaclass.errors.acceptFileTypes'));
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Format bytes to human readable format
+     */
+    private function formatBytes($bytes, $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
+    /**
+     * Calculate max file size from string format (e.g., "5MB", "500KB")
+     */
+    private function calculateMaxFileSize(?string $size): int
+    {
+        if (!$size) {
+            return 16 * 1024 * 1024; // 16MB default
+        }
+
+        $size = strtoupper(trim($size));
+        $value = (int) preg_replace('/[^0-9]/', '', $size);
+
+        return match (true) {
+            str_contains($size, 'KB') => $value * 1024,
+            str_contains($size, 'MB') => $value * 1024 * 1024,
+            str_contains($size, 'GB') => $value * 1024 * 1024 * 1024,
+            default => $value,
+        };
     }
 }

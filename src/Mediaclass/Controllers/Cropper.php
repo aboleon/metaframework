@@ -37,8 +37,8 @@ class Cropper
 
             $image = $cropper->imageManager->read($file);
 
-            // Create filename with crop key
-            $filename = Path::mediaFolderName($media->bindedModel()) . '/' . $cropKey . '_' . $media->filename . '.' . $media->extension();
+            // Create filename with cropped_ prefix and crop key
+            $filename = Path::mediaFolderName($media->bindedModel()) . '/cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();
 
             // Chain crop and resize operations, then encode
             $processedImage = $image
@@ -92,8 +92,8 @@ class Cropper
 
             $media = Media::query()->findOrFail($mediaId);
 
-            // Build the crop filename
-            $filename = $cropKey . '_' . $media->filename . '.' . $media->extension();
+            // Build the crop filename with cropped_ prefix and key
+            $filename = 'cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();
             $path = Path::mediaFolderName($media->bindedModel()) . '/' . $filename;
 
             // Delete the cropped file
