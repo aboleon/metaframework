@@ -30,7 +30,7 @@ class Parser
     /**
      * Localized description
      */
-    public readonly mixed $description;
+    public readonly ?string $description;
 
     /**
      * Array of URLs for different sizes
@@ -112,17 +112,44 @@ class Parser
      * Parse the localized description
      *
      * @param Media $media
-     * @return mixed
+     * @return string|null
      */
-    protected function parseDescription(Media $media): mixed
+    protected function parseDescription(Media $media): ?string
     {
-        $locale = app()->getLocale();
+        $description = $media->description;
 
-        if (is_array($media->description) && isset($media->description[$locale])) {
-            return $media->description[$locale];
+        // If description is null or empty, return empty string
+        if (!$description) {
+            return '';
         }
 
-        return $media->description;
+        // If it's already a string, return it
+        if (is_string($description)) {
+            return $description;
+        }
+
+        // If it's an array, get the current locale's value
+        if (is_array($description)) {
+            $locale = app()->getLocale();
+
+            // Try to get current locale's description
+            if (isset($description[$locale])) {
+                return $description[$locale] ?: '';
+            }
+
+            // Fallback: try to get first non-empty value
+            foreach ($description as $value) {
+                if (!empty($value)) {
+                    return $value;
+                }
+            }
+
+            // If all values are empty, return empty string
+            return '';
+        }
+
+        // For any other type, cast to string
+        return (string) $description;
     }
 
     /**
@@ -376,5 +403,4 @@ class Parser
 
         throw new \Exception("Property {$name} does not exist on Parser");
     }
-
 }
