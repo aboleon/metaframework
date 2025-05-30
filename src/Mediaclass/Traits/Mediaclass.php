@@ -124,4 +124,9 @@ trait Mediaclass
         return Locale::projectLocales();
     }
 
+    public function mediaclassSettings(): array
+    {
+        return [];
+    }
+
 }

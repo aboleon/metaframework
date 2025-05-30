@@ -3,46 +3,64 @@
 namespace MetaFramework\Mediaclass;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config as ConfigFacade;
+use Illuminate\Support\Facades\Storage;
+use MetaFramework\Mediaclass\Config as MediaclassConfig;
+use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 
 class Config
 {
+    private static array $sizes
+        = [
 
-    private static array $sizes = [
-
-        'xl' => [
-            'width' => 1920,
-            'height' => 1080
-        ],
-        'lg' => [
-            'width' => 1400,
-            'height' => 788
-        ],
-        'md' => [
-            'width' => 700,
-            'height' => 394
-        ],
-        'sm' => [
-            'width' => 400,
-            'height' => 225
-        ],
-    ];
+            'xl' => [
+                'width'  => 1920,
+                'height' => 1080,
+            ],
+            'lg' => [
+                'width'  => 1400,
+                'height' => 788,
+            ],
+            'md' => [
+                'width'  => 700,
+                'height' => 394,
+            ],
+            'sm' => [
+                'width'  => 400,
+                'height' => 225,
+            ],
+        ];
 
     public static function getSizes(): array
     {
-        return \Illuminate\Support\Facades\Config::get('mediaclass.dimensions') ?? self::$sizes;
+        $sizes = ConfigFacade::get('mediaclass.dimensions') ?? self::$sizes;
 
-         uasort($sizes, function($a, $b) {
+        uasort($sizes, function ($a, $b) {
             return $a['width'] <=> $b['width'];
         });
 
         return $sizes;
     }
+
+    public static function getModelSizes(MediaclassInterface $model): array
+    {
+        if (method_exists($model, 'mediaclassSettings')) {
+            return $model->mediaClassSettings();
+        }
+
+        return [];
+    }
+
+    public static function getGroupSetings(MediaclassInterface $model, string $group): array
+    {
+        $sizes = self::getModelSizes($model);
+        return isset($sizes[$group]) ? [$group => $sizes[$group]] : [];
+    }
+
     public static function getSizesInReverseOrder(): array
     {
         $sizes = Config::getSizes();
-         uasort($sizes, function($a, $b) {
+        uasort($sizes, function ($a, $b) {
             return $b['width'] <=> $a['width'];
         });
 
@@ -52,7 +70,7 @@ class Config
     public static function getDisk(): Filesystem
     {
         $configured = ConfigFacade::get('mediaclass.disk');
-        $disk = $configured && (array_key_exists($configured, ConfigFacade::get("filesystems.disks"))) ? $configured : 'public';
+        $disk       = $configured && (array_key_exists($configured, ConfigFacade::get("filesystems.disks"))) ? $configured : 'public';
 
         return Storage::disk($disk);
     }
@@ -88,8 +106,14 @@ class Config
     {
         return min(array_column(Config::getSizes(), 'width'));
     }
+
     public static function getMaxSize(): int
     {
         return max(array_column(Config::getSizes(), 'width'));
+    }
+
+    public static function getDefaultKeys(): array
+    {
+        return array_keys(self::$sizes);
     }
 }

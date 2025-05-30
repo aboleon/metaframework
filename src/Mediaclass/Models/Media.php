@@ -11,12 +11,12 @@ use MetaFramework\Mediaclass\Traits\Accessors;
 use Symfony\Component\Mime\MimeTypes;
 
 /**
- * @property string $filename
- * @property string $position
- * @property array $description
- * @property string $mime
- * @property int $id
- * @property string $group
+ * @property string                                                   $filename
+ * @property string                                                   $position
+ * @property array                                                    $description
+ * @property string                                                   $mime
+ * @property int                                                      $id
+ * @property string                                                   $group
  * @property \MetaFramework\Mediaclass\Interfaces\MediaclassInterface $model
  */
 class Media extends Model
@@ -26,9 +26,10 @@ class Media extends Model
     protected $table = 'mediaclass';
 
     protected $guarded = [];
-    protected $casts = [
-        'description' => 'array',
-    ];
+    protected $casts
+        = [
+            'description' => 'array',
+        ];
 
     public function model(): MorphTo
     {
@@ -37,7 +38,7 @@ class Media extends Model
 
     public function extension(): ?string
     {
-       return MimeTypes::getDefault()->getExtensions($this->mime)[0] ?? null;
+        return MimeTypes::getDefault()->getExtensions($this->mime)[0] ?? null;
     }
 
     public function sizeable(): bool
@@ -49,8 +50,9 @@ class Media extends Model
     }
 
     /**
-     * @param string $size
-     * @param string|null $cropKey
+     * @param  string       $size
+     * @param  string|null  $cropKey
+     *
      * @return string
      */
     public function url(string $size = 'sm', ?string $cropKey = null): string
@@ -62,26 +64,26 @@ class Media extends Model
 
         // Otherwise, use the original url logic
         return Storage::disk('media')->url(
-            Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: $size) . $this->filename . '.' . $this->extension()
+            Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension(),
         );
     }
 
     public function file(string $size = 'sm'): string
     {
-        return Storage::disk('media')->get(Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: $size) . $this->filename .'.'. $this->extension());
+        return Storage::disk('media')->get(Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension());
     }
 
 
     /**
-     * @param string|null $key
+     * @param  string|null  $key
+     *
      * @return bool
      */
     public function isCropped(?string $key = null): bool
     {
         if ($key === null) {
-            // Original behavior - check for cropped_ prefix
             return Storage::disk('media')->exists(
-                Path::mediaFolderName($this->model) . '/' . $this->dimensionPrefix(prefix: 'cropped') . $this->filename . '.' . $this->extension()
+                Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: 'cropped').$this->filename.'.'.$this->extension(),
             );
         }
 
@@ -91,7 +93,7 @@ class Media extends Model
 
     public function dimensionPrefix(string $prefix = 'sm'): string
     {
-        if (!$this->sizeable()) {
+        if ( ! $this->sizeable()) {
             return '';
         }
 
@@ -99,23 +101,27 @@ class Media extends Model
             return 'cropped_';
         }
 
-        if (array_key_exists($prefix, Config::getSizes())) {
-            return Config::getSizes()[$prefix]['width'] . '_';
+        $modelSettings =  $this->model->mediaclassSettings();
+        if (array_key_exists($this->group, $modelSettings)) {
+            return $modelSettings[$this->group]['width'].'_';
+            // TODO: A voir dans le futur pour combiner avec un sortable [sizes => w,h] ou 'responsive'
         }
+        $prefix = array_key_exists($prefix, Config::getSizes()) ? $prefix : array_key_first(Config::getSizes());
 
-        return '';
+        return $prefix ? Config::getSizes()[$prefix]['width'].'_' : '';
     }
 
     /**
      * Check if a specific crop exists
      *
-     * @param string $key The crop key (e.g., 'banner', 'thumbnail')
+     * @param  string  $key  The crop key (e.g., 'banner', 'thumbnail')
+     *
      * @return bool
      */
     public function isCroppedForKey(string $key): bool
     {
         return Storage::disk('media')->exists(
-            Path::mediaFolderName($this->model) . '/' . $key . '_' . $this->filename . '.' . $this->extension()
+            Path::mediaFolderName($this->model).'/'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
 
@@ -123,17 +129,18 @@ class Media extends Model
     /**
      * Get URL for a specific crop
      *
-     * @param string $key The crop key
+     * @param  string  $key  The crop key
+     *
      * @return string|null
      */
     public function getCroppedUrl(string $key): ?string
     {
-        if (!$this->isCroppedForKey($key)) {
+        if ( ! $this->isCroppedForKey($key)) {
             return null;
         }
 
         return Storage::disk('media')->url(
-            Path::mediaFolderName($this->model) . '/' . $key . '_' . $this->filename . '.' . $this->extension()
+            Path::mediaFolderName($this->model).'/'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
 
@@ -148,7 +155,7 @@ class Media extends Model
         $cropable = $this->settings()['cropable'] ?? [];
 
         // force associative form: ['thumb'=>[200,200], …]
-        if (!is_array($cropable) || isset($cropable[0])) {
+        if ( ! is_array($cropable) || isset($cropable[0])) {
             $cropable = ['default' => $cropable];
         }
 
@@ -156,12 +163,13 @@ class Media extends Model
         foreach ($cropable as $key => $dim) {
             if ($this->isCroppedForKey($key)) {               // purely FS check
                 $out[$key] = [
-                    'width'  => $dim[0],
-                    'height' => $dim[1],
-                    'filename' => "{$key}_{$this->filename}.{$this->extension()}"
+                    'width'    => $dim[0],
+                    'height'   => $dim[1],
+                    'filename' => "{$key}_{$this->filename}.{$this->extension()}",
                 ];
             }
         }
+
         return $out;
     }
 
