@@ -35,7 +35,8 @@ class Cropable
                 $this->cropable_settings = [
                     $this->media->group => [
                         $this->settings['width'],
-                        $this->settings['height']
+                        $this->settings['height'],
+                        $this->settings['label'] ?? ucfirst($this->media->group) // Include label if available
                     ]
                 ];
             }
@@ -45,17 +46,18 @@ class Cropable
             $cropable = $this->settings['cropable'];
 
             if (is_array($cropable) && !isset($cropable[0])) {
-                // Associative array like ['thumbnail' => [200, 200]]
+                // Associative array like ['thumbnail' => [200, 200]] or ['thumbnail' => [200, 200, 'Thumbnail Label']]
                 $this->cropable_settings = $cropable;
             } elseif (is_array($cropable) && isset($cropable[0])) {
-                // Simple array like [200, 200]
+                // Simple array like [200, 200] or [200, 200, 'Label']
                 $this->cropable_settings = ['cropped' => $cropable];
             } elseif ($cropable === true && isset($this->settings['width']) && isset($this->settings['height'])) {
                 // Boolean true with dimensions in parent settings
                 $this->cropable_settings = [
                     'cropped' => [
                         $this->settings['width'],
-                        $this->settings['height']
+                        $this->settings['height'],
+                        $this->settings['label'] ?? 'Cropped' // Include label if available
                     ]
                 ];
             }
@@ -172,7 +174,7 @@ class Cropable
     }
 
     /**
-     * Updated links() method
+     * Updated links() method with proper label handling
      */
     public function links(): string
     {
@@ -192,18 +194,8 @@ class Cropable
                     continue;
                 }
 
-                // Get label from settings if available
-                $label = ucfirst($key); // Default to capitalized key
-
-                // Check if we have custom group settings with a label
-                $groupSettings = Config::getGroupSetings($this->media->model, $this->media->group);
-                if (!empty($groupSettings) && isset($groupSettings[$this->media->group]['label'])) {
-                    $label = $groupSettings[$this->media->group]['label'];
-                }
-                // Also check in the direct settings (for backwards compatibility)
-                elseif (isset($this->settings['label'])) {
-                    $label = $this->settings['label'];
-                }
+                // Get label with multiple fallback options
+                $label = $this->getCropLabel($key, $dimensions);
 
                 $isCropped  = $this->isCroppedForKey($key);
                 $cropClass  = $isCropped ? 'crop cropped' : 'crop';
@@ -212,6 +204,7 @@ class Cropable
 
                 $buttons[] = '<a class="'.$cropClass.'"
            data-crop-key="'.$key.'"
+           data-crop-label="'.htmlspecialchars($label).'"
            data-crop-w="'.$width.'"
            data-crop-h="'.$height.'"
            data-media-id="'.$this->media->id.'"               
@@ -234,6 +227,29 @@ class Cropable
         }
 
         return '<div class="crop-actions-bar">' . implode('', $buttons) . '</div>';
+    }
+
+    /**
+     * Get the label for a crop configuration
+     *
+     * @param string $key The crop key
+     * @param array $dimensions The dimensions array
+     * @return string
+     */
+    private function getCropLabel(string $key, array $dimensions): string
+    {
+        // First check if label is in the dimensions array (3rd element)
+        if (isset($dimensions[2]) && is_string($dimensions[2])) {
+            return $dimensions[2];
+        }
+
+        // Then check if we're using a custom group setting with a label
+        if ($key === $this->media->group && isset($this->settings['label'])) {
+            return $this->settings['label'];
+        }
+
+        // Finally, default to capitalized key
+        return ucfirst($key);
     }
 
     public function link(): string
@@ -282,6 +298,20 @@ class Cropable
     public function getCurrentCropKey(): ?string
     {
         return $this->current_crop_key;
+    }
+
+    /**
+     * Get the label for the current crop key
+     *
+     * @return string
+     */
+    public function getCurrentCropLabel(): string
+    {
+        if ($this->current_crop_key && isset($this->cropable_settings[$this->current_crop_key])) {
+            return $this->getCropLabel($this->current_crop_key, $this->cropable_settings[$this->current_crop_key]);
+        }
+
+        return ucfirst($this->current_crop_key ?? 'cropped');
     }
 
     public function setWidth(int $width): self
@@ -416,11 +446,12 @@ class Cropable
         foreach ($this->cropable_settings as $key => $dimensions) {
             $width     = (int)$dimensions[0];
             $height    = (int)$dimensions[1];
+            $label     = $this->getCropLabel($key, $dimensions);
             $isCropped = $this->isCroppedForKey($key);
 
             if ($width > 0 && $height > 0) {
                 $html .= '<span class="crop-size-item">';
-                $html .= ucfirst($key).': '.$width.' x '.$height;
+                $html .= $label.': '.$width.' x '.$height;
                 if ($isCropped) {
                     $html .= ' <i class="fa-solid fa-circle-check"></i>';
                 }

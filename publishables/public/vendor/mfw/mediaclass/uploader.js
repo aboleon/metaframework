@@ -478,8 +478,10 @@ const MediaclassUploader = {
         // Set timeout to ensure DOM is ready
         setTimeout(() => {
           // Populate modal content
-          $modal.find('.crop-key-title, .crop-key-label')
-              .text($btn.data('crop-key'));
+          const cropLabel = $btn.data('crop-label') || $btn.data('crop-key');
+
+          $modal.find('.crop-key-title').text(cropLabel);
+          $modal.find('.crop-key-label').text($btn.data('crop-key'));
           $modal.find('.crop-dimensions-text, .crop-dimensions-label')
               .text($btn.data('crop-w') + ' x ' + $btn.data('crop-h'));
           $modal.find('.crop-preview-image')

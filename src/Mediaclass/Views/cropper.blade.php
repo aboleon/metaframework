@@ -50,6 +50,8 @@
     $url = $media->url(size:'xl');
     list($current_w, $current_h) = getimagesize($url);
     $cropKey = $crop_key ?? 'cropped';
+    // Get the label using the cropable method
+    $cropLabel = $cropable->getCurrentCropLabel();
 @endphp
 
 <form id="mediaclass-cropable-form" data-ajax="{{ route('mediaclass.ajax') }}">
@@ -65,7 +67,7 @@
     <input type=hidden name=resized_temp_w value="{!! $current_w !!}">
 
     <div class="crop-info">
-        <h5>Recadrage : {{ ucfirst($cropKey) }}</h5>
+        <h5>Recadrage : {{ $cropLabel  }}</h5>
         <div class="dimensions">Dimensions cibles : {{ $cropable->width() }} x {{ $cropable->height() }} px</div>
     </div>
 
