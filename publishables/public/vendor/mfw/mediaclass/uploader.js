@@ -152,8 +152,54 @@ const MediaclassUploader = {
         $this.find('span.mediaclass-uploader').addClass('disabled');
       }
     });
+  },// Add this to the uploaderCall() function after uploadContainer.html(...) line:
+  uploaderCall() {
+    $('span.mediaclass-uploader').off().on('click', function () {
+      const instantiator = $(this).closest('.mediaclass-uploadable');
+      const uploadContainer = MediaclassUploader.uploadableContainer($(this));
+
+      // Check if we've reached the upload limit
+      if (MediaclassUploader.isLimitReached(instantiator)) {
+        // Optional: Show a message that the limit has been reached
+        const limit = Number(instantiator.data('limit'));
+        MediaclassUploader.alerts().html(`<div class="alert alert-warning">Limite de ${limit} fichier(s) atteinte</div>`);
+        return; // Don't show the uploader
+      }
+
+      if (uploadContainer.find('.fileupload-container').length < 1) {
+        uploadContainer.html(MediaclassUploader.template().html())
+            .attr('data-description', instantiator.data('description'));
+
+        // Add dimension hint if requirements exist
+        const requiredWidth = instantiator.data('required-width');
+        const requiredHeight = instantiator.data('required-height');
+
+        if (requiredWidth && requiredHeight) {
+          const fileuploadBar = uploadContainer.find('.fileupload-buttonbar');
+          const dimensionHint = `<div class="dimension-requirements text-center mb-3">
+            <i class="bi bi-info-circle"></i>
+            <strong>Dimensions requises :</strong> ${requiredWidth} × ${requiredHeight} px minimum
+          </div>`;
+          fileuploadBar.prepend(dimensionHint);
+        }
+
+        MediaclassUploader.initFileupload(uploadContainer);
+        MediaclassUploader.uploaderOptions(uploadContainer);
+      } else {
+        uploadContainer.html('');
+      }
+    });
+
+    // Immediately disable uploader buttons where limit is already reached
+    $('.mediaclass-uploadable').each(function () {
+      const $this = $(this);
+      if (MediaclassUploader.isLimitReached($this)) {
+        $this.find('span.mediaclass-uploader').addClass('disabled');
+      }
+    });
   },
 
+// Also update the uploaderOptions function to pass dimension requirements:
   uploaderOptions(uploadContainer) {
     const fileuploadContainer = this.fileupload(uploadContainer);
     const uploadable = this.uploadable(uploadContainer);
@@ -162,15 +208,9 @@ const MediaclassUploader = {
     const maxFileSize = this.calculateMaxFileSize(inputFileSize);
     const messagesUI = uploadable.find('.ui-messages');
 
-    // Get dimensions from data attributes if available
-    const groupSettings = uploadable.data('group-settings');
-    let minWidth = null;
-    let minHeight = null;
-
-    if (groupSettings && groupSettings.width && groupSettings.height) {
-      minWidth = groupSettings.width;
-      minHeight = groupSettings.height;
-    }
+    // Get dimensions from data attributes
+    const requiredWidth = uploadable.data('required-width');
+    const requiredHeight = uploadable.data('required-height');
 
     const options = {
       previewMaxWidth: 220,
@@ -186,21 +226,11 @@ const MediaclassUploader = {
       },
     };
 
-    // Add dimension validation if needed
-    if (minWidth && minHeight) {
-      options.messages.minImageWidth = `Largeur minimale requise : ${minWidth}px`;
-      options.messages.minImageHeight = `Hauteur minimale requise : ${minHeight}px`;
-
-      // Add process callback for dimension validation
-      options.processQueue = [
-        {
-          action: 'validate',
-          always: true,
-          acceptFileTypes: '@',
-          maxFileSize: '@',
-          maxNumberOfFiles: '@'
-        }
-      ];
+    // Add dimension validation messages if requirements exist
+    if (requiredWidth && requiredHeight) {
+      options.messages.minImageWidth = `Largeur minimale requise : ${requiredWidth}px`;
+      options.messages.minImageHeight = `Hauteur minimale requise : ${requiredHeight}px`;
+      options.messages.imageDimensions = `Dimensions minimales requises : ${requiredWidth} × ${requiredHeight} px`;
     }
 
     fileuploadContainer.fileupload('option', options);

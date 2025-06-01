@@ -12,11 +12,20 @@
      data-has-description="{{ $description }}"
      data-cropable="{{ $cropable }}"
      data-ghost="{{ $ghost ? '1' : '0' }}"
+     @if($requiredWidth && $requiredHeight)
+         data-required-width="{{ $requiredWidth }}"
+     data-required-height="{{ $requiredHeight }}"
+        @endif
 >
-    <div class="controls d-flex justify-between align-items-center" style="background: #EFEFEF">
-        <span class="subcontrol mediaclass-uploader"><i class="{{ $icon }}"></i> {{ $label }}</span>
-        <span class="subcontrol"
-              style="font-size: 14px;font-weight: 700">{{ array_key_exists('sizes', $settings) ? current($settings['sizes']).' x '. end($settings['sizes']): '' }}</span>
+    <div class="controls d-flex justify-content-between align-items-center" style="background: #EFEFEF">
+        <span class="subcontrol mediaclass-uploader">
+            <i class="{{ $icon }}"></i> {!! $displayLabel !!}
+        </span>
+        @if($requiredWidth && $requiredHeight)
+            <span class="subcontrol dimensions-badge me-3" style="font-size: 16px; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">
+            {{ $requiredWidth }}px × {{ $requiredHeight }}px
+        </span>
+        @endif
     </div>
     <div class="mediaclass-upload-container"></div>
     <div class="uploaded">
@@ -30,6 +39,52 @@
                               :ghost="$ghost"/>
     </div>
 </div>
+
+@once
+    @push('css')
+        <style>
+            .mediaclass-uploadable .controls {
+                transition: all 0.2s ease;
+            }
+
+            .mediaclass-uploadable .controls:hover {
+                background: #E5E5E5 !important;
+            }
+
+            .mediaclass-uploadable .dimensions-info {
+                font-size: 0.85em;
+                opacity: 0.8;
+                font-weight: normal;
+            }
+
+            .mediaclass-uploadable .dimensions-badge {
+                font-family: monospace;
+                font-weight: 600;
+            }
+
+            /* Disabled state styling */
+            .mediaclass-uploadable .mediaclass-uploader.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            /* Add visual hint for dimension requirements */
+            .mediaclass-uploadable[data-required-width] .mediaclass-upload-container {
+                position: relative;
+            }
+
+            .mediaclass-uploadable[data-required-width] .fileupload-buttonbar::before {
+                content: attr(data-dimensions-hint);
+                display: block;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 10px;
+            }
+        </style>
+    @endpush
+@endonce
+
 @once
     @if ($model instanceof \MetaFramework\Mediaclass\Interfaces\MediaclassInterface && !isset($model->id) && !$ghost)
         <input type="hidden" name="mediaclass_temp_id" value="{{ Str::random(32) }}">
@@ -38,7 +93,6 @@
     <x-mediaclass::template/>
     <x-mediaclass::crop-template/>
 @endonce
-
 
 @once
     <x-mediaclass::crop-modal/>

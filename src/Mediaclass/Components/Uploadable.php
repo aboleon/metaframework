@@ -7,6 +7,10 @@ use Illuminate\View\Component;
 
 class Uploadable extends Component
 {
+    public ?int $requiredWidth = null;
+    public ?int $requiredHeight = null;
+    public string $displayLabel = '';
+
     public function __construct(
         public object $model,
         public bool   $positions = false,
@@ -48,6 +52,12 @@ class Uploadable extends Component
                     $this->label = $groupSettings['label'];
                 }
 
+                // Extract dimensions
+                if (isset($groupSettings['width']) && isset($groupSettings['height'])) {
+                    $this->requiredWidth = $groupSettings['width'];
+                    $this->requiredHeight = $groupSettings['height'];
+                }
+
                 // Set cropable if defined in group settings
                 // Note: cropable will be dynamically determined based on uploaded image dimensions
                 // This is just a fallback for the component initialization
@@ -62,6 +72,17 @@ class Uploadable extends Component
             }
         }
 
+        // Extract dimensions from settings array if available
+        if (!$this->requiredWidth && !$this->requiredHeight && isset($this->settings['sizes']) && is_array($this->settings['sizes'])) {
+            $this->requiredWidth = (int) $this->settings['sizes'][0];
+            $this->requiredHeight = (int) $this->settings['sizes'][1];
+        }
+
+        // Build display label with dimensions
+        $this->displayLabel = $this->label;
+       /* if ($this->requiredWidth && $this->requiredHeight) {
+            $this->displayLabel .= ' <span class="dimensions-info" style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">(' . $this->requiredWidth . ' × ' . $this->requiredHeight . ' px)</span>';
+        }*/
         if (is_array($this->cropable)) {
             $this->cropable = json_encode($this->cropable);
         }

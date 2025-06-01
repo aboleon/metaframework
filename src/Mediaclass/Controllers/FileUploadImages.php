@@ -272,6 +272,49 @@ class FileUploadImages
 
                     return $this;
                 }
+
+                // NEW: Check if cropable is enabled and validate scale
+                if (isset($groupSettings[$groupKey]['cropable']) && $groupSettings[$groupKey]['cropable'] === true) {
+                    // Calculate what the resized dimensions would be
+                    $isWidthMain = $requiredWidth >= $requiredHeight;
+                    $mainDimension = $isWidthMain ? $requiredWidth : $requiredHeight;
+                    $currentMainDimension = $isWidthMain ? $imageWidth : $imageHeight;
+
+                    // Only check scale if resizing will happen
+                    if ($currentMainDimension !== $mainDimension) {
+                        $scaleRatio = $mainDimension / $currentMainDimension;
+                        $resizedWidth = (int)($imageWidth * $scaleRatio);
+                        $resizedHeight = (int)($imageHeight * $scaleRatio);
+
+                        // Check if resized dimensions would be insufficient for cropping
+                        if ($resizedWidth < $requiredWidth || $resizedHeight < $requiredHeight) {
+                            // Calculate the minimum scale needed
+                            $minScaleWidth = $requiredWidth / $imageWidth;
+                            $minScaleHeight = $requiredHeight / $imageHeight;
+                            $minScale = max($minScaleWidth, $minScaleHeight);
+
+                            // Calculate minimum original dimensions needed
+                            $minOriginalWidth = (int)ceil($requiredWidth / $minScale);
+                            $minOriginalHeight = (int)ceil($requiredHeight / $minScale);
+
+                            $this->responseError(
+                                __('mediaclass.errors.scale_for_crop', [
+                                    'width' => $requiredWidth,
+                                    'height' => $requiredHeight,
+                                    'min_width' => $minOriginalWidth,
+                                    'min_height' => $minOriginalHeight,
+                                    'uploaded_width' => $imageWidth,
+                                    'uploaded_height' => $imageHeight
+                                ])
+                            );
+
+                            // Clean up the image resource
+                            unset($this->image);
+
+                            return $this;
+                        }
+                    }
+                }
             }
         }
 
