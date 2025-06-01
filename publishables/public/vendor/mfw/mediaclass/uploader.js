@@ -104,7 +104,9 @@ const MediaclassUploader = {
           deleteData.selector.remove();
 
           if (deleteData.container.find('.unlinkable').length < 1) {
-            MediaclassUploader.alerts().html(`<div class="alert alert-info">${MediaclassUploader.alerts().data('msg')}</div>`);
+            // Find the alerts container specific to this uploadable
+            const alertsContainer = deleteData.uploadable.find('.mediaclass-alerts');
+            alertsContainer.html(`<div class="alert alert-info">${alertsContainer.data('msg')}</div>`);
           }
 
           // Re-enable uploader button if we're now below the limit
@@ -128,7 +130,7 @@ const MediaclassUploader = {
       if (MediaclassUploader.isLimitReached(instantiator)) {
         // Optional: Show a message that the limit has been reached
         const limit = Number(instantiator.data('limit'));
-        $('.mediaclass-alerts').html(`<div class="alert alert-warning">Limite de ${limit} fichier(s) atteinte</div>`);
+        MediaclassUploader.alerts().html(`<div class="alert alert-warning">Limite de ${limit} fichier(s) atteinte</div>`);
         return; // Don't show the uploader
       }
 
@@ -250,7 +252,7 @@ const MediaclassUploader = {
         MediaclassUploader.progress().hide();
       },
       success: (data) => {
-        const $alerts = $('.mediaclass-alerts').html('');
+        MediaclassUploader.alerts().html('');
 
         // Check for errors FIRST before doing anything else
         if (data.hasOwnProperty('errors') || data.hasOwnProperty('error')) {
