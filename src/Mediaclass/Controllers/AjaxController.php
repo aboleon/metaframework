@@ -37,6 +37,11 @@ class AjaxController extends Controller
 
     public function delete(): array
     {
+        // Pass the model for ghost support
+        if (request('ghost') === '1' && request('model')) {
+            $this->uploader->setModel(request('model'));
+        }
+
         return $this->uploader->delete()->fetchResponse();
     }
 

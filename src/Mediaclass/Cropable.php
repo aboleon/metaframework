@@ -16,9 +16,13 @@ class Cropable
     private int $cropable_width = 0;
     private int $cropable_height = 0;
     public array $croppedImages = [];
+    private bool $is_ghost = false;
 
     public function __construct(public Media $media)
     {
+        // Check if this is a ghost media (no model_id)
+        $this->is_ghost = $media->model_id === null;
+
         $this->settings();
         $this->checkIfCropped();
     }
@@ -82,14 +86,32 @@ class Cropable
 
     public static function form(Media $media)
     {
+        // For ghost models, ensure we have a model instance
+        if ($media->model_id === null && !$media->relationLoaded('model')) {
+            $modelClass = $media->model_type;
+
+            // Handle morph map
+            $morphMap = \Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+            if (!empty($morphMap)) {
+                $modelClass = $morphMap[$modelClass] ?? $modelClass;
+            }
+
+            if (class_exists($modelClass)) {
+                $model = new $modelClass();
+                $media->setRelation('model', $model);
+            }
+        }
+
         $cropKey  = request('crop_key', 'cropped');
         $cropable = new Cropable($media);
         $cropable->setCurrentCropKey($cropKey);
 
+        // Pass ghost flag to view
         return view('mediaclass::cropper')->with([
             'media'    => $media,
             'cropable' => $cropable,
             'crop_key' => $cropKey,
+            'is_ghost' => $cropable->is_ghost,
         ]);
     }
 
@@ -494,5 +516,10 @@ class Cropable
     {
         // For backwards compatibility, check if any crop exists
         return ! empty($this->croppedImages);
+    }
+
+    public function isGhost(): bool
+    {
+        return $this->is_ghost;
     }
 }

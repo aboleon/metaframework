@@ -5,12 +5,13 @@
      data-maxfilesize="{{ $maxfilesize }}"
      data-limit="{{ $limit }}"
      data-model="{{ get_class($model) }}"
-     data-model-id="{{ $model->id }}"
+     data-model-id="{{ $model->id ?? '' }}"
      data-positions="{{ $positions }}"
      data-group="{{ $group }}"
      data-subgroup="{{ $settings['subgroup'] ?? false }}"
      data-has-description="{{ $description }}"
      data-cropable="{{ $cropable }}"
+     data-ghost="{{ $ghost ? '1' : '0' }}"
 >
     <div class="controls d-flex justify-between align-items-center" style="background: #EFEFEF">
         <span class="subcontrol mediaclass-uploader"><i class="{{ $icon }}"></i> {{ $label }}</span>
@@ -25,11 +26,12 @@
                               :nomedia="$nomedia"
                               :group="$group"
                               :subgroup="$settings['subgroup'] ?? null "
-                              :description="$description"/>
+                              :description="$description"
+                              :ghost="$ghost"/>
     </div>
 </div>
 @once
-    @if ($model instanceof \MetaFramework\Mediaclass\Interfaces\MediaclassInterface && !isset($model->id))
+    @if ($model instanceof \MetaFramework\Mediaclass\Interfaces\MediaclassInterface && !isset($model->id) && !$ghost)
         <input type="hidden" name="mediaclass_temp_id" value="{{ Str::random(32) }}">
     @endif
     @include('mediaclass::fileupload_scripts')
@@ -42,5 +44,3 @@
     <x-mediaclass::crop-modal/>
     <x-mediaclass::confirm-delete-modal/>
 @endonce
-
-

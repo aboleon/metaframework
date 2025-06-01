@@ -24,13 +24,38 @@ class Stored extends Component
         public int|bool   $description = true,
         public array|string|null $cropable = null, // Changed to accept array
         public string $nomedia = '',
+        public bool $ghost = false
     )
     {
         $this->description = $this->description ? 1 : 0;
-        $this->medias = $this->model->media->where('group', $this->group);
 
-        if ($this->subgroup) {
-            $this->medias = $this->medias->where('subgroup', $this->subgroup);
+        if ($this->ghost) {
+            // For ghost models, don't query the relationship
+            // Instead, query Media directly using model type and group
+            $modelType = get_class($this->model);
+            $morphMap = \Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+            $morphType = array_search($modelType, $morphMap) ?: $modelType;
+
+            $query = Media::where('model_type', $morphType)
+                ->where('group', $this->group)
+                ->whereNull('model_id'); // Ghost records have no model_id
+
+            if ($this->subgroup) {
+                $query->where('subgroup', $this->subgroup);
+            }
+
+            $this->medias = $query->get();
+
+            // Inject the ghost model into each media
+            $this->medias->each(function($media) {
+                $media->setRelation('model', $this->model);
+            });
+        } else {
+            $this->medias = $this->model->media->where('group', $this->group);
+
+            if ($this->subgroup) {
+                $this->medias = $this->medias->where('subgroup', $this->subgroup);
+            }
         }
 
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');

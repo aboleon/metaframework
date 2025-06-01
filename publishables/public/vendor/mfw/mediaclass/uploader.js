@@ -258,10 +258,10 @@ const MediaclassUploader = {
           const errorData = data.ajax_messages ?? data.messages;
 
           // Call notificator with correct parameters: status, data, messages, keepMessages, printerOptions
-          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+          notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
           // Clean up the upload UI
-          uploadable.find('.files .template-upload').fadeOut(function() {
+          uploadable.find('.files .template-upload').fadeOut(function () {
             $(this).remove();
 
             // If no more files in queue, hide the uploadables section
@@ -315,17 +315,17 @@ const MediaclassUploader = {
           const errorData = {
             danger: [xhr.responseJSON.errors]
           };
-          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+          notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
         } else {
           // Generic error message
           const errorData = {
             danger: ['Une erreur est survenue lors du téléchargement de votre fichier']
           };
-          notificator(200, errorData, MediaclassUploader.messages(), false, { isDismissable: true });
+          notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
         }
 
         // Clean up the upload UI
-        uploadable.find('.files .template-upload').fadeOut(function() {
+        uploadable.find('.files .template-upload').fadeOut(function () {
           $(this).remove();
 
           // If no more files in queue, hide the uploadables section
@@ -371,6 +371,7 @@ const MediaclassUploader = {
         {name: 'model_id', value: uploadable.data('model-id')},
         {name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? ''},
         {name: 'count_files', value: validFiles},
+        {name: 'ghost', value: uploadable.data('ghost') || '0'},
         {name: 'cropable', value: cropableData || ''}
       ];
 

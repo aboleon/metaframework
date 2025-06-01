@@ -32,6 +32,17 @@ class Cropper
 
         try {
             $media = Media::query()->findOrFail(request('object_id'));
+
+            // For ghost models, inject the model instance
+            if ($media->model_id === null) {
+                // Create a new instance of the model class
+                $modelClass = $media->model_type;
+                if (class_exists($modelClass)) {
+                    $model = new $modelClass();
+                    $media->setRelation('model', $model);
+                }
+            }
+
             $file = $media->file('xl');
             $cropKey = request('crop_key', 'default');
 
@@ -91,6 +102,16 @@ class Cropper
             $cropKey = request('crop_key');
 
             $media = Media::query()->findOrFail($mediaId);
+
+            // For ghost models, inject the model instance
+            if ($media->model_id === null) {
+                // Create a new instance of the model class
+                $modelClass = $media->model_type;
+                if (class_exists($modelClass)) {
+                    $model = new $modelClass();
+                    $media->setRelation('model', $model);
+                }
+            }
 
             // Build the crop filename with cropped_ prefix and key
             $filename = 'cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();

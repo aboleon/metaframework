@@ -37,6 +37,7 @@ class FileUploadImages
     private ?int $model_id;
     private string $folder_name = '';
     private string $media_group;
+    private bool $is_ghost = false;
 
     private Filesystem $disk;
     private ImageManager $imageManager;
@@ -47,6 +48,7 @@ class FileUploadImages
         $this->model_id    = (int)request('model_id') ?: null;
         $this->temp        = request('mediaclass_temp_id') ?: null;
         $this->media_group = request('group') ?: MediaclassConfig::defaultGroup();
+        $this->is_ghost    = request('ghost') === '1';
 
         $this->response['filetype'] = 'image';
 
@@ -67,7 +69,7 @@ class FileUploadImages
         try {
             $this->model = (new ReflectionClass($model))->newInstance();
 
-            if ($this->model_id) {
+            if ($this->model_id && !$this->is_ghost) {
                 $this->model = $this->model->find($this->model_id);
             }
             $this->folder_name = Path::mediaFolderName($this->model);
@@ -88,6 +90,13 @@ class FileUploadImages
     {
         try {
             $media = Media::query()->find(request('id'));
+
+            // For ghost models, we need to inject the model instance
+            if ($media->model_id === null && $this->is_ghost) {
+                // Set the model relation without querying
+                $media->setRelation('model', $this->model);
+            }
+
             $path  = Path::mediaFolderName($media->model);
             File::delete(
                 File::glob(
@@ -327,8 +336,14 @@ class FileUploadImages
             $this->responseException($e);
         }
 
-        $this->media->model = $this->model;
-        $cropable           = new Cropable($this->media);
+        // For ghost models, inject the model instance
+        if ($this->is_ghost) {
+            $this->media->setRelation('model', $this->model);
+        } else {
+            $this->media->model = $this->model;
+        }
+
+        $cropable = new Cropable($this->media);
 
         // Handle cropable settings
         $cropableData = request('cropable');
@@ -397,7 +412,7 @@ class FileUploadImages
 
         return Media::query()->create([
             'model_type'        => $morphable,
-            'model_id'          => $this->model_id,
+            'model_id'          => $this->is_ghost ? null : $this->model_id,
             'group'             => $this->media_group,
             'subgroup'          => request('subgroup') ?: null,
             'description'       => request('description'),
@@ -405,7 +420,7 @@ class FileUploadImages
             'mime'              => $this->uploadedFile->getMimeType(),
             'original_filename' => $this->uploadedFile->getClientOriginalName(),
             'filename'          => $this->filename,
-            'temp'              => $this->temp,
+            'temp'              => $this->is_ghost ? null : $this->temp,
         ]);
     }
 
