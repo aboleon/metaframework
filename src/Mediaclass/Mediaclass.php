@@ -133,6 +133,11 @@ class Mediaclass
      */
     protected function parseMedia(Media $instance): static
     {
+        // Only set model if we have an object and the media doesn't already have a model relation
+        if (isset($this->object) && !$instance->relationLoaded('model')) {
+            $instance->model = $this->object;
+        }
+
         $this->media[] = new Parser($instance);
         return $this;
     }
@@ -349,4 +354,86 @@ class Mediaclass
     {
         return array_filter($this->media, $callback);
     }
+
+    /**
+     * Get a single URL for a ghost model's media
+     * Automatically returns cropped version if available, otherwise returns requested size
+     *
+     * @param string $modelClass The fully qualified class name of the model
+     * @param string|null $group Optional group filter
+     * @param string $size The size to retrieve (sm, md, lg, xl) - ignored if cropped exists
+     * @param string|null $default Default URL if no media found (null returns empty string)
+     * @return string The URL (cropped if available, otherwise requested size)
+     */
+    public static function ghostUrl(string $modelClass, ?string $group = null, string $size = 'sm', ?string $default = null): string
+    {
+        // Handle morph map
+        $morphMap = \Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+        $morphType = array_search($modelClass, $morphMap) ?: $modelClass;
+
+        // Build query
+        $query = Media::where('model_type', $morphType)
+            ->whereNull('model_id')
+            ->orderBy('position')
+            ->orderBy('id');
+
+        if ($group !== null) {
+            $query->where('group', $group);
+        }
+
+        // Get first media
+        $media = $query->first();
+
+        if (!$media) {
+            return $default ?: '';
+        }
+
+        // Create ghost model instance and inject it
+        if (class_exists($modelClass)) {
+            $ghostModel = new $modelClass();
+            $media->setRelation('model', $ghostModel);
+        }
+
+        // Check if cropped version exists first
+        if ($group && $media->isCroppedForKey($group)) {
+            // The group name is used as the crop key for ghost models
+            return $media->getCroppedUrl($group) ?: ($default ?: '');
+        }
+
+        // Check for any other cropped version
+        if ($media->isCropped()) {
+            return $media->url('cropped');
+        }
+
+        // Otherwise return the requested size
+        $url = $media->url($size);
+
+        // If no URL found, try to construct it manually for files without extensions
+        if (!$url && $media->sizeable()) {
+            $folder = Path::mediaFolderForMedia($media);
+            $sizes = Config::getSizes();
+
+            // Try to find a file that matches our pattern
+            if (isset($sizes[$size])) {
+                $width = $sizes[$size]['width'];
+                $filename = $width . '_' . $media->filename;
+                $possibleFile = $folder . '/' . $filename;
+
+                // Check if file exists without extension
+                if (Config::getDisk()->exists($possibleFile)) {
+                    return Config::getDisk()->url($possibleFile);
+                }
+
+                // Check with extension
+                $possibleFileWithExt = $possibleFile . '.' . $media->extension();
+                if (Config::getDisk()->exists($possibleFileWithExt)) {
+                    return Config::getDisk()->url($possibleFileWithExt);
+                }
+            }
+        }
+
+        return $url ?: ($default ?: '');
+    }
+
+
 }
