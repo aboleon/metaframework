@@ -256,57 +256,82 @@ const MediaclassUploader = {
 
         // Check for errors FIRST before doing anything else
         if (data.hasOwnProperty('errors') || data.hasOwnProperty('error')) {
-
           const errorData = data.ajax_messages ?? data.messages;
-
-          // Call notificator with correct parameters: status, data, messages, keepMessages, printerOptions
           notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
-          // Clean up the upload UI
-          uploadable.find('.files .template-upload').fadeOut(function () {
+          uploadable.find('.files .template-upload').fadeOut(function() {
             $(this).remove();
-
-            // If no more files in queue, hide the uploadables section
             if (uploadable.find('.files .template-upload').length === 0) {
               uploadable.find('.uploadables').addClass('d-none');
             }
           });
-
           return;
         }
 
-        // Only proceed if we have uploaded data
         if (!data.uploaded) {
           console.error('No uploaded data in response', data);
           notificator('Erreur lors du téléchargement', 'danger', MediaclassUploader.messages());
           return;
         }
 
-        // Remove old files display
-        uploadable.find('.files').delay(500).fadeOut(function () {
+        // Hide the upload queue first, then add the new content after it's hidden
+        uploadable.find('.files').fadeOut(300, function () {
           $(this).html('').show();
+
+          // Now that the upload queue is cleared, add the new content
+          const html = MediaclassUploader.buildUploadedFileHTML(data, hideDescription);
+
+          // Find or create the lightgallery container
+          let lightGalleryContainer = uploadable.find('.lightgallery-container');
+          if (lightGalleryContainer.length === 0) {
+            uploadable.find('.uploaded').wrapInner(`<div id="lightgallery-${uploadable.data('group')}-${uploadable.data('model-id')}" class="lightgallery-container"></div>`);
+            lightGalleryContainer = uploadable.find('.lightgallery-container');
+          }
+
+          // Add the new content to the lightgallery container
+          lightGalleryContainer.append(html);
+
+          // Initialize events
+          MediaclassUploader.unlinkable();
+
+          // Initialize LightGallery for this specific container
+          setTimeout(() => {
+            // Destroy existing instance if any
+            const lgInstance = lightGalleryContainer.data('lightGallery');
+            if (lgInstance) {
+              lgInstance.destroy();
+            }
+
+            // Only initialize if there are image items
+            const imageItems = lightGalleryContainer.find('.lightgallery-item');
+            if (imageItems.length > 0) {
+              lightGallery(lightGalleryContainer[0], {
+                selector: '.lightgallery-item',
+                speed: 500,
+                download: true,
+                counter: true,
+                zoom: true,
+                thumbnail: imageItems.length > 1,
+                plugins: [lgZoom, lgThumbnail],
+                mobileSettings: {
+                  controls: true,
+                  showCloseIcon: true,
+                  download: true
+                }
+              });
+            }
+          }, 100);
+
+          // Check limits and close uploader if needed
+          if (MediaclassUploader.isLimitReached(uploadable)) {
+            uploadable.find('span.mediaclass-uploader').addClass('disabled');
+            MediaclassUploader.uploadableContainer(uploadable).html('');
+          } else if (uploadable.find('.uploaded > div.mediaclass.unlinkable').length === Number(data.count_files)) {
+            MediaclassUploader.uploadableContainer(uploadable).html('');
+          }
+
+          MediaclassUploader.modalCrop();
         });
-
-        // Create HTML for uploaded file
-        const html = MediaclassUploader.buildUploadedFileHTML(data, hideDescription);
-
-        // Add to container
-        const uploadedFilesContainer = uploadable.find('.uploaded');
-        uploadedFilesContainer.append(html);
-
-        // Initialize events and check if we need to close uploader
-        MediaclassUploader.unlinkable();
-
-        // Check if we've reached the limit after adding this file
-        if (MediaclassUploader.isLimitReached(uploadable)) {
-          // If limit reached, disable the uploader button
-          uploadable.find('span.mediaclass-uploader').addClass('disabled');
-          MediaclassUploader.uploadableContainer(uploadable).html('');
-        } else if (uploadedFilesContainer.find('> div.mediaclass.unlinkable').length === Number(data.count_files)) {
-          MediaclassUploader.uploadableContainer(uploadable).html('');
-        }
-
-        MediaclassUploader.modalCrop();
       },
       error: (xhr, ajaxOptions, thrownError) => {
         console.error('Upload error:', xhr, thrownError);
@@ -390,14 +415,34 @@ const MediaclassUploader = {
   buildUploadedFileHTML(data, hideDescription) {
     const {uploaded, filetype, preview, link, cropable_links, has_positions} = data;
 
+    // For images, we need to get the full size URL for LightGallery
+    const fullSizeUrl = filetype === 'image' ? (data.urls && data.urls.xl ? data.urls.xl : link) : link;
+
     let html = `
 <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
     <span class="unlink"><i class="bi bi-x-circle-fill"></i></span>
     <div class="row m-0">
         <div class="col-xl-3 pe-xl-4 col-12 impImg position-relative preview ${filetype}">
             <div class="w-100 h-100" style="background-image: url(${preview}); background-size: contain;background-repeat: no-repeat;background-position: center;">
-                <div class="actions">
-                    <a target="_blank" href="${link}" class="zoom"><i class="fa-sharp fa-solid fa-magnifying-glass"></i></a>
+                <div class="actions">`;
+
+    if (filetype === 'image') {
+      // For images, add the lightgallery-item class and data-sub-html
+      html += `
+                    <a href="${fullSizeUrl}"
+                       class="lightgallery-item zoom"
+                       data-sub-html="<h4>${uploaded.original_filename}</h4><p>${uploaded.description ? (uploaded.description[document.documentElement.lang] || '') : ''}</p>">
+                        <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
+                    </a>`;
+    } else {
+      // For non-images, just open in new tab
+      html += `
+                    <a target="_blank" href="${link}" class="zoom">
+                        <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
+                    </a>`;
+    }
+
+    html += `
                 </div>
             </div>
         </div>
@@ -432,7 +477,7 @@ const MediaclassUploader = {
                     </div>
                 </div>`;
 
-    // Add descriptions - using the safe descriptions variable
+    // Add descriptions
     const descriptions = uploaded.description || {};
     for (const [key, value] of Object.entries(descriptions)) {
       html += `

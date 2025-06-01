@@ -110,66 +110,30 @@
 @endpushonce
 
 @pushonce('js')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/lightgallery.min.js" integrity="sha512-n02TbYimj64qb98ed5WwkNiSw/i9Xlvv4Ehvhg0jLp3qMAMWCYUHbOMbppZ0vimtyiyw9NqNqxUZC4hq86f4aQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/plugins/zoom/lg-zoom.min.js" integrity="sha512-fwxc/NvaA3du4ZRE6J/Ilrqi2xwOB1QfHBR4neA+ha13/pkweiRfPgBiV4VbfAf/Vi3rXAXdQ3zexUJ1V2bWrg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/plugins/thumbnail/lg-thumbnail.min.js" integrity="sha512-jZxB8WysJ6S6e4Hz5IZpAzR1WiflBl0hBxriHGlLkUN32T18+rD1aLNifa1KTll/zx8lIfWVP1NqEjHi/Khy5w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/lightgallery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/plugins/zoom/lg-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/plugins/thumbnail/lg-thumbnail.min.js"></script>
     <script>
+        // Initialize LightGallery on page load for existing images
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize LightGallery for each uploadable container
-            const initLightGallery = function() {
-                document.querySelectorAll('.lightgallery-container').forEach(container => {
-                    // Check if already initialized
-                    if (container.lgInitialized) return;
-
-                    // Find all image links within this container
-                    const imageLinks = container.querySelectorAll('.lightgallery-item');
-
-                    if (imageLinks.length > 0) {
-                        // Initialize LightGallery on the container
-                        const lgInstance = lightGallery(container, {
-                            selector: '.lightgallery-item',
-                            speed: 500,
-                            download: true,
-                            counter: true,
-                            zoom: true,
-                            thumbnail: imageLinks.length > 1, // Show thumbnails only if multiple images
-                            plugins: [lgZoom, lgThumbnail],
-                            mobileSettings: {
-                                controls: true,
-                                showCloseIcon: true,
-                                download: true
-                            }
-                        });
-
-                        // Mark as initialized
-                        container.lgInitialized = true;
-                        container.lgInstance = lgInstance;
-                    }
-                });
-            };
-
-            // Initialize on page load
-            initLightGallery();
-
-            // Re-initialize after AJAX uploads
-            $(document).on('ajaxSuccess', function(event, xhr) {
-                setTimeout(function() {
-                    // Destroy existing instances first
-                    document.querySelectorAll('.lightgallery-container').forEach(container => {
-                        if (container.lgInstance) {
-                            container.lgInstance.destroy();
-                            container.lgInitialized = false;
+            document.querySelectorAll('.lightgallery-container').forEach(container => {
+                const imageLinks = container.querySelectorAll('.lightgallery-item');
+                if (imageLinks.length > 0) {
+                    lightGallery(container, {
+                        selector: '.lightgallery-item',
+                        speed: 500,
+                        download: true,
+                        counter: true,
+                        zoom: true,
+                        thumbnail: imageLinks.length > 1,
+                        plugins: [lgZoom, lgThumbnail],
+                        mobileSettings: {
+                            controls: true,
+                            showCloseIcon: true,
+                            download: true
                         }
                     });
-
-                    // Re-initialize
-                    initLightGallery();
-                }, 500);
-            });
-
-            // Clean up when modal is closed
-            $('#mediaclass-crop').on('hidden.bs.modal', function () {
-                initLightGallery();
+                }
             });
         });
     </script>
