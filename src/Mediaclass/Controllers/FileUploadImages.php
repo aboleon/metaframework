@@ -72,7 +72,13 @@ class FileUploadImages
             if ($this->model_id && !$this->is_ghost) {
                 $this->model = $this->model->find($this->model_id);
             }
-            $this->folder_name = Path::mediaFolderName($this->model);
+
+            // For ghost models, use just the model name folder
+            if ($this->is_ghost) {
+                $this->folder_name = Str::snake((new ReflectionClass($this->model))->getShortName());
+            } else {
+                $this->folder_name = Path::mediaFolderName($this->model);
+            }
         } catch (Throwable $e) {
             $this->responseException($e, "Unknown ".$model." class in ".static::class);
         }
@@ -92,12 +98,12 @@ class FileUploadImages
             $media = Media::query()->find(request('id'));
 
             // For ghost models, we need to inject the model instance
-            if ($media->model_id === null && $this->is_ghost) {
+            if ($media->model_id === null) {
                 // Set the model relation without querying
-                $media->setRelation('model', $this->model);
+                $media->setRelation('model', (new ReflectionClass($media->model_type))->newInstance());
             }
 
-            $path  = Path::mediaFolderName($media->model);
+            $path  = Path::mediaFolderForMedia($media);
             File::delete(
                 File::glob(
                     $this->disk->path($path.DIRECTORY_SEPARATOR.'*'.$media->filename.'*'),

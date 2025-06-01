@@ -49,7 +49,7 @@ class Cropper
             $image = $cropper->imageManager->read($file);
 
             // Create filename with cropped_ prefix and crop key
-            $filename = Path::mediaFolderName($media->bindedModel()) . '/cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();
+            $filename = Path::mediaFolderForMedia($media) . '/cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();
 
             // Chain crop and resize operations, then encode
             $processedImage = $image
@@ -115,7 +115,7 @@ class Cropper
 
             // Build the crop filename with cropped_ prefix and key
             $filename = 'cropped_' . $cropKey . '_' . $media->filename . '.' . $media->extension();
-            $path = Path::mediaFolderName($media->bindedModel()) . '/' . $filename;
+            $path = Path::mediaFolderForMedia($media) . '/' . $filename;
 
             // Delete the cropped file
             if (Config::getDisk()->exists($path)) {

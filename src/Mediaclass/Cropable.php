@@ -144,7 +144,7 @@ class Cropable
                 }
             }
 
-            $path = Path::mediaFolderName($this->media->model) . '/' . $filename;
+            $path = Path::mediaFolderForMedia($this->media) . '/' . $filename;
 
             if (Config::getDisk()->exists($path)) {
                 $fullPath = Config::getDisk()->path($path);

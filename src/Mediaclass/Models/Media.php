@@ -72,14 +72,14 @@ class Media extends Model
         }
 
         return Storage::disk('media')->url(
-            Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension(),
+            Path::mediaFolderForMedia($this).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension(),
         );
     }
 
 
     public function file(string $size = 'sm'): string
     {
-        return Storage::disk('media')->get(Path::mediaFolderName($this->model).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension());
+        return Storage::disk('media')->get(Path::mediaFolderForMedia($this).'/'.$this->dimensionPrefix(prefix: $size).$this->filename.'.'.$this->extension());
     }
 
 
@@ -92,7 +92,7 @@ class Media extends Model
     {
         if ($key === null) {
             // Check if any crop exists by looking for files with cropped_ prefix
-            $path = Path::mediaFolderName($this->model);
+            $path = Path::mediaFolderForMedia($this);
 
             // Get all files in the media folder
             $files = Storage::disk('media')->files($path);
@@ -140,7 +140,7 @@ class Media extends Model
     public function isCroppedForKey(string $key): bool
     {
         return Storage::disk('media')->exists(
-            Path::mediaFolderName($this->model).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
+            Path::mediaFolderForMedia($this).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
 
@@ -158,7 +158,7 @@ class Media extends Model
         }
 
         return Storage::disk('media')->url(
-            Path::mediaFolderName($this->model).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
+            Path::mediaFolderForMedia($this).'/'.'cropped_'.$key.'_'.$this->filename.'.'.$this->extension(),
         );
     }
 
