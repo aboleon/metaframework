@@ -20,6 +20,7 @@ trait Responses
     protected bool $keepErrors = false;
     protected bool $restrictedToDev = false;
     protected bool $as_exception = false;
+    protected string $messageKey = 'messages';
 
     public function reset()
     {
@@ -32,6 +33,12 @@ trait Responses
         $this->debugMode         = false;
         $this->keepErrors        = false;
         $this->restrictedToDev   = false;
+        $this->messageKey        = 'mfw_messages';
+    }
+
+    public function getDefaultMessageKey(): string
+    {
+        return 'mfw_messages';
     }
 
     public function throwException(): self
@@ -56,6 +63,7 @@ trait Responses
     public function enableAjaxMode(): static
     {
         $this->ajax_mode = true;
+        $this->messageKey = 'mfw_ajax_messages';
 
         return $this;
     }
@@ -63,6 +71,7 @@ trait Responses
     public function disableAjaxMode(): static
     {
         $this->ajax_mode = false;
+        $this->messageKey = $this->getDefaultMessageKey();
 
         return $this;
     }
@@ -88,11 +97,6 @@ trait Responses
 
     public function fetchResponse(): array
     {
-        if ($this->ajax_mode && array_key_exists('messages', $this->response)) {
-            $this->response['ajax_messages'] = $this->response['messages'];
-            unset($this->response['messages']);
-        }
-
         if ($this->debugMode && ! $this->keepErrors) {
             unset($this->response['error']);
         }
@@ -113,7 +117,7 @@ trait Responses
 
     public function fetchMessages(): array
     {
-        return $this->response['messages'];
+        return $this->response[$this->messageKey] ?? [];
     }
 
     public function disableRedirects(): static
@@ -125,8 +129,8 @@ trait Responses
 
     public function fetchErrorMessages(): array
     {
-        if (array_key_exists($this->messagesKey(), $this->response)) {
-            $this->response[$this->messagesKey()] = array_filter($this->response[$this->messagesKey()], fn($key) => array_filter($key, fn($key) => in_array($key, ['danger', 'warning']), ARRAY_FILTER_USE_KEY));
+        if (array_key_exists($this->getMessageKey(), $this->response)) {
+            $this->response[$this->getMessageKey()] = array_filter($this->response[$this->getMessageKey()], fn($key) => array_filter($key, fn($key) => in_array($key, ['danger', 'warning']), ARRAY_FILTER_USE_KEY));
         }
 
         return $this->response;
@@ -156,7 +160,7 @@ trait Responses
     public function responseNotice($message): static
     {
         if ($this->enabledMessages()) {
-            $this->response[$this->messagesKey()][]['info'] = $message;
+            $this->response[$this->getMessageKey()][]['info'] = $message;
         }
 
         return $this;
@@ -166,9 +170,9 @@ trait Responses
     {
         if ($this->enabledMessages()) {
             if ( ! empty($key)) {
-                $this->response[$this->messagesKey()][$key]['success'] = $message;
+                $this->response[$this->getMessageKey()][$key]['success'] = $message;
             } else {
-                $this->response[$this->messagesKey()][]['success'] = $message;
+                $this->response[$this->getMessageKey()][]['success'] = $message;
             }
 
             return $this;
@@ -188,20 +192,20 @@ trait Responses
     {
         if ($this->enabledMessages()) {
             $this->response['error']                          = true;
-            $this->response[$this->messagesKey()][]['danger'] = $message;
+            $this->response[$this->getMessageKey()][]['danger'] = $message;
         }
     }
 
     protected function responseLog($message): void
     {
-        $this->response[$this->messagesKey()][]['log'] = $message;
+        $this->response[$this->getMessageKey()][]['log'] = $message;
     }
 
     protected function responseAbort($message): void
     {
         if ($this->enabledMessages()) {
             $this->response['abort']                          = true;
-            $this->response[$this->messagesKey()][]['danger'] = $message;
+            $this->response[$this->getMessageKey()][]['danger'] = $message;
         }
     }
 
@@ -211,7 +215,7 @@ trait Responses
             if ($error) {
                 $this->response['error'] = true;
             }
-            $this->response[$this->messagesKey()][]['warning'] = $message;
+            $this->response[$this->getMessageKey()][]['warning'] = $message;
         }
     }
 
@@ -220,7 +224,7 @@ trait Responses
         $this->debugMode = true;
 
         $this->responseWarning('<b>DEBUG&nbsp;|&nbsp;</b> '.$notice, error: false);
-        $this->response[$this->messagesKey()][]['debug'] = $message;
+        $this->response[$this->getMessageKey()][]['debug'] = $message;
     }
 
 
@@ -280,15 +284,15 @@ trait Responses
 
     public function pushMessages(object $object): static
     {
-        $messages = $object->fetchResponse()[$this->messagesKey()] ?? [];
+        $messages = $object->fetchResponse()[$this->getMessageKey()] ?? [];
 
-        $object->removeFromResponse($this->messagesKey());
+        $object->removeFromResponse($this->getMessageKey());
 
         $this->response = array_merge($this->response, $object->fetchResponse());
 
         if ($messages) {
             foreach ($messages as $message) {
-                $this->response[$this->messagesKey()][] = $message;
+                $this->response[$this->getMessageKey()][] = $message;
             }
             if ($object->hasErrors()) {
                 $this->response['error'] = true;
@@ -328,9 +332,9 @@ trait Responses
         }
     }
 
-    private function messagesKey(): string
+    public function getMessageKey(): string
     {
-        return ($this->ajax_mode ? 'ajax_' : '').'messages';
+        return $this->messageKey;
     }
 
     public function tabRedirect(): void
@@ -373,6 +377,7 @@ trait Responses
         if ($ajax) {
             $this->ajaxMode();
         }
+
         return $this;
     }
 
