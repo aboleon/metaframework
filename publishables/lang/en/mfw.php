@@ -33,6 +33,7 @@ return [
     'confirm' => 'Confirm',
     'delete' => 'Delete',
     'close' => 'Close',
+    'loading' => 'Loading...',
     'home_page' => "Home Page",
     'bookings' => 'Booking',
     'update' => 'Update',

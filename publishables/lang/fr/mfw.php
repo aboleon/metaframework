@@ -31,6 +31,7 @@ return [
     'edit' => 'Éditer',
     'cancel' => 'Annuler',
     'confirm' => 'Confirmer',
+    'loading' => 'Chargement...',
     'delete' => 'Supprimer',
     'restore' => 'Rétablir',
     'close' => 'Fermer',
