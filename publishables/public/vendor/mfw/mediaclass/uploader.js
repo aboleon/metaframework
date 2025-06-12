@@ -286,7 +286,7 @@ const MediaclassUploader = {
 
         // Check for errors FIRST before doing anything else
         if (data.hasOwnProperty('errors') || data.hasOwnProperty('error')) {
-          const errorData = data.ajax_messages ?? data.messages;
+          const errorData = data.mfw_ajax_messages ?? data.messages;
           notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
           uploadable.find('.files .template-upload').fadeOut(function() {
