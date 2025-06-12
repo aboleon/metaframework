@@ -2,8 +2,8 @@
 
 namespace MetaFramework\Accessors;
 
-use MetaFramework\Models\Country;
 use Illuminate\Support\Str;
+use MetaFramework\Models\Country;
 
 class Countries
 {
@@ -13,8 +13,8 @@ class Countries
      */
     public static function orderedCodeNameArray(): array
     {
-        return cache()->rememberForever('countries_' . app()->getLocale(), function () {
-            return Country::query()->select('name', 'code', 'name' . (Locale::multilang() ? '->' . app()->getLocale() : '') . ' as sortable')->get()
+        return cache()->rememberForever('countries_'.app()->getLocale(), function () {
+            return Country::query()->select('name', 'code', 'name'.(Locale::multilang() ? '->'.app()->getLocale() : '').' as sortable')->get()
                 ->sortBy(fn($item) => Str::slug($item->sortable))
                 ->pluck('name', 'code')
                 ->toArray();
@@ -24,6 +24,18 @@ class Countries
     public static function getCountryNameByCode(?string $code = null): string
     {
         return self::orderedCodeNameArray()[$code] ?? 'NC';
+    }
+
+    public static function getRawCountries()
+    {
+        return cache()->rememberForever('countries_raw', function () {
+            return Country::all()->mapWithKeys(fn($country) => [$country->code => json_decode($country->getRawOriginal('name'))]);
+        });
+    }
+
+    public static function getCountryNameByCodeAndLocale(?string $code = null, ?string $locale = null): string
+    {
+        return self::getRawCountries()[$code][$locale] ?? 'NC';
     }
 
 }
