@@ -29,12 +29,17 @@ class Countries
     public static function getRawCountries()
     {
         return cache()->rememberForever('countries_raw', function () {
-            return Country::all()->mapWithKeys(fn($country) => [$country->code => json_decode($country->getRawOriginal('name'))]);
+            return Country::all()->mapWithKeys(fn($country)
+                => [
+                $country->code => json_decode($country->getRawOriginal('name'), true),
+            ]);
         });
     }
 
     public static function getCountryNameByCodeAndLocale(?string $code = null, ?string $locale = null): string
     {
+        $locale = $locale ?: config('app.locale');
+
         return self::getRawCountries()[$code][$locale] ?? 'NC';
     }
 
