@@ -1,1 +1,0 @@
-<i class="bi bi-x-circle cursor-pointer fs-5 text-danger-emphasis action-remove-pec-number"></i>

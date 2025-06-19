@@ -15,7 +15,6 @@ Route::middleware(['auth:sanctum', 'verified', 'roles:' . (new User())->adminUse
         Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
         include('users.php');
-        include('dictionnaries.php');
 
         # Dynamic modals
         Route::get('modal/{requested}', [ModalController::class, 'distribute'])->name('modal');
