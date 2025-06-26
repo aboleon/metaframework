@@ -23,10 +23,12 @@ class Input extends Component
         public bool $required = false,
         public bool $readonly = false,
         public bool $randomize = false,
+        public ?string $prefix = null
     ) {
         $this->id            = Helpers::generateInputId($this->name.($this->randomize ? '_'.Str::random(8) : ''));
         $this->validation_id = Helpers::generateValidationId($this->name);
         $this->name          = Helpers::generateInputName($this->name);
+
     }
 
     public function render(): Renderable
@@ -42,6 +44,7 @@ class Input extends Component
             'required'      => $this->required,
             'readonly'      => $this->readonly,
             'params'        => $this->params,
+            'prefix'        => $this->prefix,
         ]);
     }
 }

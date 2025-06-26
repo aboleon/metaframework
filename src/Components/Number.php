@@ -22,7 +22,8 @@ class Number extends Component
         public bool $required = false,
         public bool $readonly = false,
         public array $params = [],
-        public bool $randomize = false
+        public bool $randomize = false,
+        public string $prefix = ''
     )
     {
         $this->id = Helpers::generateInputId($this->name . ($this->randomize ? '_' . Str::random(8) : ''));
@@ -48,7 +49,8 @@ class Number extends Component
             'required' => $this->required,
             'readonly' => $this->readonly,
             'value' => $this->value,
-            'params' => $this->params
+            'params' => $this->params,
+            'prefix' => $this->prefix
         ]);
     }
 }
