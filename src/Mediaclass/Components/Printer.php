@@ -303,7 +303,7 @@ class Printer extends Component
      */
     public function render(): Renderable
     {
-        return view('mediaclass::components.printer');
+        return view('mediaclass::components.printer')->with('html', $this->html);
     }
 
     /**
