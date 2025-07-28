@@ -73,6 +73,7 @@ const MediaclassUploader = {
   unlinkable() {
     // Use event delegation to avoid re-binding issues
     $(document).off('click.unlink').on('click.unlink', '.unlink', function (e) {
+      // console.log('=== DELETE BUTTON CLICKED ===');
       e.preventDefault();
       e.stopPropagation();
 
@@ -89,11 +90,48 @@ const MediaclassUploader = {
         formData: `action=delete&id=${selector.attr('data-id')}&model=${uploadable.attr('data-model')}`
       };
 
-      // Show the confirmation modal
-      MediaclassUploader.confirmDeleteModal().modal('show');
+      // Debug: Check modal state before showing
+      const $modal = MediaclassUploader.confirmDeleteModal();
+      /*
+      console.log('Modal element exists:', $modal.length);
+      console.log('Modal HTML:', $modal.html());
+      console.log('Modal display:', $modal.css('display'));
+      console.log('Modal visibility:', $modal.css('visibility'));
+      console.log('Modal z-index:', $modal.css('z-index'));
+      console.log('Modal opacity:', $modal.css('opacity'));
+
+      // Check for any existing backdrops
+      console.log('Existing backdrops:', $('.modal-backdrop').length);
+*/
+      // Clean up any existing modal states
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open');
+
+      try {
+        // Show the confirmation modal
+        //console.log('Attempting to show modal...');
+        $modal.modal('show');
+        //console.log('Modal show command executed');
+
+        // Check modal state after show command
+        /*
+        setTimeout(() => {
+            console.log('=== AFTER SHOW (100ms) ===');
+            console.log('Modal has "show" class:', $modal.hasClass('show'));
+            console.log('Modal display:', $modal.css('display'));
+            console.log('Number of backdrops:', $('.modal-backdrop').length);
+            console.log('Body has modal-open:', $('body').hasClass('modal-open'));
+        }, 100);
+
+             */
+      } catch (error) {
+        console.error('Error showing modal:', error);
+      }
 
       // Handle confirm button click
       MediaclassUploader.confirmDeleteBtn().off('click').on('click', function () {
+        // console.log('Confirm delete clicked');
+
         // Hide the modal first
         MediaclassUploader.confirmDeleteModal().modal('hide');
 
@@ -120,39 +158,6 @@ const MediaclassUploader = {
       });
     });
   },
-
-  uploaderCall() {
-    $('span.mediaclass-uploader').off().on('click', function () {
-      const instantiator = $(this).closest('.mediaclass-uploadable');
-      const uploadContainer = MediaclassUploader.uploadableContainer($(this));
-
-      // Check if we've reached the upload limit
-      if (MediaclassUploader.isLimitReached(instantiator)) {
-        // Optional: Show a message that the limit has been reached
-        const limit = Number(instantiator.data('limit'));
-        MediaclassUploader.alerts().html(`<div class="alert alert-warning">Limite de ${limit} fichier(s) atteinte</div>`);
-        return; // Don't show the uploader
-      }
-
-      if (uploadContainer.find('.fileupload-container').length < 1) {
-        uploadContainer.html(MediaclassUploader.template().html())
-            .attr('data-description', instantiator.data('description'));
-
-        MediaclassUploader.initFileupload(uploadContainer);
-        MediaclassUploader.uploaderOptions(uploadContainer);
-      } else {
-        uploadContainer.html('');
-      }
-    });
-
-    // Immediately disable uploader buttons where limit is already reached
-    $('.mediaclass-uploadable').each(function () {
-      const $this = $(this);
-      if (MediaclassUploader.isLimitReached($this)) {
-        $this.find('span.mediaclass-uploader').addClass('disabled');
-      }
-    });
-  },// Add this to the uploaderCall() function after uploadContainer.html(...) line:
   uploaderCall() {
     $('span.mediaclass-uploader').off().on('click', function () {
       const instantiator = $(this).closest('.mediaclass-uploadable');
@@ -289,7 +294,7 @@ const MediaclassUploader = {
           const errorData = data.mfw_ajax_messages ?? data.messages;
           notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
-          uploadable.find('.files .template-upload').fadeOut(function() {
+          uploadable.find('.files .template-upload').fadeOut(function () {
             $(this).remove();
             if (uploadable.find('.files .template-upload').length === 0) {
               uploadable.find('.uploadables').addClass('d-none');
@@ -719,9 +724,44 @@ const MediaclassUploader = {
       $(this).find('.modal-body').empty();
     });
   },
+  fixModalLocation() {
+    // Find all modals that might be inside tab panes
+    const modals = ['#mediaclass-confirm-delete', '#mediaclass-crop'];
+
+    modals.forEach(modalId => {
+      const $modal = $(modalId);
+
+      if ($modal.length > 0) {
+        // Check if modal is inside a tab pane
+        const $tabPane = $modal.closest('.tab-pane');
+
+        if ($tabPane.length > 0) {
+          console.log(`Moving ${modalId} outside of tab structure`);
+
+          // Detach from current location and append to body
+          $modal.detach().appendTo('body');
+
+          // If the modal was inside a hidden tab, ensure it's properly hidden
+          $modal.removeClass('show').css({
+            'display': '',
+            'opacity': ''
+          });
+        }
+      }
+    });
+  },
 
 
   init() {
+
+    // Fix modal locations first
+    this.fixModalLocation();
+
+    // Also fix on tab changes
+    $('a[data-toggle="tab"], button[data-bs-toggle="tab"]').on('shown.bs.tab', () => {
+      this.fixModalLocation();
+    });
+
     // Initialize positions for all uploadable elements
     $('.mediaclass-uploadable').each(function () {
       MediaclassUploader.positions($(this));
