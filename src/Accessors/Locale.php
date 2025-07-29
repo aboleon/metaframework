@@ -34,9 +34,18 @@ class Locale
         return config('app.fallback_locale');
     }
 
-    public static function localesAsSelectable(): array
+    public static function localesAsSelectable(bool $useOriginal = false): array
     {
-        return collect(trans('lang'))->sortBy('code')->pluck('label', 'code')->toArray();
+        $locales = config('mfw.translatable.locales', ['fr', 'en']);
+        $allTranslations = trans('mfw-lang');
+        $labelKey = $useOriginal ? 'label_original' : 'label';
+
+        return collect($locales)
+            ->mapWithKeys(function ($locale) use ($allTranslations, $labelKey) {
+                $label = $allTranslations[$locale][$labelKey] ?? $locale;
+                return [$locale => $label];
+            })
+            ->toArray();
     }
 
     public static function alternateIsoLocales(): array

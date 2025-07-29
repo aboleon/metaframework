@@ -34,7 +34,7 @@ trait Locale
 
     public function localesAsSelectable(): array
     {
-        return collect(trans('lang'))->sortBy('code')->pluck('label', 'code')->toArray();
+        return collect(trans('mfw-lang'))->sortBy('code')->pluck('label', 'code')->toArray();
     }
 
     public function alternateIsoLocales(): array
