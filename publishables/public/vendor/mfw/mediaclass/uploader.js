@@ -294,7 +294,7 @@ const MediaclassUploader = {
           const errorData = data.mfw_ajax_messages ?? data.messages;
           notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
-          uploadable.find('.files .template-upload').fadeOut(function () {
+          uploadable.find('.files .template-upload').fadeOut(function() {
             $(this).remove();
             if (uploadable.find('.files .template-upload').length === 0) {
               uploadable.find('.uploadables').addClass('d-none');
@@ -331,17 +331,18 @@ const MediaclassUploader = {
 
           // Initialize LightGallery for this specific container
           setTimeout(() => {
-            // Destroy existing instance if any
-            const lgInstance = lightGalleryContainer.data('lightGallery');
-            if (lgInstance) {
-              lgInstance.destroy();
-            }
-
-            // Only initialize if there are image items
+            // Only initialize LightGallery if there are actual image items
             const imageItems = lightGalleryContainer.find('.lightgallery-item');
+
             if (imageItems.length > 0) {
+              // Destroy existing instance if any
+              const lgInstance = lightGalleryContainer.data('lightGallery');
+              if (lgInstance) {
+                lgInstance.destroy();
+              }
+
               lightGallery(lightGalleryContainer[0], {
-                selector: '.lightgallery-item',
+                selector: '.lightgallery-item', // This will only target images
                 speed: 500,
                 download: true,
                 counter: true,
@@ -457,29 +458,33 @@ const MediaclassUploader = {
 <div class="mediaclass unlinkable uploaded-image my-2" data-id="${uploaded.id}" id="mediaclass-${uploaded.id}">
     <span class="unlink"><i class="bi bi-x-circle-fill"></i></span>
     <div class="row m-0">
-        <div class="col-xl-3 pe-xl-4 col-12 impImg position-relative preview ${filetype}">
-            <div class="w-100 h-100" style="background-image: url(${preview}); background-size: contain;background-repeat: no-repeat;background-position: center;">
-                <div class="actions">`;
+        <div class="col-xl-3 pe-xl-4 col-12 impImg position-relative preview ${filetype}">`;
 
     if (filetype === 'image') {
-      // For images, add the lightgallery-item class and data-sub-html
+      // For images: make the entire preview area clickable with LightGallery
       html += `
-                    <a href="${fullSizeUrl}"
-                       class="lightgallery-item zoom"
-                       data-sub-html="<h4>${uploaded.original_filename}</h4><p>${uploaded.description ? (uploaded.description[document.documentElement.lang] || '') : ''}</p>">
-                        <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
-                    </a>`;
+            <a href="${fullSizeUrl}"
+               class="lightgallery-item d-block w-100 h-100"
+               data-sub-html="<h4>${uploaded.original_filename}</h4><p>${uploaded.description ? (uploaded.description[document.documentElement.lang] || '') : ''}</p>"
+               style="background-image: url(${preview}); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                <div class="actions">
+                    <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
+                </div>
+            </a>`;
     } else {
-      // For non-images, just open in new tab
+      // For non-images (PDFs, etc): make the entire preview area clickable but open in new tab
       html += `
-                    <a target="_blank" href="${link}" class="zoom">
-                        <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
-                    </a>`;
+            <a href="${link}"
+               target="_blank"
+               class="file-preview-link d-block w-100 h-100"
+               style="background-image: url(${preview}); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                <div class="actions">
+                    <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
+                </div>
+            </a>`;
     }
 
     html += `
-                </div>
-            </div>
         </div>
         <div class="col-xl-9 col-12 impFileName">
             <div class="row infos">
@@ -751,6 +756,104 @@ const MediaclassUploader = {
     });
   },
 
+  fixExistingFileLinks() {
+    // Find all non-image preview areas (files like PDFs)
+    $('.mediaclass .preview.file').each(function() {
+      const $preview = $(this);
+      const $previewDiv = $preview.find('> div').first();
+      const $existingLink = $previewDiv.find('a.zoom');
+
+      if ($existingLink.length > 0 && $previewDiv.length > 0) {
+        // Get the href from the existing link
+        const href = $existingLink.attr('href');
+
+        // Get the background image style from the div
+        const bgStyle = $previewDiv.attr('style');
+
+        // Clone the actions div to preserve it
+        const $actions = $previewDiv.find('.actions').clone();
+
+        // Create a new link that will replace the div
+        const $newLink = $('<a>')
+            .attr('href', href)
+            .attr('target', '_blank')
+            .addClass('file-preview-link d-block w-100 h-100')
+            .attr('style', bgStyle);
+
+        // Append the actions back to the new link
+        $newLink.append($actions);
+
+        // Replace the div with the new link
+        $previewDiv.replaceWith($newLink);
+      }
+    });
+
+    // Also fix image preview areas to have full clickable area
+    $('.mediaclass .preview.image').each(function() {
+      const $preview = $(this);
+      const $previewDiv = $preview.find('> div').first();
+      const $existingLink = $previewDiv.find('a.zoom');
+
+      if ($existingLink.length > 0 && $previewDiv.length > 0) {
+        // Get the href from the existing link
+        const href = $existingLink.attr('href');
+
+        // Get the background image style from the div
+        const bgStyle = $previewDiv.attr('style');
+
+        // Get the description for lightgallery
+        const $mediaElement = $preview.closest('.mediaclass');
+        const filename = $mediaElement.find('.name span:first').text();
+        const description = $mediaElement.find('textarea.description').first().val() || '';
+
+        // Clone the actions div
+        const $actions = $previewDiv.find('.actions').clone();
+
+        // Create new lightgallery link
+        const $newLink = $('<a>')
+            .attr('href', href)
+            .addClass('lightgallery-item d-block w-100 h-100')
+            .attr('data-sub-html', `<h4>${filename}</h4><p>${description}</p>`)
+            .attr('style', bgStyle);
+
+        // Append the actions
+        $newLink.append($actions);
+
+        // Replace the div with the new link
+        $previewDiv.replaceWith($newLink);
+      }
+    });
+
+    // Re-initialize LightGallery only for containers with images
+    $('.lightgallery-container').each(function() {
+      const $container = $(this);
+      const imageItems = $container.find('.lightgallery-item');
+
+      // Destroy existing instance
+      const lgInstance = $container.data('lightGallery');
+      if (lgInstance) {
+        lgInstance.destroy();
+      }
+
+      // Only init if there are image items
+      if (imageItems.length > 0) {
+        lightGallery(this, {
+          selector: '.lightgallery-item',
+          speed: 500,
+          download: true,
+          counter: true,
+          zoom: true,
+          thumbnail: imageItems.length > 1,
+          plugins: [lgZoom, lgThumbnail],
+          mobileSettings: {
+            controls: true,
+            showCloseIcon: true,
+            download: true
+          }
+        });
+      }
+    });
+  },
 
   init() {
 
@@ -761,6 +864,8 @@ const MediaclassUploader = {
     $('a[data-toggle="tab"], button[data-bs-toggle="tab"]').on('shown.bs.tab', () => {
       this.fixModalLocation();
     });
+
+    this.fixExistingFileLinks();
 
     // Initialize positions for all uploadable elements
     $('.mediaclass-uploadable').each(function () {
