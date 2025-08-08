@@ -114,7 +114,7 @@ trait TranslatableValidationTrait
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('lang.'.$locale.'.label');
+                $localeLabel = __('mwf-lang.'.$locale.'.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
@@ -168,7 +168,7 @@ trait TranslatableValidationTrait
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('lang.'.$locale.'.label');
+                $localeLabel = __('mfw-lang.'.$locale.'.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
