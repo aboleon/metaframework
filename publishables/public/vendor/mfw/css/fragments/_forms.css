@@ -93,3 +93,7 @@ legend, .legend {
         }
     }
 }
+
+.form-check-inline label {
+    white-space: nowrap;
+}
