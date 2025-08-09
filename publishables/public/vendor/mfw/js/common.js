@@ -73,17 +73,60 @@ let token = function () {
         $newMessage.css('opacity', 1); // Triggers the CSS transition
       }, currentTimer);
     },
-    ajax = function (formData, selector) {
-        let ajax_url = document.querySelector('meta[name="ajax-route"]').content ?? null,
-            ajax_url_origin,
-            formTag = selector.closest('.form');
+    ajax = function (formData, selector, options = {}) {
+        // Safely get ajax_url with multiple fallbacks
+        let ajax_url = null;
+        let ajax_url_origin = 'default';
+        let metaTag = document.querySelector('meta[name="ajax-route"]');
 
+        // Try to get URL from meta tag first
+        if (metaTag && metaTag.content) {
+            ajax_url = metaTag.content;
+            ajax_url_origin = 'meta tag';
+        }
+
+        let formTag = selector.closest('.form');
+
+        let spinner = options.spinner ?? null;
+        if (spinner) {
+            spinner = selector.find('.ajax-spinner');
+            if (!spinner.length) {
+                spinner = null;
+            }
+        }
+
+        let successHandler = options.successHandler ?? null;
+        let errorHandler = options.errorHandler ?? null;
+        let printerOptions = options.printerOptions ?? false;
+
+        // Check selector for data-ajax attribute (overrides meta tag)
         if (selector[0].hasAttribute('data-ajax')) {
             ajax_url = selector.attr('data-ajax');
             ajax_url_origin = 'selector data-ajax';
-        } else if (formTag.length) {
-            if (formTag[0].hasAttribute('data-ajax')) {
-                ajax_url = formTag.attr('data-ajax');
+        }
+        // Check parent form for data-ajax attribute
+        else if (formTag.length && formTag[0].hasAttribute('data-ajax')) {
+            ajax_url = formTag.attr('data-ajax');
+            ajax_url_origin = 'form data-ajax';
+        }
+        // Check closest container with data-ajax
+        else if (!ajax_url && selector.closest('[data-ajax]').length) {
+            ajax_url = selector.closest('[data-ajax]').data('ajax');
+            ajax_url_origin = 'parent data-ajax';
+        }
+
+        // Final fallback based on current path if still no URL
+        if (!ajax_url) {
+            let currentPath = window.location.pathname;
+            if (currentPath.includes('/panel/Seller/')) {
+                ajax_url = '/panel/Seller/ajax';
+                ajax_url_origin = 'path-based fallback (Seller)';
+            } else if (currentPath.includes('/panel/')) {
+                ajax_url = '/panel/ajax';
+                ajax_url_origin = 'path-based fallback (panel)';
+            } else {
+                ajax_url = '/ajax';
+                ajax_url_origin = 'path-based fallback (root)';
             }
         }
 
@@ -101,24 +144,51 @@ let token = function () {
         selector = (typeof selector == 'undefined' ? $(this).closest('.form') : selector);
         selector.find('.messages').length < 1 ? selector.append('<div class="messages"></div>') : '';
 
-        let messages = selector.find('.messages');
+        let messages = selector.find('.messages'), keepMessages = options.keepMessages ?? false;
+
+        if (spinner) {
+            $(spinner).show();
+        }
+
+        let messagePrinter = options.messagePrinter ?? function (status, ajax_messages, messages, keepMessages, printerOptions) {
+            return ajax_messages.length > 0 ? notificator(status, ajax_messages, messages, keepMessages, printerOptions) : null;
+        };
+
         $.ajax({
             data: formData,
             done: function () {
                 messages.html('');
             },
             success: function (result) {
-                result.hasOwnProperty('ajax_messages') ? notificator(200, result.ajax_messages, messages) : null;
-                let callback = result.hasOwnProperty('callback') ? result.callback : false;
-                dev ? console.log(result, 'Result') : null;
-                typeof window[callback] === 'function' ? window[callback](result) : null;
-                console.log(callback, typeof window[callback] === 'function');
+
+                let hasError = result.error || false;
+                let showMessages = true;
+
+                if (hasError && errorHandler) {
+                    showMessages = errorHandler(result);
+                } else if (!hasError && successHandler) {
+                    showMessages = successHandler(result);
+                }
+
+                if (showMessages && result.hasOwnProperty('mfw_ajax_messages')) {
+                    messagePrinter(200, result.mfw_ajax_messages, messages, keepMessages, printerOptions);
+                }
             },
             error: function (xhr) {
                 dev ? console.log(xhr) : null;
-                notificator(xhr.status, xhr, messages);
+                notificator(xhr.status, xhr, messages, keepMessages, printerOptions);
             },
-        }).always(function () {
+
+        }).always(function (result) {
+
+            let callback = result.hasOwnProperty('callback') ? result.callback : false;
+            dev ? console.log(result, 'Result') : null;
+            typeof window[callback] === 'function' ? window[callback](result) : null;
+            console.log(callback, typeof window[callback] === 'function');
+
+            if (spinner) {
+                $(spinner).hide();
+            }
             spinout();
         });
     },
