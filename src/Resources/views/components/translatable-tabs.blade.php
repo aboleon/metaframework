@@ -6,7 +6,13 @@
              role="tabpanel"
              aria-labelledby="{{ $id }}_btn_{{ $locale }}">
             <div class="row mb-4">
-                <x-mfw::fillable-parser :datakey="$datakey" :fillables="$fillables" :model="$model" :locale="$locale" :disabled="$disabled" :parsed="$pluck"/>
+                <x-mfw::fillable-parser :datakey="$datakey"
+                                        :fillables="$fillables"
+                                        :model="$model"
+                                        :locale="$locale"
+                                        :fallbacklocale="$fallbacklocale"
+                                        :disabled="$disabled"
+                                        :parsed="$pluck"/>
             </div>
         </div>
     @endforeach

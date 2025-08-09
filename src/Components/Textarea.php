@@ -27,6 +27,9 @@ class Textarea extends Component
         $this->id = Helpers::generateInputId($this->name. ($this->randomize ? '_'.Str::random(8):''));
         $this->validation_id = Helpers::generateValidationId($this->name);
         $this->name = Helpers::generateInputName($this->name);
+        if (array_key_exists('height', $this->params)) {
+            $this->height = $this->params['height'];
+        }
     }
 
     public function render(): Renderable

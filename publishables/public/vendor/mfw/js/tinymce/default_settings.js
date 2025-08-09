@@ -23,6 +23,23 @@ function mfw_default_tinymce_settings(targets) {
             editor.on('change', function () {
                 tinymce.triggerSave();
             });
+            editor.on('init', function() {
+                var textarea = editor.getElement();
+                var height = textarea.getAttribute('height');
+
+                if (height) {
+                    height = parseInt(height, 10);
+
+                    // Override the .tox-tinymce container min-height
+                    var toxTinymce = editor.getContainer().closest('.tox-tinymce');
+                    if (toxTinymce) {
+                        toxTinymce.style.minHeight = height + 'px';
+                        toxTinymce.style.height = height + 'px';
+                    }
+
+                }
+            });
         },
+
     };
 }

@@ -13,7 +13,8 @@ class FillableParser extends Component
         public ?string $datakey = null,
         public array $fillables = [],
         public bool $disabled = false,
-        public array $parsed = []
+        public array $parsed = [],
+        public bool $fallbacklocale = false
     )
     {
         if (!$this->parsed) {
