@@ -14,8 +14,8 @@ class Checkbox extends Component
     public bool $isSelected = false;
 
     public function __construct(
-        public int|string|null $value,
         public string $name,
+        public int|string|null $value = 1,
         public mixed $affected = null,
         public string|null $label = '',
         public string $class = '',
