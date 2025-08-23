@@ -1,4 +1,4 @@
-<div class="my-3 p-0">
+<div class="{{ $class }}">
     @if ($label)
         <label class="form-label d-block">{{ $label }}</label>
     @endif
