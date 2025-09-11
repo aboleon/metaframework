@@ -32,7 +32,13 @@ class Uploadable extends Component
         public array $settings = [],
         public string $icon = 'bi bi-card-image',
         public string $nomedia = '',
-        public bool $ghost = false
+        public bool $ghost = false,
+        /**
+         * @var string|null
+         * JavaScript callback function name to call after successful upload
+         * The function will receive the upload response data as parameter
+         */
+        public ?string $callback = null
     )
     {
         $this->group = $this->settings['group'] ?? $this->group;
@@ -80,9 +86,9 @@ class Uploadable extends Component
 
         // Build display label with dimensions
         $this->displayLabel = $this->label;
-       /* if ($this->requiredWidth && $this->requiredHeight) {
-            $this->displayLabel .= ' <span class="dimensions-info" style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">(' . $this->requiredWidth . ' × ' . $this->requiredHeight . ' px)</span>';
-        }*/
+        /* if ($this->requiredWidth && $this->requiredHeight) {
+             $this->displayLabel .= ' <span class="dimensions-info" style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">(' . $this->requiredWidth . ' × ' . $this->requiredHeight . ' px)</span>';
+         }*/
         if (is_array($this->cropable)) {
             $this->cropable = json_encode($this->cropable);
         }

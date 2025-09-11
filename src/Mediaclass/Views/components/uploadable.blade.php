@@ -12,6 +12,9 @@
      data-has-description="{{ $description }}"
      data-cropable="{{ $cropable }}"
      data-ghost="{{ $ghost ? '1' : '0' }}"
+     @if($callback)
+         data-callback="{{ $callback }}"
+     @endif
      @if($requiredWidth && $requiredHeight)
          data-required-width="{{ $requiredWidth }}"
      data-required-height="{{ $requiredHeight }}"
