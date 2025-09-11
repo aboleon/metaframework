@@ -220,7 +220,7 @@ let token = function () {
                         console.log(logKey + ':', result[logKey]);
                         result[logKey].forEach(function(logEntry) {
                             Object.keys(logEntry).forEach(function(logType) {
-                                console.log('[' + logType.toUpperCase() + ']', logEntry[logType]);
+                                console.log('MFW LOG [' + logType.toUpperCase() + ']', logEntry[logType]);
                             });
                         });
                     }
