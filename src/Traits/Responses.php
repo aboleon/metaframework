@@ -21,7 +21,7 @@ trait Responses
     protected bool $restrictedToDev = false;
     protected bool $as_exception = false;
     protected string $messageKey = 'messages';
-    private bool $consoleLog = false;
+    protected bool $consoleLog = false;
 
     public function reset()
     {
@@ -102,17 +102,13 @@ trait Responses
             unset($this->response['error']);
         }
 
-        if ($this->consoleLog) {
-            $this->response[$this->getMessageKey().'_log'] = $this->response[$this->getMessageKey()];
-            unset($this->response[$this->getMessageKey()]);
-        }
-
         return $this->response;
     }
 
     public function consoleLog(): self
     {
         $this->consoleLog = true;
+        $this->messageKey = $this->getMessageKey().'_log';
         return $this;
     }
 
@@ -382,6 +378,11 @@ trait Responses
     public function isAjaxMode(): bool
     {
         return $this->ajax_mode;
+    }
+
+    public function isInConsoleMode(): bool
+    {
+        return $this->consoleLog;
     }
 
     public function shouldBeAjax(bool $ajax): static
