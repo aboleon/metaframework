@@ -1,13 +1,25 @@
 $.fn.hasParent = function (e) {
     return !!$(this).parents(e).length;
 };
+
+function sendMailFromModalResponse(result) {
+    let myModal = $('#' + result.input.modal_id);
+    removeVeil();
+    myModal.on('hidden.bs.modal', function () {
+        $(this).find('.messages').remove();
+    });
+    setTimeout(function () {
+        myModal.find('.btn-close').trigger('click');
+    }, 4000);
+}
+
 let token = function () {
         return $('meta[name="csrf-token"]').attr('content');
     },
     dev = true,
     spinner = '<i class="core spinner fa fa-cog fa-spin fa-fw"></i>',
     timerDefault = function () {
-        return 500;
+        return 200;
     },
     setDelay = (function () {
         let timer = 0;
@@ -28,64 +40,114 @@ let token = function () {
         return messages.find(' > div').length;
     },
     notificator = function (status, data, messages, keepMessages, printerOptions) {
-      const isDismissable = printerOptions.isDismissable ?? true;
-      const $data = $(data);
+        const isDismissable = printerOptions.isDismissable ?? true;
+        const $data = $(data);
 
-      if (!keepMessages) {
-        messages.empty(); // Clear all previous messages
-      }
-
-      switch (status) {
-        case 422: // Laravel JSON Validator Messages
-          if (data.responseJSON?.errors) {
-            $.each(data.responseJSON.errors, function (key, errorMessages) {
-              alertDispatcher(errorMessages[0], messages, 'danger', isDismissable);
-            });
-          }
-          break;
-
-        default:
-          if (!$data.length) return false; // Exit if no data
-
-          // Append and process each message sequentially
-          $data.each(function (index, message) {
-            $.each(message, function (key, value) {
-              alertDispatcher(value, messages, key, isDismissable);
-            });
-          });
-      }
-
-      dismissable(); // Reapply dismissible behavior
-    },
-    alertDispatcher = function (message, messages, messageType, isDismissable) {
-      const alertHtml = isDismissable
-          ? '<div style="opacity: 0; transition: opacity 0.5s;" class="alert alert-dismissible alert-' + messageType + '">' +
-          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-          message + '</div>'
-          : '<div style="opacity: 0; transition: opacity 0.5s;" class="alert alert-' + messageType + '">' + message + '</div>';
-
-      // Append the message to the container
-      const $newMessage = $(alertHtml).appendTo(messages);
-
-      // Use a timeout to apply fade-in effect via CSS transition
-      const currentTimer = timerDefault() * (notificationQueue(messages));
-      setTimeout(() => {
-        $newMessage.css('opacity', 1); // Triggers the CSS transition
-      }, currentTimer);
-    },
-    ajax = function (formData, selector, options = {}) {
-        // Safely get ajax_url with multiple fallbacks
-        let ajax_url = null;
-        let ajax_url_origin = 'default';
-        let metaTag = document.querySelector('meta[name="ajax-route"]');
-
-        // Try to get URL from meta tag first
-        if (metaTag && metaTag.content) {
-            ajax_url = metaTag.content;
-            ajax_url_origin = 'meta tag';
+        if (!keepMessages) {
+            messages.empty(); // Clear all previous messages
         }
 
-        let formTag = selector.closest('.form');
+        switch (status) {
+            case 422: // Laravel JSON Validator Messages
+                if (data.responseJSON?.errors) {
+                    $.each(data.responseJSON.errors, function (key, errorMessages) {
+                        alertDispatcher(errorMessages[0], messages, 'danger', isDismissable);
+                    });
+                }
+                break;
+
+            default:
+                if (!$data.length) return false; // Exit if no data
+
+                // Append and process each message sequentially
+                $data.each(function (index, message) {
+                    $.each(message, function (key, value) {
+                        alertDispatcher(value, messages, key, isDismissable);
+                    });
+                });
+        }
+
+        dismissable(); // Reapply dismissible behavior
+    },
+    alertDispatcher = function (message, messages, messageType, isDismissable) {
+        const alertHtml = isDismissable
+            ? '<div style="opacity: 0; transition: opacity 0.5s;" class="alert alert-dismissible alert-' + messageType + '">' +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            message + '</div>'
+            : '<div style="opacity: 0; transition: opacity 0.5s;" class="alert alert-' + messageType + '">' + message + '</div>';
+
+        // Append the message to the container
+        const $newMessage = $(alertHtml).appendTo(messages);
+
+        // Use a timeout to apply fade-in effect via CSS transition
+        const currentTimer = timerDefault() * (notificationQueue(messages));
+        setTimeout(() => {
+            $newMessage.css('opacity', 1); // Triggers the CSS transition
+        }, currentTimer);
+    },
+    serializedToObject = function (serializedData) {
+        let obj = {};
+        let pairs = serializedData.split('&');
+
+        pairs.forEach(function (pair) {
+            pair = pair.split('=');
+            obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        });
+
+        return obj;
+    },
+    setVeil = function (c) {
+        c.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/front/images/loading.svg" width="40" alt="..."></div>');
+    },
+    removeVeil = function () {
+        $('.veil').remove();
+    },
+    /**
+     * Convert serialized array to object.
+     * Usage:
+     * let formDataObject = serializedArrayToObject(   $('form').serializeArray()   );
+     */
+    serializedArrayToObject = function (formDataArray) {
+        let formDataObject = {};
+
+        $.each(formDataArray, function (i, field) {
+            // Remove trailing "[]" from the field name
+            let fieldName = field.name.replace(/\[\]$/, '');
+
+            if (formDataObject[fieldName]) {
+                // If the property already exists as an array, push the new value to it
+                if ($.isArray(formDataObject[fieldName])) {
+                    formDataObject[fieldName].push(field.value);
+                }
+                // If the property exists but is not an array, create an array with both old and new values
+                else {
+                    formDataObject[fieldName] = [formDataObject[fieldName], field.value];
+                }
+            } else {
+                formDataObject[fieldName] = field.value;
+            }
+        });
+
+        return formDataObject;
+    },
+    activateEventManagerLeftMenuItem = function (itemName) {
+        const jMenu = $('#sidebar-menu');
+        const jItem = jMenu.find('.item-' + itemName);
+        if (jItem.length) {
+            jMenu.find('.current-page').removeClass('current-page');
+            jItem.addClass('current-page');
+            jItem.closest('.child_menu').show();
+        } else {
+            const jStandalone = jMenu.find('.standalone-' + itemName);
+            if (jStandalone.length) {
+                jStandalone.addClass('current-page');
+            }
+        }
+    },
+    ajax = function (formData, selector, options = {}) {
+        let ajax_url = document.querySelector('meta[name="ajax-route"]').content ?? null,
+            ajax_url_origin,
+            formTag = selector.closest('.form');
 
         let spinner = options.spinner ?? null;
         if (spinner) {
@@ -99,34 +161,12 @@ let token = function () {
         let errorHandler = options.errorHandler ?? null;
         let printerOptions = options.printerOptions ?? false;
 
-        // Check selector for data-ajax attribute (overrides meta tag)
         if (selector[0].hasAttribute('data-ajax')) {
             ajax_url = selector.attr('data-ajax');
             ajax_url_origin = 'selector data-ajax';
-        }
-        // Check parent form for data-ajax attribute
-        else if (formTag.length && formTag[0].hasAttribute('data-ajax')) {
-            ajax_url = formTag.attr('data-ajax');
-            ajax_url_origin = 'form data-ajax';
-        }
-        // Check closest container with data-ajax
-        else if (!ajax_url && selector.closest('[data-ajax]').length) {
-            ajax_url = selector.closest('[data-ajax]').data('ajax');
-            ajax_url_origin = 'parent data-ajax';
-        }
-
-        // Final fallback based on current path if still no URL
-        if (!ajax_url) {
-            let currentPath = window.location.pathname;
-            if (currentPath.includes('/panel/Seller/')) {
-                ajax_url = '/panel/Seller/ajax';
-                ajax_url_origin = 'path-based fallback (Seller)';
-            } else if (currentPath.includes('/panel/')) {
-                ajax_url = '/panel/ajax';
-                ajax_url_origin = 'path-based fallback (panel)';
-            } else {
-                ajax_url = '/ajax';
-                ajax_url_origin = 'path-based fallback (root)';
+        } else if (formTag.length) {
+            if (formTag[0].hasAttribute('data-ajax')) {
+                ajax_url = formTag.attr('data-ajax');
             }
         }
 
@@ -173,6 +213,18 @@ let token = function () {
                 if (showMessages && result.hasOwnProperty('mfw_ajax_messages')) {
                     messagePrinter(200, result.mfw_ajax_messages, messages, keepMessages, printerOptions);
                 }
+
+                // Handle console logging for messages_log
+                ['mfw_ajax_messages_log', 'mfw_messages_log'].forEach(function(logKey) {
+                    if (result.hasOwnProperty(logKey)) {
+                        console.log(logKey + ':', result[logKey]);
+                        result[logKey].forEach(function(logEntry) {
+                            Object.keys(logEntry).forEach(function(logType) {
+                                console.log('[' + logType.toUpperCase() + ']', logEntry[logType]);
+                            });
+                        });
+                    }
+                });
             },
             error: function (xhr) {
                 dev ? console.log(xhr) : null;
@@ -195,20 +247,7 @@ let token = function () {
     slugify = function (text) {
         return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\u0100-\uFFFF\w\-]/g, '-').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
     },
-    guid = function (keylength = 9) {
-        let str = '';
-        while (str.length < keylength) {
-            str += Math.random().toString(36).substr(2);
-        }
-        return str.substr(0, keylength);
-    },
-    generateUUID = function () {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0,
-                v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    },
+    guid = (keyLength = 9) => Math.random().toString(36).slice(2, 2 + keyLength),
     access_key = function (iteration = 10, keylength = 16) {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
@@ -233,6 +272,9 @@ let token = function () {
             $(this).parent().remove();
         });
     },
+    removeTabCookieRedirect = function (id) {
+        Cookies.set('mfw_tab_redirect_' + id, '', {expires: 0});
+    },
     currentDate = function () {
         var today = new Date(),
             dd = today.getDate(),
@@ -245,6 +287,16 @@ let token = function () {
             mm = '0' + mm;
         }
         return dd + '/' + mm + '/' + yyyy;
+    },
+    formatDate = function (dateString) {
+        var dateObj = new Date(dateString);
+        var day = dateObj.getDate();
+        var month = dateObj.getMonth() + 1;
+        var year = dateObj.getFullYear();
+        day = day < 10 ? '0' + day : day;
+        month = month < 10 ? '0' + month : month;
+        year = year.toString();
+        return day + '/' + month + '/' + year;
     },
     // Téléchargement des images : annuler
     cancel = function () {
@@ -288,12 +340,42 @@ let token = function () {
             resetIteration(container);
         });
     },
-    setVeil = function (c) {
-        c.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/assets/system/loading.svg" width="40" alt="..."></div>');
-    },
-    removeVeil = function () {
-        $('.veil').remove();
+    produceNumberFromInput = function (input) {
+        if (typeof input == 'string') {
+            input = input.replace(/\s+/g, '');
+        }
+        let value = Number(input);
+        return isNaN(value) ? 0 : value;
     };
+
+if ('undefined' === typeof window.redrawDataTable) {
+    window.redrawDataTable = function () {
+        if ($.fn.DataTable) {
+            $('.dt').DataTable().ajax.reload();
+        }
+    };
+}
+
+if ('undefined' === typeof window.debounce) {
+    window.debounce = function (fn, delay = 150) {
+        let timeoutID;
+        return function (...args) {
+            const context = this;
+            if (timeoutID) {
+                clearTimeout(timeoutID);
+            }
+            timeoutID = setTimeout(() => {
+                fn.apply(context, args);
+            }, delay);
+        };
+    };
+}
+
+// Usage with your search event
+$('#input-search-event').on('keyup', debounce(function () {
+    let value = $(this).val().toLowerCase();
+    console.log('typed value', value);
+}));
 
 const wa_geo_control = {
     reset: function (el) {
@@ -308,11 +390,39 @@ $(function () {
         $(this).parent().find('.toggable').slideToggle();
         $(this).find('i').toggleClass('fa-chevron-up');
     });
+
 });
 
+// Get the hash value from the URL
+const tab_hash = window.location.hash;
 
+// If there's a hash value, activate the corresponding tab
+if (tab_hash) {
+    let targetTab = $('#nav-tab button[data-bs-target="' + tab_hash + '"]').first();
+    if (targetTab.length) {
+        targetTab.click();
+    }
+}
+// Mass checkable
+$('.meta-checkable :checkbox').click(function () {
+    let li = $(this).closest('li');
+    if (!li.hasClass('child')) {
+        li.closest('ul').find('li[data-parent=' + li.data('id') + ']').find(':checkbox').prop('checked', $(this).is(':checked'));
+    }
+});
 setTimeout(function () {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    let tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-}, 500);
+}, 1500);
+
+
+// When modal is shown, manage topbar z-index
+document.body.addEventListener('shown.bs.modal', function () {
+    $('#topbar').removeClass('sticky-top');
+});
+
+// When modal is hidden
+document.body.addEventListener('hidden.bs.modal', function () {
+    $('#topbar').addClass('sticky-top');
+});
