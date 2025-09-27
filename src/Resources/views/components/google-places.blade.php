@@ -22,7 +22,7 @@
         <x-mfw::validation-error field="{{ $field }}[text_address]"/>
     </div>
 
-    <div class="mb-3 row {{ $field }}_fields">
+    <div class="my-3 row {{ $field }}_fields">
         <div class="mb-3 col-sm-4 {{ $inputable('street_number') }}">
             <x-mfw::input class="field street_number{{ $tagRequired('street_number') . $readonlies('street_number') }}"
                           :label="trans('mfw.geo.street_number')"
