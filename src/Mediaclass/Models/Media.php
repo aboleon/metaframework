@@ -29,6 +29,7 @@ class Media extends Model
     protected $casts
         = [
             'description' => 'array',
+            'storable' => 'array',
         ];
 
     public function model(): MorphTo

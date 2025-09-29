@@ -30,6 +30,7 @@ class Uploadable extends Component
          */
         public ?string $maxfilesize = null,
         public array $settings = [],
+        public array $storables = [],
         public string $icon = 'bi bi-card-image',
         public string $nomedia = '',
         public bool $ghost = false,

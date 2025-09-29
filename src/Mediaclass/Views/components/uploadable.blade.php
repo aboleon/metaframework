@@ -20,12 +20,19 @@
      data-required-height="{{ $requiredHeight }}"
         @endif
 >
+
+
+    @foreach((array)$storables as $key => $value)
+        <input type="hidden" name="mediaclass_storable[{{ $key }}]" value="{{ $value }}"/>
+    @endforeach
+
     <div class="controls d-flex justify-content-between align-items-center" style="background: #EFEFEF">
         <span class="subcontrol mediaclass-uploader">
             <i class="{{ $icon }}"></i> {!! $displayLabel !!}
         </span>
         @if($requiredWidth && $requiredHeight)
-            <span class="subcontrol dimensions-badge me-3" style="font-size: 16px; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">
+            <span class="subcontrol dimensions-badge me-3"
+                  style="font-size: 16px; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px;">
             {{ $requiredWidth }}px × {{ $requiredHeight }}px
         </span>
         @endif
@@ -39,7 +46,8 @@
                               :group="$group"
                               :subgroup="$settings['subgroup'] ?? null "
                               :description="$description"
-                              :ghost="$ghost"/>
+                              :ghost="$ghost"
+                              :storables="$storables"/>
     </div>
 </div>
 
@@ -92,6 +100,8 @@
     @if ($model instanceof \MetaFramework\Mediaclass\Interfaces\MediaclassInterface && !isset($model->id) && !$ghost)
         <input type="hidden" name="mediaclass_temp_id" value="{{ Str::random(32) }}">
     @endif
+
+
     @include('mediaclass::fileupload_scripts')
     <x-mediaclass::template/>
     <x-mediaclass::crop-template/>

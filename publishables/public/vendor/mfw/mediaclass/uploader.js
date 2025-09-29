@@ -280,7 +280,7 @@ const MediaclassUploader = {
                     const errorData = data.mfw_ajax_messages ?? data.messages;
                     notificator(200, errorData, MediaclassUploader.messages(), false, {isDismissable: true});
 
-                    uploadable.find('.files .template-upload').fadeOut(function() {
+                    uploadable.find('.files .template-upload').fadeOut(function () {
                         $(this).remove();
                         if (uploadable.find('.files .template-upload').length === 0) {
                             uploadable.find('.uploadables').addClass('d-none');
@@ -424,8 +424,18 @@ const MediaclassUploader = {
                 {name: 'mediaclass_temp_id', value: $('input[name="mediaclass_temp_id"]').first().val() ?? ''},
                 {name: 'count_files', value: validFiles},
                 {name: 'ghost', value: uploadable.data('ghost') || '0'},
-                {name: 'cropable', value: cropableData || ''}
+                {name: 'cropable', value: cropableData || ''},
             ];
+
+            uploadable
+                .find(':input[name^="mediaclass_storable"]')
+                .serializeArray()
+                .forEach((field) => {
+                    data.formData.push({
+                        name: field.name.replace(/^mediaclass_storable/, 'storables'),
+                        value: (field.value ?? '').trim(),
+                    });
+                });
 
             // Add form fields
             data.context.find('textarea, input').each(function () {
@@ -746,7 +756,7 @@ const MediaclassUploader = {
 
     fixExistingFileLinks() {
         // Find all non-image preview areas (files like PDFs)
-        $('.mediaclass .preview.file').each(function() {
+        $('.mediaclass .preview.file').each(function () {
             const $preview = $(this);
             const $previewDiv = $preview.find('> div').first();
             const $existingLink = $previewDiv.find('a.zoom');
@@ -777,7 +787,7 @@ const MediaclassUploader = {
         });
 
         // Also fix image preview areas to have full clickable area
-        $('.mediaclass .preview.image').each(function() {
+        $('.mediaclass .preview.image').each(function () {
             const $preview = $(this);
             const $previewDiv = $preview.find('> div').first();
             const $existingLink = $previewDiv.find('a.zoom');
@@ -813,7 +823,7 @@ const MediaclassUploader = {
         });
 
         // Re-initialize LightGallery only for containers with images
-        $('.lightgallery-container').each(function() {
+        $('.lightgallery-container').each(function () {
             const $container = $(this);
             const imageItems = $container.find('.lightgallery-item');
 

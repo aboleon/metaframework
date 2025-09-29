@@ -22,12 +22,14 @@ class Stored extends Component
         public ?string $subgroup = null,
         public bool       $positions = false,
         public int|bool   $description = true,
-        public array|string|null $cropable = null, // Changed to accept array
+        public array|string|null $cropable = null,
         public string $nomedia = '',
-        public bool $ghost = false
+        public bool $ghost = false,
+        public array $storables = []
     )
     {
         $this->description = $this->description ? 1 : 0;
+        $this->storables = $this->sanitizeStorables($this->storables);
 
         if ($this->ghost) {
             // For ghost models, don't query the relationship
@@ -56,6 +58,12 @@ class Stored extends Component
             if ($this->subgroup) {
                 $this->medias = $this->medias->where('subgroup', $this->subgroup);
             }
+        }
+
+        if ($this->storables !== []) {
+            $this->medias = $this->medias
+                ->filter(fn(Media $media) => $this->mediaMatchesStorables($media))
+                ->values();
         }
 
         $this->nomedia = $this->nomedia ?: __('mediaclass.no_media');
@@ -103,5 +111,44 @@ class Stored extends Component
     public function getPositionning(): array
     {
         return $this->positionning;
+    }
+
+    private function sanitizeStorables(array $storables): array
+    {
+        return collect($storables)
+            ->map(static function ($value) {
+                if (is_string($value)) {
+                    $trimmed = trim($value);
+
+                    return $trimmed === '' ? null : $trimmed;
+                }
+
+                return $value;
+            })
+            ->filter(static fn($value) => $value !== null && $value !== '')
+            ->all();
+    }
+
+    private function mediaMatchesStorables(Media $media): bool
+    {
+        if ($this->storables === []) {
+            return true;
+        }
+
+        $mediaStorables = (array)($media->storable ?? []);
+
+        foreach ($this->storables as $key => $expected) {
+            $mediaValue = $mediaStorables[$key] ?? null;
+
+            if (is_string($mediaValue)) {
+                $mediaValue = trim($mediaValue);
+            }
+
+            if ($mediaValue != $expected) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
