@@ -56,11 +56,5 @@ class RouteServiceProvider extends ServiceProvider
                 include __DIR__ . '/Routes/web.php';
             });
 
-        Route::prefix('mediaclass')
-            ->name('mediaclass.')
-            ->group(function () {
-                include __DIR__ . '/Mediaclass/Routes/public.php';
-                include __DIR__ . '/Mediaclass/Routes/panel.php';
-            });
     }
 }

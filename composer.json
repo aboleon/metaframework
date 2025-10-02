@@ -15,7 +15,8 @@
     "css-crush/css-crush": "^4.1",
     "intervention/image": "^3.11",
     "symfony/mime": "^7.2",
-    "aboleon/metaframework-support": "^0.1"
+    "aboleon/metaframework-support": "^0.1",
+    "aboleon/metaframework-mediaclass": "^0.1"
   },
   "require-dev": {
     "orchestra/testbench": "^9.9",
@@ -27,8 +28,7 @@
       "MetaFramework\\": "src/"
     },
     "files": [
-      "src/Functions/loader.php",
-      "src/Mediaclass/functions.php"
+      "src/Functions/loader.php"
     ]
   },
   "autoload-dev": {
@@ -43,8 +43,7 @@
       ],
       "aliases": {
         "Meta": "MetaFramework\\Facades\\MetaFacade",
-        "Nav": "MetaFramework\\Facades\\NavFacade",
-        "Mediaclass": "MetaFramework\\Mediaclass\\Facades\\MediaclassFacade"
+        "Nav": "MetaFramework\\Facades\\NavFacade"
       }
     }
   },
@@ -62,6 +61,10 @@
     {
       "type": "path",
       "url": "../metaframework-support"
+    },
+    {
+      "type": "path",
+      "url": "../metaframework-mediaclass"
     }
   ]
 }
