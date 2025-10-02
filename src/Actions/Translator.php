@@ -7,8 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use MetaFramework\Accessors\Locale;
 use MetaFramework\Polyglote\Traits\Translation;
-use MetaFramework\Support\Traits\{
-    Responses};
+use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
 class Translator
