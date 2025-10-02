@@ -3,7 +3,7 @@
 namespace MetaFramework\Actions;
 
 
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 

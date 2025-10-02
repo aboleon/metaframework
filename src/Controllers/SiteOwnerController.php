@@ -10,7 +10,7 @@ use Illuminate\Http\{
 };
 use MetaFramework\Models\SiteOwner;
 use MetaFramework\Services\Validation\ValidationTrait;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
 class SiteOwnerController extends Controller

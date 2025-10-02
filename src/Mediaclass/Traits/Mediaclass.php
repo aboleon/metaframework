@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use MetaFramework\Accessors\Locale;
 use MetaFramework\Mediaclass\Models\Media;
 use MetaFramework\Mediaclass\Path;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use ReflectionClass;
 use Throwable;
 

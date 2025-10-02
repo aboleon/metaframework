@@ -4,7 +4,7 @@ namespace MetaFramework\Controllers;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use MetaFramework\Models\Vat;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use MetaFramework\Services\Validation\ValidationTrait;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;

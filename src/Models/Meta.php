@@ -14,11 +14,11 @@ use MetaFramework\Accessors\Locale;
 use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 use MetaFramework\Mediaclass\Traits\Mediaclass;
 use MetaFramework\Polyglote\Traits\Translation;
+use MetaFramework\Support\Traits\Responses;
 use MetaFramework\Traits\{
     AccessKey,
     MetaParams,
     OnlineStatus,
-    Responses,
     TreeBuilder};
 
 /**

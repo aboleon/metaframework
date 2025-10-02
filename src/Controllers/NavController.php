@@ -8,7 +8,7 @@ use MetaFramework\Accessors\Locale;
 use MetaFramework\Models\Nav;
 use MetaFramework\Printers\Nav\Table;
 use MetaFramework\Services\Validation\ValidationTrait;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
 class NavController extends Controller

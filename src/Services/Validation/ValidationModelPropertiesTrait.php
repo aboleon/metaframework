@@ -4,7 +4,7 @@ namespace MetaFramework\Services\Validation;
 
 use Exception;
 use Illuminate\Support\Facades\Log;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 
 trait ValidationModelPropertiesTrait
 {

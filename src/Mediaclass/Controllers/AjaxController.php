@@ -5,7 +5,7 @@ namespace MetaFramework\Mediaclass\Controllers;
 
 use MetaFramework\Accessors\Users;
 use MetaFramework\Controllers\Controller;
-use MetaFramework\Traits\Ajax;
+use MetaFramework\Support\Traits\Ajax;
 
 class AjaxController extends Controller
 {

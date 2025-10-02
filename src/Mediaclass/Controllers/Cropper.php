@@ -9,8 +9,8 @@ use MetaFramework\Mediaclass\Config;
 use MetaFramework\Mediaclass\Cropable;
 use MetaFramework\Mediaclass\Models\Media;
 use MetaFramework\Mediaclass\Path;
-use MetaFramework\Traits\Ajax;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Ajax;
+use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
 class Cropper

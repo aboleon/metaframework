@@ -3,7 +3,7 @@
 namespace MetaFramework\Services\Validation;
 
 use Illuminate\Foundation\Http\FormRequest;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 
 trait ValidationTrait
 {

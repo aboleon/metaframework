@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
 use MetaFramework\Accessors\Routing;
 use MetaFramework\Models\Setting;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 
 class SettingsController extends Controller
 {

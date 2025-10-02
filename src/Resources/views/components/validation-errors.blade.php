@@ -1,5 +1,5 @@
 @if ($errors->isNotEmpty())
     <div class="messages">
-        {!! \MetaFramework\Support\ResponseMessages::validationErrors($errors) !!}
+        {!! \MetaFramework\Support\Responses\ResponseMessages::validationErrors($errors) !!}
     </div>
 @endif

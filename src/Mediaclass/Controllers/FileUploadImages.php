@@ -15,7 +15,7 @@ use MetaFramework\Mediaclass\Cropable;
 use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 use MetaFramework\Mediaclass\Models\Media;
 use MetaFramework\Mediaclass\Path;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 use ReflectionClass;
 use Throwable;
 

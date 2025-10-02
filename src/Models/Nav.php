@@ -9,7 +9,7 @@ use MetaFramework\Accessors\Locale;
 use MetaFramework\Accessors\Routing;
 use MetaFramework\Actions\Translator;
 use MetaFramework\Polyglote\Traits\Translation;
-use MetaFramework\Traits\Responses;
+use MetaFramework\Support\Traits\Responses;
 
 class Nav extends Model
 {
