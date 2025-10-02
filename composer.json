@@ -14,7 +14,8 @@
     "php": "^8.3",
     "css-crush/css-crush": "^4.1",
     "intervention/image": "^3.11",
-    "symfony/mime": "^7.2"
+    "symfony/mime": "^7.2",
+    "aboleon/metaframework-support": "^0.1"
   },
   "require-dev": {
     "orchestra/testbench": "^9.9",
@@ -60,7 +61,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../package-meta-framework"
+      "url": "../metaframework-support"
     }
   ]
 }
