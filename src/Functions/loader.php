@@ -1,4 +1,5 @@
 <?php
 
-require "responses.php";
-require "functions.php";
+declare(strict_types=1);
+
+// Legacy loader retained for backwards compatibility.
