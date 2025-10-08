@@ -4,6 +4,7 @@ namespace MetaFramework\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class Install extends Command
 {
@@ -80,6 +81,7 @@ return [
         $this->replaceInFile("view('dashboard", "view('".$panel_prefix.'/dashboard', $routeFilePath);
 
         $this->callPublishConfiguration();
+        $this->setupUserFactoryAndSeeder();
     }
 
     private function auth()
@@ -204,5 +206,116 @@ return [
             '--provider' => 'MetaFramework\ServiceProvider',
             '--tag'      => 'mfw-auth',
         ]);
+    }
+
+    private function setupUserFactoryAndSeeder(): void
+    {
+        $this->newLine();
+        $this->comment('Configuring default admin user and authentication scaffolding...');
+        $this->comment('------------------------------------------');
+
+        $this->publishUserFactoryStub();
+
+        if (! $this->confirm('Would you like to configure a default admin user now?', true)) {
+            $this->info('User factory has been updated. You can create your admin seeder later using: php artisan make:seeder AdminUserSeeder');
+            return;
+        }
+
+        $firstName = $this->ask('Admin first name');
+        $lastName  = $this->ask('Admin last name');
+        $email     = $this->ask('Admin email address', 'admin@example.com');
+
+        if (! $firstName || ! $lastName || ! $email) {
+            $this->error('First name, last name and email are required to create the admin user.');
+            return;
+        }
+
+        $password = $this->secret('Admin password (leave blank to auto-generate)');
+        if (! $password) {
+            $password = Str::password(12);
+            $this->info('');
+            $this->info('Generated password: ' . $password);
+        }
+
+        $this->publishAdminSeederStub($firstName, $lastName, $email, $password);
+        $this->ensureDatabaseSeederCallsAdminSeeder();
+
+        $this->newLine();
+        $this->info('User factory and admin seeder have been configured.');
+        $this->info('Remember to run: php artisan migrate --seed');
+    }
+
+    private function publishUserFactoryStub(): void
+    {
+        $stubPath = __DIR__ . '/../../publishables/stubs/database/factories/UserFactory.stub';
+        if (! File::exists($stubPath)) {
+            $this->error('User factory stub not found.');
+            return;
+        }
+
+        $targetPath = database_path('factories/UserFactory.php');
+        $directory = dirname($targetPath);
+        if (! File::isDirectory($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
+
+        File::put($targetPath, File::get($stubPath));
+    }
+
+    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password): void
+    {
+        $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
+        if (! File::exists($stubPath)) {
+            $this->error('Admin user seeder stub not found.');
+            return;
+        }
+
+        $replacements = [
+            '{{ first_name }}' => addslashes($firstName),
+            '{{ last_name }}' => addslashes($lastName),
+            '{{ email }}' => addslashes($email),
+            '{{ password }}' => addslashes($password),
+        ];
+
+        $content = str_replace(array_keys($replacements), array_values($replacements), File::get($stubPath));
+
+        $targetPath = database_path('seeders/AdminUserSeeder.php');
+        $directory = dirname($targetPath);
+        if (! File::isDirectory($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
+
+        File::put($targetPath, $content);
+    }
+
+    private function ensureDatabaseSeederCallsAdminSeeder(): void
+    {
+        $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
+        if (! File::exists($databaseSeederPath)) {
+            $this->warn('DatabaseSeeder.php was not found; skipping automatic wiring of the admin seeder.');
+            return;
+        }
+
+        $content = File::get($databaseSeederPath);
+
+        if (str_contains($content, 'AdminUserSeeder::class')) {
+            File::put($databaseSeederPath, $content);
+            return;
+        }
+
+        $content = preg_replace('/\s*User::factory\(\)->create\(\[[\s\S]*?\]\);\s*/m', PHP_EOL, $content);
+
+        if (! str_contains($content, 'User::')) {
+            $content = str_replace('use App\\Models\\User;' . PHP_EOL, '', $content);
+        }
+
+        $pattern = '/public function run\(\): void\s*\{\s*/';
+        if (preg_match($pattern, $content)) {
+            $content = preg_replace($pattern, "$0        \$this->call(AdminUserSeeder::class);\n\n", $content, 1);
+        } else {
+            $this->warn('Unable to automatically update DatabaseSeeder.php; please ensure AdminUserSeeder::class is called manually.');
+        }
+
+        File::put($databaseSeederPath, $content);
     }
 }
