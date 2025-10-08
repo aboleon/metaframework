@@ -60,62 +60,44 @@ The installer will perform the following actions:
      ];
      ```
 
-3. **Update `RouteServiceProvider.php`**:
-   - The `RouteServiceProvider.php` file will be updated to use the provided back-office route prefix.
+3. **Update Routes**:
+   - The dashboard route will be updated to use the provided back-office route prefix.
 
 ---
 
 ### 4. **Publish Configuration Files**
 
-The installer will automatically publish the necessary configuration files using the following command:
+The installer will automatically publish the necessary configuration files using:
 ```bash
-php artisan vendor:publish --provider="MetaFramework\MetaFrameworkServiceProvider" --tag="config"
+php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-install"
 ```
 
 ---
 
-### 5. **Verify Installation**
+### 5. **Admin User & Seeds**
 
-After the installation is complete, verify the following:
+The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role (from `config/mfw-users.php`) should be assigned to that admin.
 
-1. **Check `app.php`**:
-   - Ensure the `name`, `locale`, and `fallback_locale` values are correctly updated.
-
-2. **Check `mfw.php`**:
-   - Ensure the file exists in the `config` directory and contains the correct values.
-
-3. **Check `RouteServiceProvider.php`**:
-   - Ensure the back-office route prefix is correctly applied.
+After the wizard completes, run:
+```bash
+php artisan migrate --seed
+```
+to set up the database and seed the admin user.
 
 ---
 
 ## Troubleshooting
 
-### 1. **File Permission Issues**
-If the installer fails to update or create files, ensure that the following directories have the correct permissions:
-- `config/`
-- `app/Providers/`
-
-### 2. **Missing `callPublishConfiguration` Method**
-If you encounter an error related to the `callPublishConfiguration` method, ensure that the `MetaFrameworkServiceProvider` is correctly registered in your `config/app.php` file.
-
-### 3. **Invalid Input**
-If you provide invalid input (e.g., empty app name or locale), the installer will display an error message. Re-run the command and provide valid input.
+- **File Permission Issues**: ensure `config/` and `database/` are writable.
+- **Missing Methods**: confirm the package service provider is registered.
+- **Invalid Input**: re-run the command and provide valid values.
 
 ---
 
 ## Uninstallation
 
-To uninstall the MetaFramework, manually remove the following:
-1. The `mfw.php` configuration file from the `config` directory.
-2. Any changes made to `app.php` and `RouteServiceProvider.php`.
+Remove `config/mfw.php`, revert any changes to `config/app.php`, and delete published resources as needed.
 
 ---
 
-## Support
-
-For further assistance, refer to the [MetaFramework Documentation](#) or contact the support team.
-
----
-
-**Note**: This installation process assumes that the `Install.php` command is part of a Laravel package. If the package is not yet installed, ensure you install it via Composer before running the command.
+For additional help, consult the package docs or contact support.

@@ -237,7 +237,24 @@ return [
             $this->info('Generated password: ' . $password);
         }
 
-        $this->publishAdminSeederStub($firstName, $lastName, $email, $password);
+        $rolesConfigPath = config_path('mfw-users.php');
+        $rolesConfig = File::exists($rolesConfigPath) ? include $rolesConfigPath : [];
+        $roleId = null;
+
+        if (! empty($rolesConfig) && is_array($rolesConfig)) {
+            $roleKeys = array_keys($rolesConfig);
+            $defaultRole = array_key_exists('super-admin', $rolesConfig) ? 'super-admin' : $roleKeys[0];
+            $roleKey = $this->anticipate('Role key for the admin user', $roleKeys, $defaultRole);
+            $roleId = $rolesConfig[$roleKey]['id'] ?? null;
+
+            if (! $roleId) {
+                $this->warn("Role [$roleKey] does not define an id in config/mfw-users.php. The admin user will be created without a role assignment.");
+            }
+        } else {
+            $this->warn('Unable to locate roles from config/mfw-users.php. The admin user will be created without a role assignment.');
+        }
+
+        $this->publishAdminSeederStub($firstName, $lastName, $email, $password, $roleId);
         $this->ensureDatabaseSeederCallsAdminSeeder();
 
         $this->newLine();
@@ -262,7 +279,7 @@ return [
         File::put($targetPath, File::get($stubPath));
     }
 
-    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password): void
+    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null): void
     {
         $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
         if (! File::exists($stubPath)) {
@@ -275,6 +292,7 @@ return [
             '{{ last_name }}' => addslashes($lastName),
             '{{ email }}' => addslashes($email),
             '{{ password }}' => addslashes($password),
+            '{{ role_id }}' => $roleId !== null ? (string) $roleId : 'null',
         ];
 
         $content = str_replace(array_keys($replacements), array_values($replacements), File::get($stubPath));
