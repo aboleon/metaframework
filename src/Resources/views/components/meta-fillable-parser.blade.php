@@ -1,7 +1,7 @@
 <div class="{{ $value['class'] ?? 'col-12' }} mb-4{{ $model->visibility($key) }}">
     @switch($value['type'] ?? '')
         @case('textarea')
-            <x-mfw::textarea :name="$model->translatableInput($inputkey)" class="{{ $value['class'] ?? '' }}" :value="$content" :label="$value['label'] ?? ''"/>
+            <x-mfw-input::textarea :name="$model->translatableInput($inputkey)" class="{{ $value['class'] ?? '' }}" :value="$content" :label="$value['label'] ?? ''"/>
             @break
         @case('component')
             @if (auth()->user()->hasRole('dev'))
@@ -13,7 +13,7 @@
             @includeIf('panel.'.$model->type.'.component_'.$subkey)
             @break
         @case('number')
-            <x-mfw::input type="number" :name="$model->translatableInput($inputkey)" :value="$content" :label="$value['label'] ?? ''" :params="$value['params'] ?? []"/>
+            <x-mfw-input::input type="number" :name="$model->translatableInput($inputkey)" :value="$content" :label="$value['label'] ?? ''" :params="$value['params'] ?? []"/>
             @break
         @case('media')
             <x-mediaclass::uploadable :model="$model" :settings="array_merge($value, ['subgroup' => $uuid])"/>
@@ -45,6 +45,6 @@
             @endfor
             @break
         @default
-            <x-mfw::input :name="$model->translatableInput($inputkey)" :value="$content" :label="$value['label'] ?? ''" :params="$value['params'] ?? []"/>
+            <x-mfw-input::input :name="$model->translatableInput($inputkey)" :value="$content" :label="$value['label'] ?? ''" :params="$value['params'] ?? []"/>
     @endswitch
 </div>

@@ -26,7 +26,7 @@
                                     ?: \MetaFramework\Models\Setting::defaultSettingValue($item['name']));
                             @endphp
                             @if($item['type'] == 'textarea')
-                                <x-mfw::textarea name="{{ $item['name'] }}"
+                                <x-mfw-input::textarea name="{{ $item['name'] }}"
                                                  class="{{  $item['class'] ?? ''}}"
                                                  :label="$item['title'] ?? ''"
                                                  :value="$value"/>
@@ -34,7 +34,7 @@
                                     @include('mfw::lib.tinymce')
                                 @endonce
                             @else
-                                <x-mfw::input name="{{$item['name']}}"
+                                <x-mfw-input::input name="{{$item['name']}}"
                                               type="{{ $item['type'] }}"
                                               label="{!! $item['title'] ?? '' !!}"
                                               class="{{ $item['class'] ?? '' }}"

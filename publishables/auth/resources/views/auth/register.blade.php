@@ -4,13 +4,13 @@
 
         <!-- Name -->
         <div>
-            <x-mfw::input :label="__('mfw-auth.first_name')"
+            <x-mfw-input::input :label="__('mfw-auth.first_name')"
                           name="first_name"
                           :value="old('first_name')"
                           :required="true"/>
         </div>
         <div>
-            <x-mfw::input :label="__('mfw-auth.last_name')"
+            <x-mfw-input::input :label="__('mfw-auth.last_name')"
                           name="last_name"
                           :value="old('last_name')"
                           :required="true"/>
@@ -18,7 +18,7 @@
 
         <!-- Email Address -->
         <div class="mt-4">
-            <x-mfw::input type="email"
+            <x-mfw-input::input type="email"
                           :label="__('mfw-auth.email')"
                           name="email" :value="old('email')"
                           :required="true"/>
@@ -26,7 +26,7 @@
 
         <!-- Password -->
         <div class="mt-4">
-            <x-mfw::input type="password"
+            <x-mfw-input::input type="password"
                           :label="__('mfw-auth.password.label')"
                           name="password"
                           :required="true"
@@ -36,7 +36,7 @@
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-mfw::input type="password"
+            <x-mfw-input::input type="password"
                           :label="__('mfw-auth.password.confirm')"
                           name="password_confirmation"
                           :required="true"

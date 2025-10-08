@@ -7,7 +7,7 @@
 
         <!-- Email Address -->
         <div>
-            <x-mfw::input type="email"
+            <x-mfw-input::input type="email"
                           :label="__('mfw-auth.email')"
                           name="email" :value="old('email', $request->email)"
                           :required="true"/>
@@ -15,7 +15,7 @@
 
         <!-- Password -->
         <div class="mt-4">
-            <x-mfw::input type="password"
+            <x-mfw-input::input type="password"
                           :label="__('mfw-auth.password.label')"
                           name="password"
                           :required="true"
@@ -25,7 +25,7 @@
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-mfw::input type="password"
+            <x-mfw-input::input type="password"
                           :label="__('mfw-auth.password.new')"
                           name="password_confirmation"
                           :required="true"

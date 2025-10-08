@@ -8,7 +8,7 @@
 
         <!-- Password -->
         <div>
-            <x-mfw::input type="password"
+            <x-mfw-input::input type="password"
                           :label="__('mfw-auth.password.label')"
                           name="password"
                           :required="true"

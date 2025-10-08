@@ -22,7 +22,7 @@
             @endphp
         </div>
 
-        <x-mfw::select name="meta_blocs_selector" :values="\MetaFramework\Models\MetaBloc::selectableArray()" label="Affecter un bloc" :affected="collect()" :nullable="false" :disablename="true"/>
+        <x-mfw-input::select name="meta_blocs_selector" :values="\MetaFramework\Models\MetaBloc::selectableArray()" label="Affecter un bloc" :affected="collect()" :nullable="false" :disablename="true"/>
 
         <span id="add_meta_bloc" class="btn btn-default btn-sm mt-3">Ajouter un bloc</span>
     </div>

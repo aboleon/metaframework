@@ -12,7 +12,7 @@
         <x-mfw::response-messages/>
         <form method="post" action="{{ route('mfw.meta.create_admin') }}" class="p-4">
             @csrf
-            <x-mfw::input name="type" label="Type"/>
+            <x-mfw-input::input name="type" label="Type"/>
             <div class="mt-5 main-save">
                 <x-mfw::btn-save/>
             </div>

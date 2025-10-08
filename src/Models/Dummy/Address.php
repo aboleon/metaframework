@@ -2,7 +2,7 @@
 
 namespace MetaFramework\Models\Dummy;
 
-use MetaFramework\Interfaces\GooglePlacesInterface;
+use MetaFramework\Inputable\Contracts\GooglePlacesInterface;
 
 class Address implements GooglePlacesInterface
 {

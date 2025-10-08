@@ -53,7 +53,7 @@
                     <div class="row">
                         <div class="col-md-5">
                             <h4>Zone d'affectation</h4>
-                            <x-mfw::select :values="$data->zones" name="zone" :affected="$data->zone" :nullable="false"/>
+                            <x-mfw-input::select :values="$data->zones" name="zone" :affected="$data->zone" :nullable="false"/>
                         </div>
                         <div class="col-md-6 offset-md-1">
                             <h4>Type de lien</h4>

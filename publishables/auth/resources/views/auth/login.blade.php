@@ -28,14 +28,14 @@
         <div class="row">
             <div class="col-2 offset-4">
                 <div>
-                    <x-mfw::input type="email"
+                    <x-mfw-input::input type="email"
                                   :label="__('mfw-auth.email')"
                                   name="email" :value="old('email')"
                                   :required="true"/>
                 </div>
 
                 <div class="mt-4">
-                    <x-mfw::input type="password"
+                    <x-mfw-input::input type="password"
                                   :label="__('mfw-auth.password.label')"
                                   name="password" :value="old('email')"
                                   :required="true"
@@ -43,7 +43,7 @@
                     />
                 </div>
 
-                <x-mfw::checkbox name="remember" :label="__('mfw-auth.keepMe')" value="1" :affected="old('remember')"/>
+                <x-mfw-input::checkbox name="remember" :label="__('mfw-auth.keepMe')" value="1" :affected="old('remember')"/>
 
 
                 <div class="d-flex align-items-center justify-content-between mt-4">

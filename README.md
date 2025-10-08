@@ -12,7 +12,7 @@ php artisan vendor:publish --tag=mfw
 #### Components
     
 ```blade
-<x-mfw::input name="phone" :value="$data->phone" />
+<x-mfw-input::input name="phone" :value="$data->phone" />
 ```
 
 ### Mediaclass Upload Library

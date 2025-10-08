@@ -10,7 +10,7 @@
         @csrf
         <!-- Email Address -->
         <div>
-            <x-mfw::input type="email"
+            <x-mfw-input::input type="email"
                           :label="__('mfw-auth.email')"
                           name="email" :value="old('email')"
                           :required="true"/>

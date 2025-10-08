@@ -4,7 +4,7 @@
             @case('textarea')
             @case('textarea_extended')
                 <div class="col-12 mb-4">
-                    <x-mfw::textarea name="custom[fillables][{{$key}}]"
+                    <x-mfw-input::textarea name="custom[fillables][{{$key}}]"
                                 :className="$value['type'] .' '.($value['class']??'') "
                                 value="{!! isset($model->custom['fillables'][$key]) ? $model->custom['fillables'][$key] : '' !!}" label="{{$value['label']}}"/>
                 </div>
@@ -12,7 +12,7 @@
             @default
 
                 <div class="{{ $value['class'] ?? 'col-12' }} mb-4">
-                    <x-mfw::input name="custom[fillables][{{$key}}]" value="{{ isset($model->custom['fillables'][$key]) ? $model->custom['fillables'][$key] : '' }}" label="{{$value['label']}}"/>
+                    <x-mfw-input::input name="custom[fillables][{{$key}}]" value="{{ isset($model->custom['fillables'][$key]) ? $model->custom['fillables'][$key] : '' }}" label="{{$value['label']}}"/>
                 </div>
 
         @endswitch

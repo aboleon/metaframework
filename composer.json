@@ -16,7 +16,8 @@
     "intervention/image": "^3.11",
     "symfony/mime": "^7.2",
     "aboleon/metaframework-support": "^0.1",
-    "aboleon/metaframework-mediaclass": "^0.1"
+    "aboleon/metaframework-mediaclass": "^0.1",
+    "aboleon/metaframework-inputable": "^0.1"
   },
   "require-dev": {
     "orchestra/testbench": "^9.9",
@@ -65,6 +66,10 @@
     {
       "type": "path",
       "url": "../metaframework-mediaclass"
+    },
+    {
+      "type": "path",
+      "url": "../metaframework-inputable"
     }
   ]
 }

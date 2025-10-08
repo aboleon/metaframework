@@ -46,10 +46,10 @@
                             <h4 class="mt-3">TVA</h4>
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <x-mfw::number name="vat[rate]" step="0.01" :value="$error ? old('vat.rate') : $data->rate" :label="__('mfw-sellable.vat.percent')"/>
+                                    <x-mfw-input::number name="vat[rate]" step="0.01" :value="$error ? old('vat.rate') : $data->rate" :label="__('mfw-sellable.vat.percent')"/>
                                 </div>
                                 <div class="col-lg-6">
-                                    <x-mfw::radio :values="[0 => 'Non',1 => 'Oui']" :affected="$error ? old('vat.default') : ($data->default ?: 0)" name="vat[default]" :label="__('mfw-sellable.vat.is_this_default')" :nullable="false"/>
+                                    <x-mfw-input::radio :values="[0 => 'Non',1 => 'Oui']" :affected="$error ? old('vat.default') : ($data->default ?: 0)" name="vat[default]" :label="__('mfw-sellable.vat.is_this_default')" :nullable="false"/>
                                 </div>
                             </div>
                         </div>
