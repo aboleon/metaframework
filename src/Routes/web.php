@@ -37,4 +37,6 @@ Route::prefix(Routing::backend())
             Route::get('show', [SettingsController::class, 'index'])->name('index');
             Route::post('update', [SettingsController::class, 'update'])->name('update');
         });
+
+        include('dictionnaries.php');
     });

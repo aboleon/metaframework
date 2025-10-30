@@ -13,7 +13,7 @@
     @if ($errors->any())
         <div>
             @foreach ($errors->all() as $error)
-                <x-mfw::alert type="warning"
+                <x-mfw-support::alert type="warning"
                               :message="__(str_replace('passwords.', 'auth.password.forgotten.',$error))"/>
             @endforeach
         </div>

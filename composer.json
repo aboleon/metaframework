@@ -1,9 +1,10 @@
 {
   "name": "aboleon/metaframework",
   "description": "Meta Framework CMS",
-  "minimum-stability": "stable",
   "license": "proprietary",
-  "keywords": ["meta framework"],
+  "keywords": [
+    "meta framework"
+  ],
   "authors": [
     {
       "name": "Aboleon Media",
@@ -20,7 +21,7 @@
     "aboleon/metaframework-inputable": "^0.1"
   },
   "require-dev": {
-    "orchestra/testbench": "^9.9",
+    "orchestra/testbench": "^10.6",
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^11.0.1"
   },
@@ -58,18 +59,15 @@
     "preferred-install": "dist",
     "sort-packages": true
   },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "repositories": [
     {
       "type": "path",
-      "url": "../metaframework-support"
-    },
-    {
-      "type": "path",
-      "url": "../metaframework-mediaclass"
-    },
-    {
-      "type": "path",
-      "url": "../metaframework-inputable"
+      "url": "../*",
+      "options": {
+        "symlink": true
+      }
     }
   ]
 }
