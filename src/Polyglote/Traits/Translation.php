@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace MetaFramework\Polyglote\Traits;
 
 use MetaFramework\Accessors\Locale;
+use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 
 trait Translation
 {
     use HasTranslations;
-
+    
     public array $translatable = [];
     /**
      * The Model Translatables
@@ -18,6 +19,28 @@ trait Translation
      */
     private array $translatables = [];
     private object $updatable;
+
+    public static function bootTranslation(): void
+    {
+        static::retrieved(function ($model) {
+            if (method_exists($model, 'defineTranslatables')) {
+                $model->defineTranslatables();
+            }
+        });
+
+        static::creating(function ($model) {
+            if (method_exists($model, 'defineTranslatables')) {
+                $model->defineTranslatables();
+            }
+        });
+    }
+
+    public function initializeTranslation(): void
+    {
+        if (method_exists($this, 'defineTranslatables')) {
+            $this->defineTranslatables();
+        }
+    }
 
     public function translation(string $key, string $locale = null, $useFallbackLocale = true): mixed
     {
@@ -80,6 +103,10 @@ trait Translation
 
     public function getTranslatableProperties(): array
     {
+        if (method_exists($this, 'setTranslatables')) {
+            $this->translatables = $this->setTranslatables();
+            return $this->translatables;
+        }
         return property_exists($this, 'fillables') ? $this->fillables : $this->translatables;
     }
 
