@@ -4,6 +4,7 @@ namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\View\Component;
+use MetaFramework\Polyglote\Interfaces\TranslatableInterface;
 
 class FillableParser extends Component
 {
@@ -15,10 +16,9 @@ class FillableParser extends Component
         public bool $disabled = false,
         public array $parsed = [],
         public bool $fallbacklocale = false
-    )
-    {
-        if (!$this->parsed) {
-            $this->fillables = $this->fillables ?: $this->model->fillales;
+    ) {
+        if ( ! $this->parsed) {
+            $this->fillables = $this->model instanceof TranslatableInterface ? $this->model->getTranslatableProperties() : ((array)$this->fillables ?: []);
         }
     }
 

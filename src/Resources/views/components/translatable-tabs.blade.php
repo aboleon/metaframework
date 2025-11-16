@@ -1,7 +1,7 @@
-<x-mfw::language-tabs id="{{ $id }}"/>
+<x-mfw::language-tabs id="{{ $id }}" :selectedlocale="$selectedlocale"/>
 <div class="tab-content pt-4">
     @foreach(config('mfw.translatable.locales') as $locale)
-        <div class="tab-pane fade {!! $locale == app()->getLocale() ? 'show active': null !!}"
+        <div class="tab-pane fade{!! $selectedlocale == $locale ? ' show active' : null !!}"
              id="{{ $id }}_{{ $locale }}"
              role="tabpanel"
              aria-labelledby="{{ $id }}_btn_{{ $locale }}">
@@ -12,7 +12,8 @@
                                         :locale="$locale"
                                         :fallbacklocale="$fallbacklocale"
                                         :disabled="$disabled"
-                                        :parsed="$pluck"/>
+                                        :parsed="$pluck"
+                />
             </div>
         </div>
     @endforeach
