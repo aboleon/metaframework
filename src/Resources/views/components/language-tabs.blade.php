@@ -2,7 +2,7 @@
     <ul id="{{ $id }}_tabs" class="nav nav-tabs admintabs" role="tablist">
         @foreach(config('mfw.translatable.locales') as $locale)
             <li class="nav-item " role="presentation">
-                <button class="nav-link toggable-lang {!! $locale == app()->getLocale() ? 'active': null !!}"
+                <button class="nav-link toggable-lang {!! ($active ?? app()->getLocale()) === $locale ? 'active': null !!}"
                         data-lang="{{ $locale }}"
                         id="{{ $id }}_btn_{{ $locale }}"
                         data-bs-toggle="tab"

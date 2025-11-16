@@ -13,7 +13,8 @@ class LanguageTabs extends Component
      * @return void
      */
     public function __construct(
-        public string $id = 'tab_translatable'
+        public string $id = 'tab_translatable',
+        public ?string $active = null
     )
     {
         //
