@@ -13,7 +13,7 @@ use MetaFramework\Controllers\{
 
 Route::prefix(Routing::backend())
     ->name('mfw.')
-    ->middleware(['web', 'auth:sanctum'])->group(function () {
+    ->middleware(['web'])->group(function () {
 
         // Ajax requests
         Route::post('ajax', [AjaxController::class, 'distribute'])->name('ajax');

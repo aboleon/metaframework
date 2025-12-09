@@ -3,18 +3,10 @@
  * Utilisateurs
  */
 
+use App\Http\Controllers\{AccountCardController, AccountController, AccountDocumentController, AccountMailController, GroupAddressController, GroupController, RoleController, UserController};
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    AccountCardController,
-    AccountDocumentController,
-    AccountMailController,
-    AccountPhoneController,
-    AccountController,
-    GroupAddressController,
-    GroupController,
-    RoleController,
-    AccountAddressController,
-    UserController};
+use Modules\Thesaurus\Http\Controllers\AccountAddressController;
+use Modules\Thesaurus\Http\Controllers\AccountPhoneController;
 
 Route::get('role', [RoleController::class, 'index'])->name('roles');
 
