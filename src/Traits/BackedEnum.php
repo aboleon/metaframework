@@ -3,12 +3,18 @@
 namespace MetaFramework\Traits;
 
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 trait BackedEnum
 {
+    public static function translationPrefix(): string
+    {
+        return '';
+    }
+
     public static function varname(): string
     {
-        return Str::snake((new \ReflectionClass(static::class))->getShortName());
+        return str_replace('_enum', '', Str::snake((new ReflectionClass(static::class))->getShortName()));
     }
 
     public static function keys(): array
@@ -28,11 +34,11 @@ trait BackedEnum
 
     public static function translations(): array
     {
-        return cache()->rememberForever('enum_.' . static::varname(), function () {
+       return cache()->rememberForever('enum_.' . static::varname(), function () {
             $keys = self::keys();
             return array_combine(
                 $keys,
-                collect($keys)->map(fn($item) => trans('enum.' . static::varname() . '.' . $item))->toArray()
+                collect($keys)->map(fn($item) => trans(self::translationPrefix().'enum.' . static::varname() . '.' . $item))->toArray()
             );
         });
     }
