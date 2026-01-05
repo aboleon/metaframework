@@ -27,7 +27,7 @@
                   'id': $(this).data('id'),
                 });
               });
-              ajax('action=sortable&target=' + target + '&' + $.param({'data': data}), messages);
+                mfwAjax('action=sortable&target=' + target + '&' + $.param({'data': data}), messages);
             },
           });
         } else {
@@ -50,7 +50,7 @@
                                 'id': $(this).data('id'),
                             });
                         });
-                        ajax('action=sortable&target='+c.data('target')+
+                        mfwAjax('action=sortable&target='+c.data('target')+
                             '&'+$.param({'data':data}), c);
                     },
                 });

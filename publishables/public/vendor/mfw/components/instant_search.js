@@ -35,7 +35,7 @@ function instant_search_results(result) {
         setDelay(function () {
             if (data.length > 2) {
                 let formData = 'action=instantSearch&callback=' + callback + '&keyword=' + data + '&type=' + tag;
-                ajax(formData, container);
+                mfwAjax(formData, container);
             } else {
                 $('.suggestions').empty();
             }

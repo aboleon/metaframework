@@ -43,7 +43,7 @@
         <script>
             $(function () {
                 $('#add_meta_bloc').click(function () {
-                    ajax('action=addMetaBloc&parent={{ $meta->type=='bloc' ? $meta->hasParent->id : $meta->id }}&bloc=' + $('#meta_blocs_selector').val(), $('#meta_blocs'));
+                    mfwAjax('action=addMetaBloc&parent={{ $meta->type=='bloc' ? $meta->hasParent->id : $meta->id }}&bloc=' + $('#meta_blocs_selector').val(), $('#meta_blocs'));
                 });
 
                 sortableContent($('#meta_bloc_list'), 'li', $('#assigned_blocs'));
