@@ -97,7 +97,7 @@ let token = function () {
         return obj;
     },
     setVeil = function (c) {
-        c.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/front/images/loading.svg" width="40" alt="..."></div>');
+        c.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/system/loading.svg" width="40" alt="..."></div>');
     },
     removeVeil = function () {
         $('.veil').remove();
