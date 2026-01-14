@@ -15,11 +15,11 @@ class PriceInteger implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return $value / 100;
+        return abs($value) / 100;
     }
 
     public function set($model, $key, $value, $attributes)
     {
-        return $value * 100;
+        return abs($value) * 100;
     }
 }
