@@ -32,6 +32,7 @@ class GoogleAddressValidation extends ValidationAbstract
             $this->prefix . 'administrative_area_level_1_short' => 'nullable',
             $this->prefix . 'administrative_area_level_2' => 'nullable',
             $this->prefix . 'text_address' => 'required',
+            $this->prefix . 'place_id' => ['nullable', 'string'],
             $this->prefix . 'lat' => ['nullable', 'numeric'],
             $this->prefix . 'lon' => ['nullable', 'numeric'],
         ];
