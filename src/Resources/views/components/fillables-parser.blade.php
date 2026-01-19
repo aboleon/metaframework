@@ -4,6 +4,17 @@
 @if ($fillables)
     @foreach($fillables as $key=>$value)
         @php
+            if (is_string($value)) {
+                if (is_int($key)) {
+                    $key = $value;
+                }
+
+                $value = [
+                    'label' => $value,
+                    'type' => 'input',
+                ];
+            }
+
             $array_key = $datakey ? $datakey.'['.$key.']' : $key;
             $params = $value['params'] ?? [];
             if ($disabled) {

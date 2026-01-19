@@ -20,6 +20,33 @@ class FillableParser extends Component
         if ( ! $this->parsed) {
             $this->fillables = $this->model instanceof TranslatableInterface ? $this->model->getTranslatableProperties() : ((array)$this->fillables ?: []);
         }
+
+        $normalized = [];
+        foreach ($this->fillables as $key => $value) {
+            if (is_string($value)) {
+                if (is_int($key)) {
+                    $key = $value;
+                }
+
+                $normalized[$key] = [
+                    'label' => $value,
+                    'type' => 'input',
+                ];
+                continue;
+            }
+
+            if ($value === null && is_string($key)) {
+                $normalized[$key] = [
+                    'label' => $key,
+                    'type' => 'input',
+                ];
+                continue;
+            }
+
+            $normalized[$key] = $value;
+        }
+
+        $this->fillables = $normalized;
     }
 
     public function render(): Renderable
