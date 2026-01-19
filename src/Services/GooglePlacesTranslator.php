@@ -11,6 +11,13 @@ class GooglePlacesTranslator
     private ?Translator $translator = null;
     private array $responses = [];
 
+    /**
+     * Locales that use Cyrillic script.
+     *
+     * @var array<int, string>
+     */
+    private array $cyrillicLocales = ['bg', 'ru', 'uk', 'sr', 'mk', 'be'];
+
     public function __construct(
         private ?string $apiKey = null,
     ) {
@@ -61,6 +68,11 @@ class GooglePlacesTranslator
                 if ($translated === null || $translated === '') {
                     $translations[$field][$locale] = $value;
                     continue;
+                }
+
+                // Transliterate remaining Latin characters for Cyrillic locales
+                if ($this->isCyrillicLocale($locale) && $this->containsLatinCharacters($translated)) {
+                    $translated = $this->transliterateLatinToCyrillic($translated);
                 }
 
                 $translations[$field][$locale] = $translated;
@@ -149,5 +161,35 @@ class GooglePlacesTranslator
         ];
 
         return $translated;
+    }
+
+    /**
+     * Check if locale uses Cyrillic script.
+     */
+    private function isCyrillicLocale(string $locale): bool
+    {
+        return in_array(strtolower($locale), $this->cyrillicLocales, true);
+    }
+
+    /**
+     * Check if string contains Latin characters (A-Za-z).
+     */
+    private function containsLatinCharacters(string $text): bool
+    {
+        return (bool) preg_match('/[A-Za-z]/u', $text);
+    }
+
+    /**
+     * Transliterate Latin characters to Cyrillic.
+     */
+    private function transliterateLatinToCyrillic(string $text): string
+    {
+        if (! extension_loaded('intl')) {
+            return $text;
+        }
+
+        $transliterated = transliterator_transliterate('Latin-Cyrillic', $text);
+
+        return $transliterated !== false ? $transliterated : $text;
     }
 }

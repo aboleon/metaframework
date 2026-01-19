@@ -23,7 +23,7 @@ class Countries
 
     public static function getCountryNameByCode(?string $code = null): string
     {
-        return self::orderedCodeNameArray()[$code] ?? 'NC';
+        return self::getCountryNameByCodeAndLocale($code, app()->getLocale());
     }
 
     public static function getRawCountries()
