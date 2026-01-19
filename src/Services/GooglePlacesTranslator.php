@@ -2,43 +2,68 @@
 
 namespace MetaFramework\Services;
 
-use Illuminate\Support\Facades\Http;
+use DeepL\DeepLException;
+use DeepL\TranslateTextOptions;
+use DeepL\Translator;
 
 class GooglePlacesTranslator
 {
+    private ?Translator $translator = null;
+    private array $responses = [];
+
     public function __construct(
         private ?string $apiKey = null,
-        private int $timeoutSeconds = 8,
     ) {
-        $this->apiKey = $this->apiKey ?? config('mfw-inputable.google.places_api_key');
+        $this->apiKey = $this->apiKey ?? config('mfw-api.deepl');
     }
 
     /**
+     * @param  array<string, string|null>  $payload
      * @param  array<int, string>  $locales
      * @param  array<string, array<string, string>>  $existing
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, string>|null>
      */
-    public function translations(string $placeId, array $locales, array $existing = []): array
+    public function translations(array $payload, string $sourceLocale, array $locales, array $existing = []): array
     {
-        if (! $placeId || ! $this->apiKey) {
-            return $existing;
-        }
-
         $translations = $existing;
+        $locales = array_values(array_unique(array_merge($locales, [$sourceLocale])));
+        $normalized = [];
 
-        foreach ($locales as $locale) {
-            $details = $this->fetchDetails($placeId, $locale);
-            if (! $details) {
+        foreach ($payload as $field => $value) {
+            $value = is_string($value) ? trim($value) : trim((string) $value);
+            if ($value === '') {
+                $translations[$field] = null;
                 continue;
             }
 
-            $fields = $this->extractTranslatableFields($details);
+            $normalized[$field] = $value;
+        }
 
-            foreach ($fields as $field => $value) {
-                if ($value === null || $value === '') {
+        $translator = $this->translator();
+        if (! $translator) {
+            foreach ($normalized as $field => $value) {
+                foreach ($locales as $locale) {
+                    $translations[$field][$locale] = $value;
+                }
+            }
+
+            return $translations;
+        }
+
+        foreach ($normalized as $field => $value) {
+            foreach ($locales as $locale) {
+                $targetLang = $this->mapLocale($locale, false);
+                if (! $targetLang) {
                     continue;
                 }
-                $translations[$field][$locale] = $value;
+
+                $translated = $this->translateText($translator, $value, null, $targetLang);
+                if ($translated === null || $translated === '') {
+                    $translations[$field][$locale] = $value;
+                    continue;
+                }
+
+                $translations[$field][$locale] = $translated;
             }
         }
 
@@ -46,121 +71,83 @@ class GooglePlacesTranslator
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<int, array<string, string|null>>
      */
-    private function fetchDetails(string $placeId, string $locale): array
+    public function responses(): array
     {
-        $details = $this->fetchPlacesV1($placeId, $locale);
-        if ($details) {
-            return $details;
-        }
-
-        return $this->fetchLegacy($placeId, $locale);
+        return $this->responses;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function fetchPlacesV1(string $placeId, string $locale): array
+    private function translator(): ?Translator
     {
-        $response = Http::timeout($this->timeoutSeconds)
-            ->withHeaders([
-                'X-Goog-Api-Key' => $this->apiKey,
-                'X-Goog-FieldMask' => 'addressComponents,formattedAddress',
-            ])
-            ->get('https://places.googleapis.com/v1/places/' . $placeId, [
-                'languageCode' => $locale,
+        if (! $this->apiKey) {
+            return null;
+        }
+
+        if ($this->translator) {
+            return $this->translator;
+        }
+
+        $this->translator = new Translator($this->apiKey);
+
+        return $this->translator;
+    }
+
+    private function mapLocale(string $locale, bool $isSource): ?string
+    {
+        $locale = strtolower($locale);
+
+        return match ($locale) {
+            'bg' => 'BG',
+            'fr' => 'FR',
+            'en' => $isSource ? 'EN' : 'EN-GB',
+            'en-gb' => 'EN-GB',
+            'en-us' => 'EN-US',
+            default => null,
+        };
+    }
+
+    private function translateText(Translator $translator, string $text, ?string $sourceLang, string $targetLang): ?string
+    {
+        try {
+            $result = $translator->translateText($text, $sourceLang, $targetLang, [
+                TranslateTextOptions::PRESERVE_FORMATTING => true,
+                TranslateTextOptions::SPLIT_SENTENCES => 'nonewlines',
             ]);
+        } catch (DeepLException $exception) {
+            $this->responses[] = [
+                'text' => $text,
+                'source_lang' => $sourceLang,
+                'target_lang' => $targetLang,
+                'translated' => null,
+                'error' => $exception->getMessage(),
+            ];
 
-        if (! $response->ok()) {
-            return [];
+            return null;
         }
 
-        $payload = $response->json();
-        if (! is_array($payload)) {
-            return [];
+        if (is_array($result)) {
+            $translated = $result[0]->text ?? null;
+            $this->responses[] = [
+                'text' => $text,
+                'source_lang' => $sourceLang,
+                'target_lang' => $targetLang,
+                'translated' => $translated,
+                'error' => null,
+            ];
+
+            return $translated;
         }
 
-        if (empty($payload['addressComponents']) && empty($payload['formattedAddress'])) {
-            return [];
-        }
+        $translated = $result->text ?? null;
+        $this->responses[] = [
+            'text' => $text,
+            'source_lang' => $sourceLang,
+            'target_lang' => $targetLang,
+            'translated' => $translated,
+            'error' => null,
+        ];
 
-        return $payload;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function fetchLegacy(string $placeId, string $locale): array
-    {
-        $response = Http::timeout($this->timeoutSeconds)->get('https://maps.googleapis.com/maps/api/place/details/json', [
-            'place_id' => $placeId,
-            'fields' => 'address_component,formatted_address',
-            'language' => $locale,
-            'key' => $this->apiKey,
-        ]);
-
-        if (! $response->ok()) {
-            return [];
-        }
-
-        $payload = $response->json();
-        if (! is_array($payload)) {
-            return [];
-        }
-
-        if (($payload['status'] ?? null) !== 'OK') {
-            return [];
-        }
-
-        return is_array($payload['result'] ?? null) ? $payload['result'] : [];
-    }
-
-    /**
-     * @param  array<string, mixed>  $details
-     * @return array<string, string|null>
-     */
-    private function extractTranslatableFields(array $details): array
-    {
-        $components = $details['addressComponents'] ?? $details['address_components'] ?? [];
-        $fields = [];
-
-        foreach ($components as $component) {
-            $types = $component['types'] ?? [];
-            foreach ($types as $type) {
-                if ($type === 'route') {
-                    $fields['route'] = $this->componentText($component);
-                }
-                if ($type === 'locality') {
-                    $fields['locality'] = $this->componentText($component);
-                }
-                if ($type === 'administrative_area_level_1') {
-                    $fields['administrative_area_level_1'] = $this->componentText($component);
-                }
-                if ($type === 'administrative_area_level_2') {
-                    $fields['administrative_area_level_2'] = $this->componentText($component);
-                }
-            }
-        }
-
-        $fields['text_address'] = $details['formattedAddress'] ?? $details['formatted_address'] ?? null;
-
-        return $fields;
-    }
-
-    /**
-     * @param  array<string, mixed>  $component
-     */
-    private function componentText(array $component): ?string
-    {
-        if (isset($component['longText'])) {
-            return $component['longText'];
-        }
-
-        if (isset($component['long_name'])) {
-            return $component['long_name'];
-        }
-
-        return null;
+        return $translated;
     }
 }
