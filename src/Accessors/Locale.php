@@ -36,7 +36,7 @@ class Locale
 
     public static function localesAsSelectable(bool $useOriginal = false): array
     {
-        $locales = config('mfw.translatable.locales', ['fr', 'en']);
+        $locales = config('mfw.translatable.locales', array_unique([app()->getLocale(), app()->getFallbackLocale()]));
         $allTranslations = trans('mfw-lang');
         $labelKey = $useOriginal ? 'label_original' : 'label';
 
