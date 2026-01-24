@@ -1,3 +1,10 @@
+function setVeil(container) {
+    container.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/system/loading.svg" width="40" alt="..."></div>');
+}
+
+function removeVeil() {
+    $('.veil').remove();
+}
 function sendMailFromModalResponse(result) {
     let myModal = $('#' + result.input.modal_id);
     removeVeil();
