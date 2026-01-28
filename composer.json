@@ -18,7 +18,7 @@
     "symfony/mime": "^7.2",
     "aboleon/metaframework-support": "0.*",
     "aboleon/metaframework-mediaclass": "0.*",
-    "aboleon/metaframework-inputable": "0.*"
+    "aboleon/metaframework-inputable": "1.*"
   },
   "require-dev": {
     "orchestra/testbench": "^10.6",
