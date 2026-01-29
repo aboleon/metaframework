@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Cache;
 
 class Locale
 {
+    private static ?bool $multilangCache = null;
+
     public static function multilang(): bool
     {
-        return Cache::rememberForever('mfw.multilang', fn() => config('mfw.translatable.multilang')) ?? false;
+        if (self::$multilangCache !== null) {
+            return self::$multilangCache;
+        }
+
+        return self::$multilangCache = Cache::rememberForever('mfw.multilang', fn() => config('mfw.translatable.multilang')) ?? false;
     }
 
     public static function locale(): string

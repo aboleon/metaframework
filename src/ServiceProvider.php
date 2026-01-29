@@ -17,15 +17,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     public function register(): void
     {
-        /**
-         * Façades
-         */
-
-        $this->app->singleton('nav', fn($app) => new Nav());
-        $this->app->singleton('meta', fn($app) => new Meta());
-
-        $this->app->bind('MetaFramework\Facades\NavFacade', fn($app) => new NavFacade());
-        $this->app->bind('MetaFramework\Facades\MetaFacade', fn($app) => new MetaFacade());
 
     }
 
@@ -66,9 +57,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__ . '/../publishables/public/' => public_path(),
             __DIR__ . '/../publishables/lang/' => base_path('lang'),
             __DIR__ . '/../publishables/database/' => database_path(),
-           // __DIR__ . '/../publishables/app/' => app_path(),
             __DIR__ . '/../publishables/resources/' => resource_path(),
-          //  __DIR__ . '/../publishables/routes/' => base_path('routes'),
         ], 'mfw-install');
     }
 

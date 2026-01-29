@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::prefix(Routing::backend())
-            ->middleware(['web', 'auth:sanctum'])
+            ->middleware(['web'])
             ->namespace($this->namespace)
             ->name('mfw.')
             ->group(function () {

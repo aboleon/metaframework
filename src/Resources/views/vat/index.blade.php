@@ -23,7 +23,7 @@
         <div class="row m-3">
             <div class="col">
 
-                <x-mfw::response-messages/>
+                <x-mfw-support::response-messages/>
 
                 <table class="table">
                     <thead>

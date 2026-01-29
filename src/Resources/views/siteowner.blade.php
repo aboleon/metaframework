@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="shadow p-4 bg-body-tertiary rounded">
-        <x-mfw::validation-banner/>
+        <x-mfw-support::validation-banner/>
         <form method="post" action="{!! route('mfw.siteowner.store') !!}">
             @csrf
             <fieldset>

@@ -14,11 +14,9 @@
   "require": {
     "php": "^8.3",
     "css-crush/css-crush": "^v5.0.0",
-    "intervention/image": "^3.11",
     "symfony/mime": "^7.2",
-    "aboleon/metaframework-support": "0.*",
-    "aboleon/metaframework-mediaclass": "0.*",
-    "aboleon/metaframework-inputable": "1.*"
+    "aboleon/metaframework-support": "^1.0",
+    "aboleon/metaframework-inputable": "^1.0"
   },
   "require-dev": {
     "orchestra/testbench": "^10.6",
@@ -28,10 +26,7 @@
   "autoload": {
     "psr-4": {
       "MetaFramework\\": "src/"
-    },
-    "files": [
-      "src/Functions/loader.php"
-    ]
+    }
   },
   "autoload-dev": {
     "psr-4": {
@@ -42,11 +37,7 @@
     "laravel": {
       "providers": [
         "MetaFramework\\ServiceProvider"
-      ],
-      "aliases": {
-        "Meta": "MetaFramework\\Facades\\MetaFacade",
-        "Nav": "MetaFramework\\Facades\\NavFacade"
-      }
+      ]
     }
   },
   "scripts": {

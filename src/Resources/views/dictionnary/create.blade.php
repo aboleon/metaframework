@@ -22,7 +22,7 @@
         />
     </x-slot>
 
-    <x-mfw::validation-errors/>
+    <x-mfw-support::validation-errors/>
 
     <div class="shadow p-4 bg-body-tertiary rounded">
 

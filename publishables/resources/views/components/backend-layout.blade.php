@@ -46,7 +46,7 @@
         </div>
 
         @section('messages')
-            <x-mfw::response-messages/>
+            <x-mfw-support::response-messages/>
         @show
 
         <div id="main">

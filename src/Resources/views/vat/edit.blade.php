@@ -28,8 +28,8 @@
         <div class="row m-3">
             <div class="col">
 
-                <x-mfw::response-messages/>
-                <x-mfw::validation-errors/>
+                <x-mfw-support::response-messages/>
+                <x-mfw-support::validation-errors/>
 
                 @php
                     $error = $errors->any();

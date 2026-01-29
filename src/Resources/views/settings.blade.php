@@ -9,8 +9,8 @@
         $error = $errors->any();
     @endphp
 
-    <x-mfw::validation-errors/>
-    <x-mfw::response-messages/>
+    <x-mfw-support::validation-errors/>
+    <x-mfw-support::response-messages/>
     <form method="post" action="{{ route('mfw.settings.update') }}">
         @csrf
         <div class="row editable">

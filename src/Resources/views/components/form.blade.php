@@ -13,8 +13,8 @@
         @csrf
         <h3>{!! $label ?: __('mfw-forms.labels.'.$form->name) !!}</h3>
 
-        <x-mfw::validation-errors/>
-        <x-mfw::response-messages/>
+        <x-mfw-support::validation-errors/>
+        <x-mfw-support::response-messages/>
 
         <div class="row">
             @foreach($config['fields'] as $field)
