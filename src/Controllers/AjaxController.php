@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use MetaFramework\Models\Meta;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Support\Traits\Ajax;
+use MetaFramework\Actions\TranslatableActions;
 use Throwable;
 
 class AjaxController extends Controller
@@ -54,24 +55,12 @@ class AjaxController extends Controller
         return [];
     }
 
-
-    public function addMetaBloc()
+    protected function translate_translatables(): array
     {
-        try {
-            $meta = Meta::makeMeta('bloc');
-            $meta->parent = request('parent');
-            $meta->taxonomy = request('bloc');
-            $meta->save();
-
-            $this->responseSuccess("Le bloc " . request('bloc')::getLabel() . ' a été ajouté à ' . $meta->hasParent->title);
-            $this->responseElement('meta', $meta);
-            $this->responseElement('callback', 'redirectAfterMetaBloc');
-
-        } catch (Throwable $e) {
-            $this->responseException($e);
-        }
-        return $this->fetchResponse();
-
+        return (new TranslatableActions())
+            ->ajaxMode()
+            ->translateTranslatables()
+            ->fetchResponse();
     }
 
 }

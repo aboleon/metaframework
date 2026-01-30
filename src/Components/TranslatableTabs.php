@@ -20,6 +20,7 @@ class TranslatableTabs extends Component
         public bool $disabled = false,
         public bool $fallbacklocale = false,
         public ?string $selectedlocale = null,
+        public bool $translatable = false,
     ) {
         $this->fillables = $this->model->getTranslatableProperties();
         if ($this->pluck) {

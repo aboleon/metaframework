@@ -127,5 +127,11 @@ return [
     'dictionnary' => [
         'add' => "Ajouter un dictionnaire",
         '503' => "Vous ne pouvez pas créer de nouveau dictionnaires."
-    ]
+    ],
+    'translate_from' => 'De',
+    'translate_to' => 'Vers',
+    'translate_action' => 'Traduire',
+    'translate_service' => 'DeepL',
+    'translation_complete' => 'Traduction terminée.',
+    'translate_target_required' => 'Sélectionnez au moins une langue cible.',
 ];

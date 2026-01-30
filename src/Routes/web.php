@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Route;
 use MetaFramework\Accessors\Routing;
 use MetaFramework\Controllers\{
     AjaxController,
-    MetaController,
-    NavController,
     SettingsController,
     SiteOwnerController,
     VatController};
@@ -16,7 +14,7 @@ Route::prefix(Routing::backend())
     ->middleware(['web'])->group(function () {
 
         // Ajax requests
-        Route::post('ajax', [AjaxController::class, 'distribute'])->name('ajax');
+        Route::post('mfw-ajax', [AjaxController::class, 'distribute'])->name('ajax');
 
         Route::resource('siteowner', SiteOwnerController::class);
         Route::resource('vat', VatController::class);

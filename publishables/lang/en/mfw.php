@@ -113,4 +113,10 @@ return [
         'composing_data' => "Data was not composed correctly.",
         'error' => "An error occured."
     ],
+    'translate_from' => 'From',
+    'translate_to' => 'To',
+    'translate_action' => 'Translate',
+    'translate_service' => 'DeepL',
+    'translation_complete' => 'Translation completed.',
+    'translate_target_required' => 'Select at least one target language.',
 ];
