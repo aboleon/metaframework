@@ -103,6 +103,24 @@ to set up the database and seed the admin user.
 - **Invalid Input**: re-run the command and provide valid values.
 
 ---
+## Cyrillic Content Utilities
+
+MetaFramework provides `MetaFramework\Polyglote\Traits\CyrillicContentTrait` for reusable Cyrillic checks.
+
+- `hasCyrillic(string $value): bool` detects Cyrillic characters in a string.
+- `isCyrillicLocale(?string $locale): bool` checks whether a locale uses Cyrillic script (supports region variants like `bg_BG`).
+
+Example usage:
+```php
+use MetaFramework\Polyglote\Traits\CyrillicContentTrait;
+
+class Example
+{
+    use CyrillicContentTrait;
+}
+```
+
+---
 
 ## Uninstallation
 

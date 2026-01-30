@@ -5,18 +5,14 @@ namespace MetaFramework\Services;
 use DeepL\DeepLException;
 use DeepL\TranslateTextOptions;
 use DeepL\Translator;
+use MetaFramework\Polyglote\Traits\CyrillicContentTrait;
 
 class GooglePlacesTranslator
 {
+    use CyrillicContentTrait;
+
     private ?Translator $translator = null;
     private array $responses = [];
-
-    /**
-     * Locales that use Cyrillic script.
-     *
-     * @var array<int, string>
-     */
-    private array $cyrillicLocales = ['bg', 'ru', 'uk', 'sr', 'mk', 'be'];
 
     public function __construct(
         private ?string $apiKey = null,
@@ -161,14 +157,6 @@ class GooglePlacesTranslator
         ];
 
         return $translated;
-    }
-
-    /**
-     * Check if locale uses Cyrillic script.
-     */
-    private function isCyrillicLocale(string $locale): bool
-    {
-        return in_array(strtolower($locale), $this->cyrillicLocales, true);
     }
 
     /**

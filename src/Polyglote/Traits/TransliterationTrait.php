@@ -8,17 +8,17 @@ use Illuminate\Support\Facades\Cache;
 
 trait TransliterationTrait
 {
+    use CyrillicContentTrait;
+
     /**
      * Get transliterated versions of search term for Cyrillic locales.
      */
     private function getSearchVariants(string $searchTerm, ?string $locale = null, bool $force = false): array
     {
-        $cyrillicLocales = ['bg', 'ru', 'uk', 'sr', 'mk', 'be'];
-
         $locales = config('mfw.translatable.locales', []);
-        $isCyrillicLocale = in_array($locale, $cyrillicLocales, true) && in_array($locale, $locales, true);
+        $isCyrillicLocale = $this->isCyrillicLocale($locale) && in_array($locale, $locales, true);
 
-        if ((!$isCyrillicLocale && !$force) || !extension_loaded('intl')) {
+        if ((! $isCyrillicLocale && ! $force) || ! extension_loaded('intl')) {
             return [$searchTerm];
         }
 
