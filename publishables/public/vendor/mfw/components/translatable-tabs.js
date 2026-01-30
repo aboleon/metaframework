@@ -118,6 +118,7 @@
         const sourceInputs = container.querySelectorAll('input[data-mfw-translate-from]');
         const targetInputs = container.querySelectorAll('input[data-mfw-translate-target]');
         const button = container.querySelector('button[data-mfw-translate-button]');
+        const spinner = button ? button.querySelector('.mfw-translate-spinner') : null;
         const targetRequiredMessage = container.getAttribute('data-translate-target-required') || '';
 
         if (!button || !locales.length || !sourceInputs.length) {
@@ -171,7 +172,12 @@
                 payload: payload,
             };
 
-            mfwAjax(data, window.jQuery(container), {
+            if (spinner) {
+                spinner.style.display = 'inline-flex';
+            }
+            button.disabled = true;
+
+            const request = mfwAjax(data, window.jQuery(container), {
                 successHandler: function(result) {
                     if (!result || result.error || !result.translations) {
                         return true;
@@ -195,6 +201,20 @@
                     return true;
                 },
             });
+
+            if (request && typeof request.always === 'function') {
+                request.always(function() {
+                    if (spinner) {
+                        spinner.style.display = 'none';
+                    }
+                    button.disabled = false;
+                });
+            } else {
+                if (spinner) {
+                    spinner.style.display = 'none';
+                }
+                button.disabled = false;
+            }
         });
     }
 

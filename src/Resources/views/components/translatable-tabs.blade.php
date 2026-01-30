@@ -66,6 +66,9 @@
                             </svg>
                             <span>{{ __('mfw.translate_action') }}</span>
                             <img src="{!! asset('vendor/mfw/components/deepl.svg') !!}" alt="{{ __('mfw.translate_service') }}" height="30" style="width:auto;"/>
+                            <span class="mfw-translate-spinner ms-2" style="display:none;">
+                                <i class="core spinner fa fa-cog fa-spin fa-fw"></i>
+                            </span>
                         </span>
                     </button>
                 </div>
@@ -76,6 +79,16 @@
 </div>
 
 @if ($translatable)
+    @pushonce('css')
+        <style>
+            .mfw-translate-btn:hover,
+            .mfw-translate-btn:focus-visible {
+                background-color: #e9e9e9;
+                color: #042b48;
+                border-color: #e9e9e9;
+            }
+        </style>
+    @endpushonce
     @pushonce('js')
         <script src="{!! asset('vendor/mfw/components/translatable-tabs.js') !!}"></script>
     @endpushonce
