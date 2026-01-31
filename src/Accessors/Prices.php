@@ -25,12 +25,16 @@ class Prices
         string $decimal_separator = ',',
         string $thousand_separator = ' ',
         bool $showDecimals = true,
+        bool $stripZeros = false,
     ): string {
         $formatted_price = number_format($price, 2, $decimal_separator, $thousand_separator);
 
         [$integer_part, $decimal_part] = explode($decimal_separator, $formatted_price);
 
         if ($showDecimals) {
+            if ($stripZeros && $decimal_part === '00') {
+                return rtrim($integer_part.' '.$currency);
+            }
             return rtrim($formatted_price.' '.$currency);
         }
 
