@@ -96,6 +96,34 @@ to set up the database and seed the admin user.
 
 ---
 
+### 6. **Development/Maintenance Nav View**
+
+MetaFramework includes a maintenance navigation view (`dev.blade.php`) for common development operations:
+- Database migrations / rollback
+- Application cache reset
+
+**Publish for customization:**
+```bash
+php artisan mfw views
+```
+
+Or:
+```bash
+php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-views"
+```
+
+Published to: `resources/views/vendor/mfw/nav/dev.blade.php`
+
+**Include in layout:**
+```blade
+@include('vendor.mfw.nav.dev')  {{-- published version --}}
+@include('mfw::dev')             {{-- package version --}}
+```
+
+**Note:** Uses `@role('dev')` directive for role-based visibility.
+
+---
+
 ## Troubleshooting
 
 - **File Permission Issues**: ensure `config/` and `database/` are writable.

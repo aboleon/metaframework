@@ -336,4 +336,18 @@ return [
 
         File::put($databaseSeederPath, $content);
     }
+
+    private function views()
+    {
+        $this->newLine();
+        $this->comment('Publishing views...');
+        $this->comment('------------------------------------------');
+
+        $this->call('vendor:publish', [
+            '--provider' => 'MetaFramework\ServiceProvider',
+            '--tag'      => 'mfw-views',
+        ]);
+
+        $this->comment('Views published successfully.');
+    }
 }

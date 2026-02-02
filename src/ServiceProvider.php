@@ -42,6 +42,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishAuth();
         $this->publishAssets();
         $this->publishLang();
+        $this->publishViews();
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -84,5 +85,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__ . '/../publishables/lang/' => base_path('lang'),
         ], 'mfw-lang');
+    }
+
+    private function publishViews(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../publishables/resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
+        ], 'mfw-views');
     }
 }

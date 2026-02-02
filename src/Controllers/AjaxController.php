@@ -3,6 +3,7 @@
 
 namespace MetaFramework\Controllers;
 
+use MetaFramework\Controllers\ArtisanController;
 use Illuminate\Support\Facades\DB;
 use MetaFramework\Models\Meta;
 use MetaFramework\Services\Validation\ValidationTrait;
@@ -62,5 +63,32 @@ class AjaxController extends Controller
             ->translateTranslatables()
             ->fetchResponse();
     }
+
+
+    public function artisanOptimize(): array
+    {
+        return new ArtisanController()->ajaxMode()->optimizeClear();
+    }
+
+    public function artisanMigrate(): array
+    {
+        return new ArtisanController()->ajaxMode()->migrate((bool)request('rollback'));
+    }
+
+    public function composerUpdate(): array
+    {
+        return new ArtisanController()->ajaxMode()->composerUpdate();
+    }
+
+    public function composerUpdateDev(): array
+    {
+        return new ArtisanController()->ajaxMode()->composerUpdateDev();
+    }
+
+    public function composerUpdateProd(): array
+    {
+        return new ArtisanController()->ajaxMode()->composerUpdateProd();
+    }
+
 
 }
