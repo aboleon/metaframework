@@ -1,5 +1,5 @@
-<li class="sh-dark-grey">
-    <x-mfw::nav-opening-header title="MAINTENANCE" icon="fas fa-code" class="sh-dark-grey"/>
+<li>
+    <x-mfw::nav-opening-header title="MAINTENANCE" icon="fas fa-code"/>
     <ul class="nav child_menu">
         {{-- @role('dev') --}}
         <x-mfw::nav-link :route="route('panel.roles', 'super-admin')" title="Rôles"/>
@@ -25,7 +25,9 @@
     <script>
         $(function () {
             let resetAppContainer = $('body'), mfwmessages = $('#mfw-messages');
-            mfwmessages.attr('data-ajax', '{{ route('mfw.ajax') }}');
+            if (mfwmessages.length) {
+                mfwmessages.attr('data-ajax', '{{ route('mfw.ajax') }}');
+            }
             $('#reset-app').off().click(function (event) {
                 event.preventDefault();
                 setVeil(resetAppContainer);

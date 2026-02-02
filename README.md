@@ -117,10 +117,15 @@ Published to: `resources/views/vendor/mfw/nav/dev.blade.php`
 **Include in layout:**
 ```blade
 @include('vendor.mfw.nav.dev')  {{-- published version --}}
-@include('mfw::dev')             {{-- package version --}}
+@include('mfw::nav.dev')         {{-- package version --}}
 ```
 
 **Note:** Uses `@role('dev')` directive for role-based visibility.
+
+**Required for AJAX actions:** place this container in a convenient spot in your app layout so the nav actions can post to MFW Ajax:
+```blade
+<div id="mfw-messages" data-ajax="{{route('mfw-ajax') }}"></div>
+```
 
 ---
 

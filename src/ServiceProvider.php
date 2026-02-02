@@ -90,7 +90,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function publishViews(): void
     {
         $this->publishes([
-            __DIR__ . '/../publishables/resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
+            __DIR__ . '/Resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
         ], 'mfw-views');
     }
 }
