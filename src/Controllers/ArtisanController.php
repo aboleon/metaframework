@@ -36,7 +36,12 @@ class ArtisanController
 
     private function executeCommand(string $command): void
     {
-        $this->statusCode = Artisan::call($command, [], $outputBuffer = new BufferedOutput());
+        $options = [];
+        if ($command === 'migrate' || $command === 'migrate:rollback') {
+            // Avoid interactive confirmation in production.
+            $options = ['--force' => true, '--no-interaction' => true];
+        }
+        $this->statusCode = Artisan::call($command, $options, $outputBuffer = new BufferedOutput());
         $response = nl2br(trim($outputBuffer->fetch(), "\r\n"));
         if ($this->statusCode == 0) {
             $this->responseNotice($response);
