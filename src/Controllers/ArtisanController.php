@@ -82,12 +82,19 @@ class ArtisanController
 
     private function executeShellCommand(array $command): void
     {
-        $process = new Process($command, base_path(), [
+        $pathPrefix = trim((string) env('MF_SHELL_PATH_PREFIX', ''));
+        $existingPath = (string) env('PATH', (string) getenv('PATH'));
+        $processEnv = [
             'TERM' => 'dumb',
             'COMPOSER_NO_INTERACTION' => '1',
             'COMPOSER_NO_PROGRESS' => '1',
             'COMPOSER_DISABLE_XDEBUG_WARN' => '1',
-        ]);
+        ];
+        if ($pathPrefix !== '') {
+            $processEnv['PATH'] = rtrim($pathPrefix, ':') . ':' . $existingPath;
+        }
+
+        $process = new Process($command, base_path(), $processEnv);
         $process->setTimeout(600); // Set timeout to 10 minutes
         $process->setTty(false);
 
