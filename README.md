@@ -129,6 +129,19 @@ Published to: `resources/views/vendor/mfw/nav/dev.blade.php`
 
 ---
 
+## ArtisanController UI Commands
+
+The maintenance UI triggers `MetaFramework\Controllers\ArtisanController` to run a small set of safe commands:
+
+- `optimize:clear`
+- `migrate` (forced, non-interactive)
+- `migrate:rollback` (forced, non-interactive)
+- `composer update` (production or dev flags depending on the action)
+
+**PHP path override for Composer**: if the server PHP binary is not in PATH (example error: `/usr/bin/env: 'php': No such file or directory`), set `MF_SHELL_PATH_PREFIX` to a PHP bin path to prepend before running Composer. Example: `MF_SHELL_PATH_PREFIX=/opt/plesk/php/8.5/bin`.
+
+---
+
 ## Troubleshooting
 
 - **File Permission Issues**: ensure `config/` and `database/` are writable.
