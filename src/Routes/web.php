@@ -25,5 +25,4 @@ Route::prefix(Routing::backend())
             Route::post('update', [SettingsController::class, 'update'])->name('update');
         });
 
-        include('dictionnaries.php');
     });
