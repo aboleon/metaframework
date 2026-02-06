@@ -1,38 +1,52 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework;
 
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\{
-    App,
-    Blade,
-    View};
-use MetaFramework\Facades\MetaFacade;
-use MetaFramework\Facades\NavFacade;
-use MetaFramework\Models\Meta;
-use MetaFramework\Models\Nav;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use MetaFramework\Console\Install;
+use MetaFramework\Polyglote\Events\TranslationHasBeenSetEvent as MetaTranslationHasBeenSetEvent;
+use MetaFramework\Polyglote\Translatable as MetaTranslatable;
+use Spatie\Translatable\Events\TranslationHasBeenSetEvent as SpatieTranslationHasBeenSetEvent;
+use Spatie\Translatable\Translatable as SpatieTranslatable;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     public function register(): void
     {
-
+        $this->app->singleton(MetaTranslatable::class, static fn () => new MetaTranslatable);
+        $this->app->bind(SpatieTranslatable::class, MetaTranslatable::class);
+        $this->app->bind('translatable', SpatieTranslatable::class);
     }
 
     public function boot(): void
     {
+        Event::listen(SpatieTranslationHasBeenSetEvent::class, static function (SpatieTranslationHasBeenSetEvent $event): void {
+            event(new MetaTranslationHasBeenSetEvent(
+                $event->model,
+                $event->key,
+                $event->locale,
+                $event->oldValue,
+                $event->newValue,
+            ));
+        });
+
         Blade::directive('role', function ($arguments) {
             return "<?php if (auth()->check() && auth()->user()->hasRole({$arguments})) { ?>";
         });
         Blade::directive('endrole', function () {
-            return "<?php } ?>";
+            return '<?php } ?>';
         });
 
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
         Blade::componentNamespace('MetaFramework\Components', 'mfw');
 
-        $this->loadRoutesFrom(__DIR__.'/Routes/web.php');
+        $this->loadRoutesFrom(__DIR__ . '/Routes/web.php');
 
         View::share('current_locale', App::getLocale());
 
@@ -64,7 +78,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
     /**
      * Publishes the Auth package
-     * @return void
      */
     private function publishAuth(): void
     {

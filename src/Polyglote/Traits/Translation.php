@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace MetaFramework\Polyglote\Traits;
 
 use MetaFramework\Accessors\Locale;
-use MetaFramework\Mediaclass\Interfaces\MediaclassInterface;
 
 trait Translation
 {
     use HasTranslations;
-    
+
     public array $translatable = [];
+
     /**
      * The Model Translatables
-     *
-     * @var array
      */
     private array $translatables = [];
+
     private object $updatable;
 
     public static function bootTranslation(): void
@@ -42,7 +41,7 @@ trait Translation
         }
     }
 
-    public function translation(string $key, string $locale = null, $useFallbackLocale = true): mixed
+    public function translation(string $key, ?string $locale = null, bool $useFallbackLocale = true): mixed
     {
         if (Locale::multilang()) {
             return $this->translate($key, $locale, $useFallbackLocale);
@@ -69,19 +68,19 @@ trait Translation
         return $this->{$key} ?? '';
     }
 
-    public function translatableInput(string $name, string $locale = null): string
+    public function translatableInput(string $name, ?string $locale = null): string
     {
         if (Locale::multilang()) {
-            return $name.'['.$locale ?: Locale::locale().']';
+            return $name . '[' . $locale ?: Locale::locale() . ']';
         }
 
         return $name;
     }
 
-    public function translatableFromRequest(string $key, string $locale = null): mixed
+    public function translatableFromRequest(string $key, ?string $locale = null): mixed
     {
         if (Locale::multilang()) {
-            return request($key.'.'.$locale);
+            return request($key . '.' . $locale);
         }
 
         return request($key);
@@ -105,10 +104,10 @@ trait Translation
     {
         if (method_exists($this, 'setTranslatables')) {
             $this->translatables = $this->setTranslatables();
+
             return $this->translatables;
         }
+
         return property_exists($this, 'fillables') ? $this->fillables : $this->translatables;
     }
-
-
 }

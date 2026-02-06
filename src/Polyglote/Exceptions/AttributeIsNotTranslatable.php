@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
 The MIT License (MIT)
 
@@ -15,6 +17,9 @@ namespace MetaFramework\Polyglote\Exceptions;
 
 use Exception;
 
+/**
+ * @deprecated Catch Spatie\Translatable\Exceptions\AttributeIsNotTranslatable in new code.
+ */
 class AttributeIsNotTranslatable extends Exception
 {
     public static function make(string $key, $model): static

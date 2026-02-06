@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
 The MIT License (MIT)
 
@@ -13,16 +15,18 @@ The above copyright notice and this permission notice shall be included in all c
 
 namespace MetaFramework\Polyglote\Events;
 
+/**
+ * @deprecated Listen to Spatie\Translatable\Events\TranslationHasBeenSetEvent in new code.
+ */
 class TranslationHasBeenSetEvent
 {
     public function __construct(
-        public mixed  $model,
+        public mixed $model,
         public string $key,
         public string $locale,
-        public mixed  $oldValue,
-        public mixed  $newValue,
-    )
-    {
+        public mixed $oldValue,
+        public mixed $newValue,
+    ) {
         //
     }
 }

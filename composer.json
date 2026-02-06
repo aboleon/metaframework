@@ -15,6 +15,7 @@
     "php": "^8.3",
     "css-crush/css-crush": "^v5.0.0",
     "symfony/mime": "^7.2",
+    "spatie/laravel-translatable": "^6.12",
     "aboleon/metaframework-support": "^1.0",
     "aboleon/metaframework-inputable": "^1.0"
   },
