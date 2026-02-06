@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -11,8 +13,7 @@ class NavOpeningHeader extends Component
         public string $class='sh-blue-grey',
         public ?string $icon = null,
         public string $title = ''
-    )
-    {
+    ) {
         //
     }
 

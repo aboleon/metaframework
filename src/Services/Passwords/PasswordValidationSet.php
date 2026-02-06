@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 final class PasswordValidationSet
 {
-
     private PasswordRequest $password_request;
 
     public function __construct(Request $request)
@@ -30,8 +29,6 @@ final class PasswordValidationSet
             ];
         }
 
-        return (new PasswordValidation())->logic();
+        return (new PasswordValidation)->logic();
     }
-
-
 }

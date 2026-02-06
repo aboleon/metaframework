@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace MetaFramework\Accessors;
 
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +16,7 @@ class Locale
             return self::$multilangCache;
         }
 
-        return self::$multilangCache = Cache::rememberForever('mfw.multilang', fn() => config('mfw.translatable.multilang')) ?? false;
+        return self::$multilangCache = Cache::rememberForever('mfw.multilang', fn () => config('mfw.translatable.multilang')) ?? false;
     }
 
     public static function locale(): string
@@ -49,6 +48,7 @@ class Locale
         return collect($locales)
             ->mapWithKeys(function ($locale) use ($allTranslations, $labelKey) {
                 $label = $allTranslations[$locale][$labelKey] ?? $locale;
+
                 return [$locale => $label];
             })
             ->toArray();
@@ -66,15 +66,16 @@ class Locale
         $output = '';
 
         foreach (config('mfw.translatable.active_locales') as $locale) {
-            $output.= '<link rel="alternate" hreflang="'.$locale.'" href="'.url($locale).'" />'."\n";
+            $output.= '<link rel="alternate" hreflang="' . $locale . '" href="' . url($locale) . '" />' . "\n";
             if ($locale == app()->getLocale()) {
-                $output.= '<link rel="alternate" hreflang="x-default" href="'.url($locale).'" />'."\n";
-                $output.= '<meta property="og:locale" content="'.$locale.'" />'."\n";
+                $output.= '<link rel="alternate" hreflang="x-default" href="' . url($locale) . '" />' . "\n";
+                $output.= '<meta property="og:locale" content="' . $locale . '" />' . "\n";
             } else {
-                $output.= '<meta property="og:locale:alternate" content="'.$locale.'" />'."\n";
+                $output.= '<meta property="og:locale:alternate" content="' . $locale . '" />' . "\n";
             }
 
         }
+
         return trim($output);
     }
 
@@ -82,5 +83,4 @@ class Locale
     {
         return config('mfw.translatable.locales');
     }
-
 }

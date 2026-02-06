@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Controllers;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-use MetaFramework\Models\Vat;
-use MetaFramework\Support\Traits\Responses;
-use MetaFramework\Services\Validation\ValidationTrait;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
+use MetaFramework\Models\Vat;
+use MetaFramework\Services\Validation\ValidationTrait;
+use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
 class VatController extends Controller
@@ -31,7 +33,6 @@ class VatController extends Controller
 
         return view('mfw::vat.edit')->with($data);
     }
-
 
     public function store(): RedirectResponse
     {
@@ -75,7 +76,7 @@ class VatController extends Controller
     public function update(Vat $vat): RedirectResponse
     {
         $this->validation_rules = [
-            'vat.rate' => 'numeric|unique:vat,rate,'.$vat->id,
+            'vat.rate' => 'numeric|unique:vat,rate,' . $vat->id,
             'vat.default' => 'nullable'
         ];
         $this->validation_messages = [
@@ -83,7 +84,6 @@ class VatController extends Controller
             'vat.rate.unique' => __('validation.unique', ['attribute' => __('mfw-sellable.vat.label')]),
         ];
         $this->validation();
-
 
         try {
             $vat->update(

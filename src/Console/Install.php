@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Console;
 
 use Illuminate\Console\Command;
@@ -24,15 +26,13 @@ class Install extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
     public function handle(): void
     {
         if (method_exists($this, $this->argument('argument'))) {
             $this->{$this->argument('argument')}();
         } else {
-            $this->error("MetaFramework: unknown console command '".$this->argument('argument')."'");
+            $this->error("MetaFramework: unknown console command '" . $this->argument('argument') . "'");
         }
     }
 
@@ -42,9 +42,9 @@ class Install extends Command
         $this->comment('Publishing configuration...');
         $this->comment('------------------------------------------');
 
-        $app_name       = $this->ask("What is the name of your app");
-        $app_default_lg = $this->ask("What is the app default language locale (en, fr, de..) ? Default is en", 'en');
-        $panel_prefix   = $this->ask("What is the prefix for your back-office routes");
+        $app_name       = $this->ask('What is the name of your app');
+        $app_default_lg = $this->ask('What is the app default language locale (en, fr, de..) ? Default is en', 'en');
+        $panel_prefix   = $this->ask('What is the prefix for your back-office routes');
 
         // Validate input
         if (empty($app_name) || empty($app_default_lg) || empty($panel_prefix)) {
@@ -55,22 +55,22 @@ class Install extends Command
 
         // Update app.php configuration
         $this->updateConfigFile(config_path('app.php'), [
-            "'name'"            => "    'name' => '".addslashes($app_name)."',",
+            "'name'"            => "    'name' => '" . addslashes($app_name) . "',",
             "'timezone'"        => "    'timezone' => 'Europe/Paris',",
-            "'locale'"          => "    'locale' => '".$app_default_lg."',",
-            "'fallback_locale'" => "    'fallback_locale' => '".$app_default_lg."',",
+            "'locale'"          => "    'locale' => '" . $app_default_lg . "',",
+            "'fallback_locale'" => "    'fallback_locale' => '" . $app_default_lg . "',",
         ]);
 
         // Create mfw.php configuration
         $mfwConfigPath    = base_path('config/mfw.php');
         $mfwConfigContent = "<?php
 return [
-    'route' => '".$panel_prefix."',
-    'locales' => ['".$app_default_lg."'],
-    'active_locales' => ['".$app_default_lg."']
+    'route' => '" . $panel_prefix . "',
+    'locales' => ['" . $app_default_lg . "'],
+    'active_locales' => ['" . $app_default_lg . "']
 ];";
 
-        if ( ! File::put($mfwConfigPath, $mfwConfigContent)) {
+        if (!File::put($mfwConfigPath, $mfwConfigContent)) {
             $this->error('Failed to write mfw configuration file.');
 
             return;
@@ -78,7 +78,7 @@ return [
 
         // Update routes in bootstrap/app.php or routes/web.php
         $routeFilePath = base_path('routes/web.php'); // or base_path('routes/web.php')
-        $this->replaceInFile("view('dashboard", "view('".$panel_prefix.'/dashboard', $routeFilePath);
+        $this->replaceInFile("view('dashboard", "view('" . $panel_prefix . '/dashboard', $routeFilePath);
 
         $this->callPublishConfiguration();
         $this->setupUserFactoryAndSeeder();
@@ -101,18 +101,18 @@ return [
             PHP;
         $existingContent = File::get($routeFilePath);
 
-        $pattern = "/^use .*?;/m";
+        $pattern = '/^use .*?;/m';
         preg_match_all($pattern, $existingContent, $matches);
 
-        if ( ! empty($matches[0])) {
+        if (!empty($matches[0])) {
             $lastUseStatement = end($matches[0]);
             $position         = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
 
-            $newContent = substr($existingContent, 0, $position).PHP_EOL.PHP_EOL.$auth_routes.substr($existingContent, $position);
+            $newContent = substr($existingContent, 0, $position) . PHP_EOL . PHP_EOL . $auth_routes . substr($existingContent, $position);
 
             File::put($routeFilePath, $newContent);
         } else {
-            File::append($routeFilePath, "\n".$auth_routes);
+            File::append($routeFilePath, "\n" . $auth_routes);
         }
 
         $this->callAuthPackage();
@@ -122,23 +122,18 @@ return [
 
     /**
      * Update configuration file by replacing specific lines.
-     *
-     * @param  string  $filePath
-     * @param  array   $replacements
-     *
-     * @return void
      */
     private function updateConfigFile(string $filePath, array $replacements): void
     {
-        if ( ! File::exists($filePath)) {
-            $this->error('Configuration file not found: '.$filePath);
+        if (!File::exists($filePath)) {
+            $this->error('Configuration file not found: ' . $filePath);
 
             return;
         }
 
         $lines = file($filePath, FILE_IGNORE_NEW_LINES);
         if ($lines === false) {
-            $this->error('Failed to read configuration file: '.$filePath);
+            $this->error('Failed to read configuration file: ' . $filePath);
 
             return;
         }
@@ -147,29 +142,23 @@ return [
             $seek = array_filter($lines, function ($line) use ($search) {
                 return strstr($line, $search);
             });
-            if ( ! empty($seek)) {
+            if (!empty($seek)) {
                 $lines[key($seek)] = $replace;
             }
         }
 
-        if ( ! File::put($filePath, implode("\n", $lines))) {
-            $this->error('Failed to update configuration file: '.$filePath);
+        if (!File::put($filePath, implode("\n", $lines))) {
+            $this->error('Failed to update configuration file: ' . $filePath);
         }
     }
 
     /**
      * Replace a string in a file.
-     *
-     * @param  string  $search
-     * @param  string  $replace
-     * @param  string  $filePath
-     *
-     * @return void
      */
     private function replaceInFile(string $search, string $replace, string $filePath): void
     {
-        if ( ! File::exists($filePath)) {
-            $this->error('File not found: '.$filePath);
+        if (!File::exists($filePath)) {
+            $this->error('File not found: ' . $filePath);
 
             return;
         }
@@ -177,15 +166,13 @@ return [
         $content    = File::get($filePath);
         $newContent = str_replace($search, $replace, $content);
 
-        if ( ! File::put($filePath, $newContent)) {
-            $this->error('Failed to update file: '.$filePath);
+        if (!File::put($filePath, $newContent)) {
+            $this->error('Failed to update file: ' . $filePath);
         }
     }
 
     /**
      * Publish configuration files.
-     *
-     * @return void
      */
     private function callPublishConfiguration(): void
     {
@@ -197,8 +184,6 @@ return [
 
     /**
      * Publish auth files.
-     *
-     * @return void
      */
     private function callAuthPackage(): void
     {
@@ -216,8 +201,9 @@ return [
 
         $this->publishUserFactoryStub();
 
-        if (! $this->confirm('Would you like to configure a default admin user now?', true)) {
+        if (!$this->confirm('Would you like to configure a default admin user now?', true)) {
             $this->info('User factory has been updated. You can create your admin seeder later using: php artisan make:seeder AdminUserSeeder');
+
             return;
         }
 
@@ -225,13 +211,14 @@ return [
         $lastName  = $this->ask('Admin last name');
         $email     = $this->ask('Admin email address', 'admin@example.com');
 
-        if (! $firstName || ! $lastName || ! $email) {
+        if (!$firstName || !$lastName || !$email) {
             $this->error('First name, last name and email are required to create the admin user.');
+
             return;
         }
 
         $password = $this->secret('Admin password (leave blank to auto-generate)');
-        if (! $password) {
+        if (!$password) {
             $password = Str::password(12);
             $this->info('');
             $this->info('Generated password: ' . $password);
@@ -241,13 +228,13 @@ return [
         $rolesConfig = File::exists($rolesConfigPath) ? include $rolesConfigPath : [];
         $roleId = null;
 
-        if (! empty($rolesConfig) && is_array($rolesConfig)) {
+        if (!empty($rolesConfig) && is_array($rolesConfig)) {
             $roleKeys = array_keys($rolesConfig);
             $defaultRole = array_key_exists('super-admin', $rolesConfig) ? 'super-admin' : $roleKeys[0];
             $roleKey = $this->anticipate('Role key for the admin user', $roleKeys, $defaultRole);
             $roleId = $rolesConfig[$roleKey]['id'] ?? null;
 
-            if (! $roleId) {
+            if (!$roleId) {
                 $this->warn("Role [$roleKey] does not define an id in config/mfw-users.php. The admin user will be created without a role assignment.");
             }
         } else {
@@ -265,14 +252,15 @@ return [
     private function publishUserFactoryStub(): void
     {
         $stubPath = __DIR__ . '/../../publishables/stubs/database/factories/UserFactory.stub';
-        if (! File::exists($stubPath)) {
+        if (!File::exists($stubPath)) {
             $this->error('User factory stub not found.');
+
             return;
         }
 
         $targetPath = database_path('factories/UserFactory.php');
         $directory = dirname($targetPath);
-        if (! File::isDirectory($directory)) {
+        if (!File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -282,8 +270,9 @@ return [
     private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null): void
     {
         $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
-        if (! File::exists($stubPath)) {
+        if (!File::exists($stubPath)) {
             $this->error('Admin user seeder stub not found.');
+
             return;
         }
 
@@ -299,7 +288,7 @@ return [
 
         $targetPath = database_path('seeders/AdminUserSeeder.php');
         $directory = dirname($targetPath);
-        if (! File::isDirectory($directory)) {
+        if (!File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -309,8 +298,9 @@ return [
     private function ensureDatabaseSeederCallsAdminSeeder(): void
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
-        if (! File::exists($databaseSeederPath)) {
+        if (!File::exists($databaseSeederPath)) {
             $this->warn('DatabaseSeeder.php was not found; skipping automatic wiring of the admin seeder.');
+
             return;
         }
 
@@ -318,12 +308,13 @@ return [
 
         if (str_contains($content, 'AdminUserSeeder::class')) {
             File::put($databaseSeederPath, $content);
+
             return;
         }
 
         $content = preg_replace('/\s*User::factory\(\)->create\(\[[\s\S]*?\]\);\s*/m', PHP_EOL, $content);
 
-        if (! str_contains($content, 'User::')) {
+        if (!str_contains($content, 'User::')) {
             $content = str_replace('use App\\Models\\User;' . PHP_EOL, '', $content);
         }
 

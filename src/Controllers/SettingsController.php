@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Artisan;
-use MetaFramework\Accessors\Routing;
 use MetaFramework\Models\Setting;
 use MetaFramework\Support\Traits\Responses;
 
@@ -28,9 +28,7 @@ class SettingsController extends Controller
             $configs = Setting::getConfigElementsKeys();
             $rules = Setting::getValidationRules();
 
-
             $data = array_intersect_key(request()->input(), array_flip($configs));
-
 
             foreach ($data as $key => $val) {
 

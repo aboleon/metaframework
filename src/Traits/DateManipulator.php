@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
 
 namespace MetaFramework\Traits;
 
-
-use Carbon\{Carbon, CarbonPeriod};
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use MetaFramework\Support\Traits\Responses;
 use Throwable;
 
@@ -17,7 +18,6 @@ trait DateManipulator
     /**
      * @throws \Exception
      */
-
     public function makeDate(string|Carbon $date, string $format = 'd/m/Y H:i'
     ): Carbon {
         try {
@@ -27,18 +27,17 @@ trait DateManipulator
 
             return Carbon::createFromFormat($format, $date);
         } catch (Throwable $e) {
-            $this->responseWarning("La date ".$date." est invalide.");
+            $this->responseWarning('La date ' . $date . ' est invalide.');
             $this->responseError($e->getMessage());
         }
     }
-
 
     public function ensureValidEndDate(Carbon $starts, Carbon $ends): bool
     {
         try {
             if ($ends->lessThan($starts)) {
                 $this->responseWarning(
-                    "La date/temps de fin est supérieur à la date/temps du début."
+                    'La date/temps de fin est supérieur à la date/temps du début.'
                 );
             }
 
@@ -63,8 +62,8 @@ trait DateManipulator
 
     public function toDateFormat(string $format, mixed $date, ?string $nullable = null): ?string
     {
-        if ( ! $date) {
-            return ! $nullable ? null : $nullable;
+        if (!$date) {
+            return !$nullable ? null : $nullable;
         }
 
         try {
@@ -75,17 +74,16 @@ trait DateManipulator
             return Carbon::parse($date)->format($format);
 
         } catch (Throwable) {
-            return ! $nullable ? null : $nullable;
+            return !$nullable ? null : $nullable;
         }
     }
 
-
-    private function parseDate(string|null $value, string $format = 'Y-m-d', ?string $nullable = null): ?string
+    private function parseDate(?string $value, string $format = 'Y-m-d', ?string $nullable = null): ?string
     {
         return $this->toDateFormat($format, $value, $nullable);
     }
 
-    private function parseHour(string $value): string|null
+    private function parseHour(string $value): ?string
     {
         $value = trim($value);
 
@@ -95,14 +93,14 @@ trait DateManipulator
                 )->format('H:i');
             } catch (Throwable $e) {
                 $value = null;
-                //throw new \Exception($e);
+                // throw new \Exception($e);
             }
         } elseif (strlen($value) == 4) {
             try {
                 $value = Carbon::parse($value)->format('H:i');
             } catch (Throwable $e) {
                 $value = null;
-                //throw new \Exception($e);
+                // throw new \Exception($e);
             }
         } else {
             $value = null;
@@ -111,7 +109,7 @@ trait DateManipulator
         return $value;
     }
 
-    public function parseTimestamp(string|null $value): string|null
+    public function parseTimestamp(?string $value): ?string
     {
         $value = trim($value);
 
@@ -126,7 +124,7 @@ trait DateManipulator
         }
     }
 
-    public function parseDateTime(string|null $value): string|null
+    public function parseDateTime(?string $value): ?string
     {
         $value = trim($value);
 
@@ -144,9 +142,9 @@ trait DateManipulator
     {
         $date->locale(app()->getLocale());
 
-        return ucfirst($date->dayName).' '.$date->day.' '.ucfirst(
-                $date->monthName
-            ).' '.$date->year;
+        return ucfirst($date->dayName) . ' ' . $date->day . ' ' . ucfirst(
+            $date->monthName
+        ) . ' ' . $date->year;
     }
 
     public static function createYearRangeFromNowToPast(int $years): array
@@ -162,5 +160,4 @@ trait DateManipulator
 
         return $years;
     }
-
 }

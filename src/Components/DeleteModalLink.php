@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Closure;
@@ -8,18 +10,16 @@ use Illuminate\View\Component;
 
 class DeleteModalLink extends Component
 {
-
     private string $params_as_string = ' ';
 
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public string  $reference,
+        public string $reference,
         public ?string $title = null,
-        public array   $params = []
-    )
-    {
+        public array $params = []
+    ) {
         $this->title = $this->title ?: __('mfw.delete');
 
         if ($this->params) {

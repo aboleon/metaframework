@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,10 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 class SiteOwner extends Model
 {
     public $timestamps = false;
+
     protected $table = 'site_owner';
+
     protected $guarded = [];
 
     protected $casts = [
-      'address' => 'json'
+        'address' => 'json'
     ];
 }

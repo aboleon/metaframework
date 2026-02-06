@@ -8,13 +8,11 @@
 
 namespace MetaFramework\Services;
 
-
 use ReCaptcha\ReCaptcha;
 use ReCaptcha\RequestMethod\CurlPost;
 
 class GoogleRecaptcha
 {
-
     public static function check(): bool
     {
         if (!self::isActive()) {
@@ -23,9 +21,9 @@ class GoogleRecaptcha
 
         $gRecaptchaResponse = request('g-recaptcha-response');
 
-        $recaptcha = new ReCaptcha(self::secretKey(), new CurlPost());
+        $recaptcha = new ReCaptcha(self::secretKey(), new CurlPost);
         $resp = $recaptcha
-            //->setExpectedHostname($hostname)
+            // ->setExpectedHostname($hostname)
             ->setScoreThreshold(0.7)
             ->verify($gRecaptchaResponse, request()->ip());
 
@@ -34,7 +32,7 @@ class GoogleRecaptcha
 
     public static function isActive(): bool
     {
-        return (bool)config('mfw-api.google.recaptcha.active') && (!empty(self::siteKey()) or !empty(self::secretKey()));
+        return (bool) config('mfw-api.google.recaptcha.active') && (!empty(self::siteKey()) or !empty(self::secretKey()));
     }
 
     public static function form(string $form_id): void
@@ -45,12 +43,12 @@ class GoogleRecaptcha
             <script>
               function doRecaptcha(result) {
                 grecaptcha.ready(function () {
-                  grecaptcha.execute('<?=self::siteKey();?>', {action: 'contact_form'}).then(function (token) {
-                    let recaptchaResponse = $('#<?=$form_id;?>').find('input[name=g-recaptcha-response]');
+                  grecaptcha.execute('<?= self::siteKey(); ?>', {action: 'contact_form'}).then(function (token) {
+                    let recaptchaResponse = $('#<?= $form_id; ?>').find('input[name=g-recaptcha-response]');
                     if (recaptchaResponse.length) {
                       recaptchaResponse.val(token);
                     } else {
-                      $('#<?=$form_id;?>').append('<input type="hidden" name="g-recaptcha-response" value="' + token + '"/>');
+                      $('#<?= $form_id; ?>').append('<input type="hidden" name="g-recaptcha-response" value="' + token + '"/>');
                     }
                     if (result !== undefined && !result.hasOwnProperty('error')) {
                       window.dataLayer = window.dataLayer || [];
@@ -79,5 +77,4 @@ class GoogleRecaptcha
     {
         return config('mfw-api.google.recaptcha.site_key');
     }
-
 }

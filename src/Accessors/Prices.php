@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Accessors;
 
 class Prices
@@ -16,7 +18,7 @@ class Prices
         }
         $price = $price * 100;
 
-        return (int)round($price);
+        return (int) round($price);
     }
 
     public static function readableFormat(
@@ -33,11 +35,12 @@ class Prices
 
         if ($showDecimals) {
             if ($stripZeros && $decimal_part === '00') {
-                return rtrim($integer_part.' '.$currency);
+                return rtrim($integer_part . ' ' . $currency);
             }
-            return rtrim($formatted_price.' '.$currency);
+
+            return rtrim($formatted_price . ' ' . $currency);
         }
 
-        return rtrim($integer_part.' '.$currency);
+        return rtrim($integer_part . ' ' . $currency);
     }
 }

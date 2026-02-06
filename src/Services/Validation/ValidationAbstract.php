@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Services\Validation;
 
 abstract class ValidationAbstract
@@ -7,14 +9,16 @@ abstract class ValidationAbstract
     /**
      * @return array<mixed>
      */
-    public function rules(): array {
+    public function rules(): array
+    {
         return [];
     }
 
     /**
      * @return array<string>
      */
-    public function messages(): array {
+    public function messages(): array
+    {
         return [];
     }
 
@@ -28,5 +32,4 @@ abstract class ValidationAbstract
             'messages' => $this->messages(),
         ];
     }
-
 }

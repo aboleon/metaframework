@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
 
 namespace MetaFramework\Traits;
 
-use MetaFramework\Models\UserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use MetaFramework\Models\UserRole;
 use MetaFramework\Services\Validation\ValidationTrait;
 
 trait Users
@@ -14,6 +15,7 @@ trait Users
     use ValidationTrait;
 
     private ?int $against_user_id = null;
+
     private array $target_role;
 
     public function adminUsers(): Collection
@@ -35,7 +37,6 @@ trait Users
     {
         return collect($this->userTypes())->where('profile', $type);
     }
-
 
     public function userType(string|int|null $type = null): array
     {
@@ -93,6 +94,7 @@ trait Users
                 echo '<span class="role btn btn-sm btn-secondary">' . trans('user_type.' . $this->userType($role->role_id)['label'] . '.label') . '</span>';
             }
         }
+
         return '';
     }
 
@@ -124,7 +126,7 @@ trait Users
 
         if (is_string($role)) {
             $separator = str_contains($role, '|') ? '|' : ',';
-            $this->target_role = array_map(fn($x) => trim(str_replace(["'", '"', '[', ']'], '', $x)), explode($separator, $role));
+            $this->target_role = array_map(fn ($x) => trim(str_replace(["'", '"', '[', ']'], '', $x)), explode($separator, $role));
         } else {
             $this->target_role = $role;
         }
@@ -132,7 +134,7 @@ trait Users
         $stringables = collect($this->userTypes())->filter(function ($item, $key) {
             return in_array($key, $this->target_role);
         })->pluck('id')->toArray();
-        $numerics = collect($this->target_role)->reject(fn($item) => !is_numeric($item))->toArray();
+        $numerics = collect($this->target_role)->reject(fn ($item) => !is_numeric($item))->toArray();
         $targeted = array_unique(array_merge($stringables, $numerics));
 
         if ($test) {
@@ -144,7 +146,7 @@ trait Users
             d(array_intersect($targeted, $this->userRolesKeys()), 'CUT');
         }
 
-        return (bool)array_intersect($targeted, $this->userRolesKeys());
+        return (bool) array_intersect($targeted, $this->userRolesKeys());
     }
 
     private function userTypeParser(string $parser, string|array $group): bool
@@ -154,7 +156,7 @@ trait Users
         } else {
             $collection = collect($this->userTypes())->whereIn($parser, $group)->keys()->toArray();
         }
+
         return $this->hasRole($collection);
     }
-
 }

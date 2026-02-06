@@ -12,13 +12,15 @@ use Illuminate\Http\Request;
 final class PasswordRequest
 {
     private bool $requestedChange;
+
     private string $password;
+
     private bool $randomPasswordRequested;
 
     /**
      * Create a new PasswordRequest instance.
      *
-     * @param Request $request The HTTP request object containing the password change data.
+     * @param  Request  $request  The HTTP request object containing the password change data.
      */
     public function __construct(Request $request)
     {
@@ -55,6 +57,7 @@ final class PasswordRequest
     public function password(): string
     {
         $this->validate();
+
         return $this->password;
     }
 
@@ -64,7 +67,7 @@ final class PasswordRequest
     public function validate(): void
     {
         if (!$this->password) {
-            $this->password = (new PasswordGenerator())->generateRandomPublicPassword()->getPublicPassword();
+            $this->password = (new PasswordGenerator)->generateRandomPublicPassword()->getPublicPassword();
         }
     }
 }

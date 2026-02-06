@@ -14,6 +14,7 @@ class TranslatableTranslator
     use CyrillicContentTrait;
 
     private ?Translator $translator = null;
+
     private array $responses = [];
 
     public function __construct(
@@ -40,12 +41,12 @@ class TranslatableTranslator
         }
 
         $translator = $this->translator();
-        if (! $translator || empty($normalized)) {
+        if (!$translator || empty($normalized)) {
             return [];
         }
 
         $sourceLang = $this->mapLocale($sourceLocale, true);
-        if (! $sourceLang) {
+        if (!$sourceLang) {
             return [];
         }
 
@@ -58,7 +59,7 @@ class TranslatableTranslator
             }
 
             $targetLang = $this->mapLocale($locale, false);
-            if (! $targetLang) {
+            if (!$targetLang) {
                 continue;
             }
 
@@ -89,7 +90,7 @@ class TranslatableTranslator
 
     private function translator(): ?Translator
     {
-        if (! $this->apiKey) {
+        if (!$this->apiKey) {
             return null;
         }
 
@@ -167,7 +168,7 @@ class TranslatableTranslator
 
     private function transliterateLatinToCyrillic(string $text): string
     {
-        if (! extension_loaded('intl')) {
+        if (!extension_loaded('intl')) {
             return $text;
         }
 

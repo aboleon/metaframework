@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Controllers;
 
 use Illuminate\Support\Facades\Artisan;
@@ -13,13 +15,14 @@ class ArtisanController
     use Ajax;
 
     private array $output = [];
+
     private int $statusCode;
 
     public function optimizeClear(): array
     {
         $this->executeCommand('optimize:clear');
         if ($this->statusCode == 0) {
-            $this->responseSuccess("Le cache application a été réinitialisé");
+            $this->responseSuccess('Le cache application a été réinitialisé');
         }
 
         return $this->fetchResponse();
@@ -29,8 +32,9 @@ class ArtisanController
     {
         $this->executeCommand('migrate' . ($rollback ? ':rollback' : ''));
         if ($this->statusCode == 0) {
-            $this->responseSuccess("Opération terminée.");
+            $this->responseSuccess('Opération terminée.');
         }
+
         return $this->fetchResponse();
     }
 
@@ -41,7 +45,7 @@ class ArtisanController
             // Avoid interactive confirmation in production.
             $options = ['--force' => true, '--no-interaction' => true];
         }
-        $this->statusCode = Artisan::call($command, $options, $outputBuffer = new BufferedOutput());
+        $this->statusCode = Artisan::call($command, $options, $outputBuffer = new BufferedOutput);
         $response = nl2br(trim($outputBuffer->fetch(), "\r\n"));
         if ($this->statusCode == 0) {
             $this->responseNotice($response);
@@ -63,6 +67,7 @@ class ArtisanController
             '--no-progress',
             '--no-ansi',
         ]);
+
         return $this->fetchResponse();
     }
 
@@ -77,6 +82,7 @@ class ArtisanController
             '--no-progress',
             '--no-ansi',
         ]);
+
         return $this->fetchResponse();
     }
 
@@ -126,14 +132,12 @@ class ArtisanController
                 $this->responseNotice('<div style="' . $errorStyle . '">' . $errorOutput . '</div>');
             }
             if ($isSuccessful) {
-                $this->responseSuccess("Composer update completed successfully.");
+                $this->responseSuccess('Composer update completed successfully.');
             } else {
-                $this->responseError("Composer update failed.");
+                $this->responseError('Composer update failed.');
             }
         } catch (ProcessFailedException $exception) {
             $this->responseError(nl2br($exception->getMessage()));
         }
     }
-
-
 }

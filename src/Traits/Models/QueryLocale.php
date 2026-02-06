@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Traits\Models;
 
 trait QueryLocale
@@ -15,7 +17,7 @@ trait QueryLocale
 
     public function getQueryLocale(): string
     {
-        if ( ! $this->query_locale) {
+        if (!$this->query_locale) {
             $this->setQueryLocale(app()->getFallbackLocale());
         }
 

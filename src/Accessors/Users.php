@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace MetaFramework\Accessors;
 
@@ -8,7 +9,6 @@ use Illuminate\Support\Collection;
 
 class Users
 {
-
     private array $user_types;
 
     public function __construct()
@@ -26,7 +26,7 @@ class Users
         return collect($this->user_types)->whereIn('profile', ['admin', 'dev']);
     }
 
-    public function adminContact():array
+    public function adminContact(): array
     {
         return collect($this->user_types)->where('profile', 'admin')->first();
     }
@@ -67,11 +67,7 @@ class Users
                 echo '<span class="role btn btn-sm btn-secondary">' . trans('user_type.' . $this->userType($role->role_id)['label'] . '.label') . '</span>';
             }
         }
+
         return '';
     }
-
-
-
-
-
 }

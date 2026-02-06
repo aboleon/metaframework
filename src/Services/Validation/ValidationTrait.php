@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Services\Validation;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -10,7 +12,9 @@ trait ValidationTrait
     use Responses;
 
     protected array $validation_rules = [];
+
     protected array $validation_messages = [];
+
     /**
      * @var array<string, mixed>
      */
@@ -50,7 +54,7 @@ trait ValidationTrait
     {
 
         $this->validated_data[$key] = is_array($request->validated()) && array_key_exists($key, $request->validated())
-            ? (array)$request->validated($key)
+            ? (array) $request->validated($key)
             : [];
         if (!$this->validated_data[$key]) {
             $this->responseWarning(__('mfw.errors.composing_data'));

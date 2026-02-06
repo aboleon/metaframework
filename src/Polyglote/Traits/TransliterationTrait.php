@@ -18,7 +18,7 @@ trait TransliterationTrait
         $locales = config('mfw.translatable.locales', []);
         $isCyrillicLocale = $this->isCyrillicLocale($locale) && in_array($locale, $locales, true);
 
-        if ((! $isCyrillicLocale && ! $force) || ! extension_loaded('intl')) {
+        if ((!$isCyrillicLocale && !$force) || !extension_loaded('intl')) {
             return [$searchTerm];
         }
 

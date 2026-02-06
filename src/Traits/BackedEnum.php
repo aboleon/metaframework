@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Traits;
 
 use Illuminate\Support\Str;
@@ -34,11 +36,12 @@ trait BackedEnum
 
     public static function translations(): array
     {
-       return cache()->rememberForever('enum_.' . static::varname(), function () {
+        return cache()->rememberForever('enum_.' . static::varname(), function () {
             $keys = self::keys();
+
             return array_combine(
                 $keys,
-                collect($keys)->map(fn($item) => trans(self::translationPrefix().'enum.' . static::varname() . '.' . $item))->toArray()
+                collect($keys)->map(fn ($item) => trans(self::translationPrefix() . 'enum.' . static::varname() . '.' . $item))->toArray()
             );
         });
     }

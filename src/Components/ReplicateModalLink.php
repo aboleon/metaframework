@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Closure;
@@ -14,8 +16,7 @@ class ReplicateModalLink extends Component
     public function __construct(
         public string $reference,
         public ?string $title = null,
-    )
-    {
+    ) {
         $this->title = $this->title ?: __('mfw.replicate');
     }
 

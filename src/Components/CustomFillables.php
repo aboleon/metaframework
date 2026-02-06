@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -11,11 +13,7 @@ class CustomFillables extends Component
     public function __construct(
         public array $values,
         public Model $model,
-    )
-    {
-
-    }
-
+    ) {}
 
     public function render(): Renderable
     {

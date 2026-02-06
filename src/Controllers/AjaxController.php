@@ -1,21 +1,18 @@
 <?php
 
+declare(strict_types=1);
 
 namespace MetaFramework\Controllers;
 
-use MetaFramework\Controllers\ArtisanController;
 use Illuminate\Support\Facades\DB;
-use MetaFramework\Models\Meta;
+use MetaFramework\Actions\TranslatableActions;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Support\Traits\Ajax;
-use MetaFramework\Actions\TranslatableActions;
-use Throwable;
 
 class AjaxController extends Controller
 {
     use Ajax;
     use ValidationTrait;
-
 
     /**
      * Statut de publication d'un élément ayant la propriété "published" en DB
@@ -34,6 +31,7 @@ class AjaxController extends Controller
         } else {
             $result['error'] = 1;
         }
+
         return $result;
     }
 
@@ -51,19 +49,20 @@ class AjaxController extends Controller
             }
             DB::commit();
             $this->responseSuccess("L'ordre a été mis à jour");
+
             return $this->fetchResponse();
         }
+
         return [];
     }
 
     protected function translate_translatables(): array
     {
-        return (new TranslatableActions())
+        return (new TranslatableActions)
             ->ajaxMode()
             ->translateTranslatables()
             ->fetchResponse();
     }
-
 
     public function artisanOptimize(): array
     {
@@ -72,7 +71,7 @@ class AjaxController extends Controller
 
     public function artisanMigrate(): array
     {
-        return new ArtisanController()->ajaxMode()->migrate((bool)request('rollback'));
+        return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'));
     }
 
     public function composerUpdate(): array
@@ -89,6 +88,4 @@ class AjaxController extends Controller
     {
         return new ArtisanController()->ajaxMode()->composerUpdateProd();
     }
-
-
 }

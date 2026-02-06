@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -15,8 +17,7 @@ class LanguageTabs extends Component
     public function __construct(
         public string $id = 'tab_translatable',
         public ?string $selectedlocale = null
-    )
-    {
+    ) {
         //
     }
 

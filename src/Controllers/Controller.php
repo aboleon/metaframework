@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;

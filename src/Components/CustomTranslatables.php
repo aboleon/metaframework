@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -12,11 +14,9 @@ class CustomTranslatables extends Component
         public array $values,
         public Model $model,
         public string $locale
-    )
-    {
+    ) {
         //
     }
-
 
     public function render(): Renderable
     {

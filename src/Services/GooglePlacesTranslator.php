@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Services;
 
 use DeepL\DeepLException;
@@ -12,6 +14,7 @@ class GooglePlacesTranslator
     use CyrillicContentTrait;
 
     private ?Translator $translator = null;
+
     private array $responses = [];
 
     public function __construct(
@@ -36,6 +39,7 @@ class GooglePlacesTranslator
             $value = is_string($value) ? trim($value) : trim((string) $value);
             if ($value === '') {
                 $translations[$field] = null;
+
                 continue;
             }
 
@@ -43,7 +47,7 @@ class GooglePlacesTranslator
         }
 
         $translator = $this->translator();
-        if (! $translator) {
+        if (!$translator) {
             foreach ($normalized as $field => $value) {
                 foreach ($locales as $locale) {
                     $translations[$field][$locale] = $value;
@@ -56,13 +60,14 @@ class GooglePlacesTranslator
         foreach ($normalized as $field => $value) {
             foreach ($locales as $locale) {
                 $targetLang = $this->mapLocale($locale, false);
-                if (! $targetLang) {
+                if (!$targetLang) {
                     continue;
                 }
 
                 $translated = $this->translateText($translator, $value, null, $targetLang);
                 if ($translated === null || $translated === '') {
                     $translations[$field][$locale] = $value;
+
                     continue;
                 }
 
@@ -88,7 +93,7 @@ class GooglePlacesTranslator
 
     private function translator(): ?Translator
     {
-        if (! $this->apiKey) {
+        if (!$this->apiKey) {
             return null;
         }
 
@@ -172,7 +177,7 @@ class GooglePlacesTranslator
      */
     private function transliterateLatinToCyrillic(string $text): string
     {
-        if (! extension_loaded('intl')) {
+        if (!extension_loaded('intl')) {
             return $text;
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Services\Avatars;
 
 use App\Models\User;
@@ -10,9 +12,11 @@ use MetaFramework\Mediaclass\Path;
 class Avatar
 {
     private string $path;
+
     private FilesystemAdapter $disk;
 
     private bool $error = false;
+
     private string $initials;
 
     public function __construct(private User $user)
@@ -49,11 +53,11 @@ class Avatar
         return $this->initials . '.svg';
     }
 
-
     private function initials(): void
     {
         if ($this->user->first_name && $this->user->last_name) {
             $this->initials = substr($this->user->first_name, 0, 1) . substr($this->user->last_name, 0, 1);
+
             return;
         }
 
@@ -62,11 +66,13 @@ class Avatar
             $this->initials = (count($name) > 1)
                 ? substr($name[0], 0, 1) . substr($name[1], 0, 1)
                 : substr($this->user->name, 0, 2);
+
             return;
         }
 
         if ($this->user->first_name) {
             $this->initials = substr($this->user->first_name, 0, 2);
+
             return;
         }
 
@@ -89,32 +95,31 @@ class Avatar
     private function colors(): array
     {
         return [
-            "D32F2F", // Red
-            "1976D2", // Blue
-            "388E3C", // Green
-            "FBC02D", // Yellow
-            "8E24AA", // Purple
-            "C2185B", // Pink
-            "7B1FA2", // Indigo
-            "0288D1", // Light Blue
-            "CDDC39", // Lime
-            "FFC107", // Amber
-            "0097A7", // Cyan
-            "689F38", // Light Green
-            "8D6E63", // Brown
-            "616161", // Grey
-            "455A64", // Blue Grey
-            "F57C00", // Orange
-            "E64A19", // Deep Orange
-            "512DA8", // Deep Purple
-            "0288D1", // Light Blue
-            "C0CA33", // Lime
-            "F4511E", // Deep Orange
-            "1B5E20", // Dark Green
-            "F44336", // Bright Red
-            "03A9F4", // Light Blue
-            "9C27B0"  // Bright Purple
+            'D32F2F', // Red
+            '1976D2', // Blue
+            '388E3C', // Green
+            'FBC02D', // Yellow
+            '8E24AA', // Purple
+            'C2185B', // Pink
+            '7B1FA2', // Indigo
+            '0288D1', // Light Blue
+            'CDDC39', // Lime
+            'FFC107', // Amber
+            '0097A7', // Cyan
+            '689F38', // Light Green
+            '8D6E63', // Brown
+            '616161', // Grey
+            '455A64', // Blue Grey
+            'F57C00', // Orange
+            'E64A19', // Deep Orange
+            '512DA8', // Deep Purple
+            '0288D1', // Light Blue
+            'C0CA33', // Lime
+            'F4511E', // Deep Orange
+            '1B5E20', // Dark Green
+            'F44336', // Bright Red
+            '03A9F4', // Light Blue
+            '9C27B0'  // Bright Purple
         ];
     }
-
 }

@@ -13,6 +13,7 @@ final class PasswordValidation extends ValidationAbstract
     /**
      * use MetaFramework\Actions\Fortify\PasswordValidationRules;
      * $this->passwordRules(),
+     *
      * @return array<string>
      */
     public function rules(): array
@@ -20,6 +21,7 @@ final class PasswordValidation extends ValidationAbstract
         $confirm = request()->has('password_confirmation')
             ? 'confirmed'
             : '';
+
         return [
             'password' => $confirm . '|alpha_dash|min:' . $this->password_length
         ];
@@ -31,11 +33,9 @@ final class PasswordValidation extends ValidationAbstract
     public function messages(): array
     {
         return [
-            'password.confirmed' => "Les mots de passe ne sont pas identiques",
-            'password.alpha_dash' => "Les mots de passe peuvent contenir chiffre, lettres et tirets",
-            'password.min' => "Le mot de passe doit être au minimum " . $this->password_length . " caractères",
+            'password.confirmed' => 'Les mots de passe ne sont pas identiques',
+            'password.alpha_dash' => 'Les mots de passe peuvent contenir chiffre, lettres et tirets',
+            'password.min' => 'Le mot de passe doit être au minimum ' . $this->password_length . ' caractères',
         ];
     }
-
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -16,7 +18,7 @@ class Modal extends Component
         public string $class = '',
     ) {
         $this->question = $this->question ?? __('mfw.should_i_delete_record');
-        $this->reference = $this->reference ?? 'myModal'.$this->reference;
+        $this->reference = $this->reference ?? 'myModal' . $this->reference;
         $this->title = $this->title ?? __('mfw.deletion');
     }
 

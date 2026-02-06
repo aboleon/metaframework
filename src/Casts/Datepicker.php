@@ -1,13 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MetaFramework\Casts;
 
 use DateTime;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-
 class Datepicker implements CastsAttributes
 {
-
     /**
      * @throws \Exception
      */
@@ -18,6 +19,7 @@ class Datepicker implements CastsAttributes
 
             return $date->format('d/m/Y');
         }
+
         return null;
     }
 

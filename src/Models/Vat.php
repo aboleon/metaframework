@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,16 +15,17 @@ use MetaFramework\Casts\PriceInteger;
  */
 class Vat extends Model
 {
-
     public $timestamps = false;
+
     protected $table = 'vat';
+
     protected $fillable = [
         'rate',
         'default'
     ];
 
     protected $casts = [
-      'rate' => PriceInteger::class
+        'rate' => PriceInteger::class
     ];
 
     public function manageDefaultState(): void

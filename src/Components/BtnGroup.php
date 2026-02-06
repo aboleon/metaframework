@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -16,9 +18,8 @@ class BtnGroup extends Component
         public array $values,
         public string $name,
         public int|string|null $affected,
-        public string|null $label = '',
-    )
-    {
+        public ?string $label = '',
+    ) {
         //
     }
 

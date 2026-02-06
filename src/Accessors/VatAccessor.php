@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Accessors;
 
 use Illuminate\Support\Collection;
@@ -13,17 +15,18 @@ class VatAccessor
         return self::rate($vat_id);
     }
 
-    public static function vatForPrice(null|float|int $price = 0, int $vat_id): float|int
+    public static function vatForPrice(null|float|int $price, int $vat_id): float|int
     {
         if (!$price) {
             return 0;
         }
 
         $vat_rate = VatAccessor::fetchVatRate($vat_id);
+
         return round($price / (100 + $vat_rate) * $vat_rate, 2);
     }
 
-    public static function netPriceFromVatPrice(null|float|int $price = 0, int $vat_id): float|int
+    public static function netPriceFromVatPrice(null|float|int $price, int $vat_id): float|int
     {
         if (!$price) {
             return 0;
@@ -32,10 +35,9 @@ class VatAccessor
         return round($price - VatAccessor::vatForPrice($price, $vat_id), 2);
     }
 
-
     public static function vats(): Collection
     {
-        return Cache::rememberForever('vats', fn() => Vat::query()->pluck('rate', 'id'));
+        return Cache::rememberForever('vats', fn () => Vat::query()->pluck('rate', 'id'));
 
     }
 
@@ -44,10 +46,9 @@ class VatAccessor
         return self::vats()[$id] ?? self::defaultRate()->rate;
     }
 
-
     public static function defaultRate(): ?Vat
     {
-        return Cache::rememberForever('default_vat_rate', fn() => Vat::query()->where('default', 1)->first());
+        return Cache::rememberForever('default_vat_rate', fn () => Vat::query()->where('default', 1)->first());
     }
 
     public static function defaultId(): int
@@ -55,10 +56,9 @@ class VatAccessor
         return self::defaultRate()->id ?? 0;
     }
 
-
     public static function readableArrayList(): array
     {
-        return VatAccessor::vats()->sortBy('default')->map(fn($item) => $item .'%')->toArray();
+        return VatAccessor::vats()->sortBy('default')->map(fn ($item) => $item . '%')->toArray();
     }
 
     public static function selectables(): array
@@ -70,8 +70,9 @@ class VatAccessor
     {
         $options = '';
         foreach (VatAccessor::vats()->sortBy('default') as $key => $value) {
-            $options.='<option data-rate="'.$value.'" value="'.$key.'"'.($affected && $affected == $key ? ' selected' : '').'>'.$value.'%</option>'."\r\n";
+            $options.='<option data-rate="' . $value . '" value="' . $key . '"' . ($affected && $affected == $key ? ' selected' : '') . '>' . $value . '%</option>' . "\r\n";
         }
+
         return $options;
     }
 }

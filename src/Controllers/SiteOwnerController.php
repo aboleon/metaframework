@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Http\{
-    RedirectResponse,
-    Request
-};
 use MetaFramework\Models\SiteOwner;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Support\Traits\Responses;
@@ -48,6 +48,7 @@ class SiteOwnerController extends Controller
         } catch (Throwable $e) {
             $this->responseException($e);
         }
+
         return $this->sendResponse();
     }
 

@@ -12,13 +12,15 @@ use Illuminate\Support\Str;
 final class PasswordGenerator
 {
     private string $hashed_password; // The hashed version of the password.
+
     private string $public_password; // The unhashed (public) version of the password.
+
     private int $password_length = 8; // The default length of the password.
 
     /**
      * Set the public and hashed passwords.
      *
-     * @param string $password The public (unhashed) version of the password.
+     * @param  string  $password  The public (unhashed) version of the password.
      */
     public function makePassword(string $password): void
     {
@@ -30,7 +32,6 @@ final class PasswordGenerator
 
     /**
      * Hash the public password.
-     *
      */
     public function hashPassword(): void
     {
@@ -57,6 +58,7 @@ final class PasswordGenerator
     public function generateRandomPublicPassword(): PasswordGenerator
     {
         $this->public_password = Str::random($this->password_length);
+
         return $this;
     }
 

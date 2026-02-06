@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -17,8 +19,8 @@ class FillableParser extends Component
         public array $parsed = [],
         public bool $fallbacklocale = false
     ) {
-        if ( ! $this->parsed) {
-            $this->fillables = $this->model instanceof TranslatableInterface ? $this->model->getTranslatableProperties() : ((array)$this->fillables ?: []);
+        if (!$this->parsed) {
+            $this->fillables = $this->model instanceof TranslatableInterface ? $this->model->getTranslatableProperties() : ((array) $this->fillables ?: []);
         }
 
         $normalized = [];
@@ -32,6 +34,7 @@ class FillableParser extends Component
                     'label' => $value,
                     'type' => 'input',
                 ];
+
                 continue;
             }
 
@@ -40,6 +43,7 @@ class FillableParser extends Component
                     'label' => $key,
                     'type' => 'input',
                 ];
+
                 continue;
             }
 

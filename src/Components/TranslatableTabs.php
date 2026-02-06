@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -24,10 +26,10 @@ class TranslatableTabs extends Component
     ) {
         $this->fillables = $this->model->getTranslatableProperties();
         if ($this->pluck) {
-            $this->fillables = array_filter($this->fillables, fn($item) => in_array($item, $this->pluck), ARRAY_FILTER_USE_KEY);
+            $this->fillables = array_filter($this->fillables, fn ($item) => in_array($item, $this->pluck), ARRAY_FILTER_USE_KEY);
         }
 
-        $this->id = ! $this->id ? $this->default_id.'_'.Str::random() : $this->id;
+        $this->id = !$this->id ? $this->default_id . '_' . Str::random() : $this->id;
 
         $this->selectedlocale = $this->selectedlocale == null ? app()->getLocale() : $this->selectedlocale;
     }

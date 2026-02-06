@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Components;
 
 use Illuminate\Contracts\Support\Renderable;
@@ -12,8 +14,7 @@ class Form extends Component
         public ?Forms $form,
         public string $label = '',
         public string $btn = ''
-    )
-    {
+    ) {
         //
     }
 

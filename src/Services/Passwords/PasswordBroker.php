@@ -15,26 +15,26 @@ final class PasswordBroker
     use ValidationTrait; // The Validation trait provides methods for validating input data.
 
     private PasswordRequest $requested; // The PasswordRequest object containing the password change data.
+
     private PasswordGenerator $generator; // The PasswordGenerator object used to generate new passwords.
 
     /**
      * Create a new PasswordBroker instance.
      *
-     * @param Request $request The HTTP request object containing the password change data.
+     * @param  Request  $request  The HTTP request object containing the password change data.
      */
     public function __construct(Request $request)
     {
         // Create a new PasswordRequest object.
         $this->requested = new PasswordRequest($request);
         // Create a new PasswordGenerator object.
-        $this->generator = new PasswordGenerator();
+        $this->generator = new PasswordGenerator;
 
         $this->passwordBroker();
     }
 
     /**
      * Is there a request for password change ?
-     * @return bool
      */
     public function requestedChange(): bool
     {
@@ -59,6 +59,7 @@ final class PasswordBroker
     public function passwordBroker(): PasswordBroker
     {
         $this->generator->makePassword($this->requested->password());
+
         return $this;
     }
 
@@ -77,7 +78,7 @@ final class PasswordBroker
     {
         return $this->generator->getEncryptedPassword();
     }
-    
+
     public function getPublicPassword(): string
     {
         return $this->generator->getPublicPassword();

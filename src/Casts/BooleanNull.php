@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-
 
 class BooleanNull implements CastsAttributes
 {

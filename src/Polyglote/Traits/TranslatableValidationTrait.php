@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MetaFramework\Polyglote\Traits;
 
 /**
@@ -46,7 +48,6 @@ namespace MetaFramework\Polyglote\Traits;
  * translatable.active_locales - Which locales to validate
  * translatable.fallback_locale - Which locale is the primary one
  */
-
 trait TranslatableValidationTrait
 {
     /**
@@ -69,7 +70,6 @@ trait TranslatableValidationTrait
      * Build validation rules for translatable fields
      *
      * @param  array  $translatableFields  Array of translatable field configurations
-     *
      * @return array
      *
      * Example usage:
@@ -97,7 +97,6 @@ trait TranslatableValidationTrait
      * Build validation messages for translatable fields
      *
      * @param  array  $translatableMessages  Array of translatable field message configurations
-     *
      * @return array
      *
      * Example usage:
@@ -114,7 +113,7 @@ trait TranslatableValidationTrait
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('mwf-lang.'.$locale.'.label');
+                $localeLabel = __('mwf-lang.' . $locale . '.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
@@ -133,10 +132,8 @@ trait TranslatableValidationTrait
      * Build validation rules for translatable fields with prefix
      * Useful for nested validation or when using prefixes
      *
-     * @param  string  $prefix              The prefix to prepend
-     * @param  array   $translatableFields  Array of translatable field configurations
-     *
-     * @return array
+     * @param  string  $prefix  The prefix to prepend
+     * @param  array  $translatableFields  Array of translatable field configurations
      */
     protected function buildTranslatableRulesWithPrefix(string $prefix, array $translatableFields): array
     {
@@ -155,10 +152,8 @@ trait TranslatableValidationTrait
     /**
      * Build validation messages for translatable fields with prefix
      *
-     * @param  string  $prefix                The prefix to prepend
-     * @param  array   $translatableMessages  Array of translatable field message configurations
-     *
-     * @return array
+     * @param  string  $prefix  The prefix to prepend
+     * @param  array  $translatableMessages  Array of translatable field message configurations
      */
     protected function buildTranslatableMessagesWithPrefix(string $prefix, array $translatableMessages): array
     {
@@ -168,7 +163,7 @@ trait TranslatableValidationTrait
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('mfw-lang.'.$locale.'.label');
+                $localeLabel = __('mfw-lang.' . $locale . '.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
@@ -188,8 +183,6 @@ trait TranslatableValidationTrait
      * and other locales are optional
      *
      * @param  array  $translatableFields  Array of translatable field configurations
-     *
-     * @return array
      */
     protected function buildTranslatableRulesWithFallbackRequired(array $translatableFields): array
     {
@@ -217,10 +210,8 @@ trait TranslatableValidationTrait
      * Build validation rules with prefix where only the fallback locale is required
      * and other locales are optional
      *
-     * @param  string  $prefix              The prefix to prepend
-     * @param  array   $translatableFields  Array of translatable field configurations
-     *
-     * @return array
+     * @param  string  $prefix  The prefix to prepend
+     * @param  array  $translatableFields  Array of translatable field configurations
      */
     protected function buildTranslatableRulesWithPrefixFallbackRequired(string $prefix, array $translatableFields): array
     {

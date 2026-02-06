@@ -1,12 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MetaFramework\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-
 class ForceInteger implements CastsAttributes
 {
-
     /**
      * @throws \Exception
      */
