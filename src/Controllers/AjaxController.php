@@ -88,4 +88,9 @@ class AjaxController extends Controller
     {
         return new ArtisanController()->ajaxMode()->composerUpdateProd();
     }
+
+    public function composerDumpAutoload(): array
+    {
+        return new ArtisanController()->ajaxMode()->composerDumpAutoload();
+    }
 }

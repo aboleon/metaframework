@@ -86,7 +86,23 @@ class ArtisanController
         return $this->fetchResponse();
     }
 
-    private function executeShellCommand(array $command): void
+    public function composerDumpAutoload(): array
+    {
+        $this->executeShellCommand([
+            'composer',
+            'dump-autoload',
+            '--no-interaction',
+            '--no-ansi',
+        ], 'Composer dump-autoload completed successfully.', 'Composer dump-autoload failed.');
+
+        return $this->fetchResponse();
+    }
+
+    private function executeShellCommand(
+        array $command,
+        string $successMessage = 'Composer update completed successfully.',
+        string $failureMessage = 'Composer update failed.'
+    ): void
     {
         $pathPrefix = trim((string) env('MF_SHELL_PATH_PREFIX', ''));
         $existingPath = (string) env('PATH', (string) getenv('PATH'));
@@ -132,9 +148,9 @@ class ArtisanController
                 $this->responseNotice('<div style="' . $errorStyle . '">' . $errorOutput . '</div>');
             }
             if ($isSuccessful) {
-                $this->responseSuccess('Composer update completed successfully.');
+                $this->responseSuccess($successMessage);
             } else {
-                $this->responseError('Composer update failed.');
+                $this->responseError($failureMessage);
             }
         } catch (ProcessFailedException $exception) {
             $this->responseError(nl2br($exception->getMessage()));

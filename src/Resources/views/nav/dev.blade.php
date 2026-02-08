@@ -4,20 +4,23 @@
         {{-- @role('dev') --}}
         <x-mfw::nav-link :route="route('panel.roles', 'super-admin')" title="Rôles"/>
         <li>
-            <a href="#" id="migrate-app">Migration DB</a>
+            <a href="#" class="mfw-dev-action" data-action="artisanMigrate">Migration DB</a>
         </li>
         <li>
-            <a href="#" id="migrate-rollback">Migration Rollback DB</a>
+            <a href="#" class="mfw-dev-action" data-action="artisanMigrate" data-param-rollback="1">Migration Rollback DB</a>
         </li>
         {{-- @endrole --}}
         <li>
-            <a href="#" id="reset-app">Réinitialiser App</a>
+            <a href="#" class="mfw-dev-action" data-action="artisanOptimize">Réinitialiser App</a>
         </li>
         <li>
-            <a href="#" id="composer-u-dev">Composer Update (dev)</a>
+            <a href="#" class="mfw-dev-action" data-action="composerUpdateDev">Composer Update (dev)</a>
         </li>
         <li>
-            <a href="#" id="composer-u-prod">Composer Update (prod)</a>
+            <a href="#" class="mfw-dev-action" data-action="composerUpdateProd">Composer Update (prod)</a>
+        </li>
+        <li>
+            <a href="#" class="mfw-dev-action" data-action="composerDumpAutoload">Composer Dump Autoload</a>
         </li>
     </ul>
 </li>
@@ -28,26 +31,31 @@
             if (mfwmessages.length) {
                 mfwmessages.attr('data-ajax', '{{ route('mfw.ajax') }}');
             }
-            $('#reset-app').off().click(function (event) {
+            $('.mfw-dev-action').off('click.mfwDevAction').click(function (event) {
                 event.preventDefault();
+                let action = $(this).data('action');
+                if (!action) {
+                    return;
+                }
+
+                let requestData = [
+                    'action=' + encodeURIComponent(action),
+                    'callback=removeVeil'
+                ];
+
+                $.each(this.attributes, function () {
+                    if (!this.name || this.name.indexOf('data-param-') !== 0) {
+                        return;
+                    }
+                    let paramName = this.name.substring('data-param-'.length);
+                    if (!paramName || this.value === '') {
+                        return;
+                    }
+                    requestData.push(encodeURIComponent(paramName) + '=' + encodeURIComponent(this.value));
+                });
+
                 setVeil(resetAppContainer);
-                mfwAjax('action=artisanOptimize&callback=removeVeil', mfwmessages);
-            });
-            $('#migrate-app, #migrate-rollback').off().click(function (event) {
-                event.preventDefault();
-                setVeil(resetAppContainer);
-                let rollback = $(this).is('#migrate-rollback') ? 1 : 0;
-                mfwAjax('action=artisanMigrate&callback=removeVeil&rollback=' + rollback, mfwmessages);
-            });
-            $('#composer-u-dev').off().click(function (event) {
-                event.preventDefault();
-                setVeil(resetAppContainer);
-                mfwAjax('action=composerUpdateDev&callback=removeVeil', mfwmessages);
-            });
-            $('#composer-u-prod').off().click(function (event) {
-                event.preventDefault();
-                setVeil(resetAppContainer);
-                mfwAjax('action=composerUpdateProd&callback=removeVeil', mfwmessages);
+                mfwAjax(requestData.join('&'), mfwmessages);
             });
         });
     </script>
