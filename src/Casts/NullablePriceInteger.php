@@ -11,13 +11,20 @@ class NullablePriceInteger implements CastsAttributes
     /**
      * @throws \Exception
      */
-    public function get($model, $key, $value, $attributes): ?int
+    public function get($model, $key, $value, $attributes): int|float|null
     {
-        return isset($value) ? $value/100 : null;
+        if (!is_numeric($value)) {
+            return $value / 100;
+        }
+        return null;
     }
 
     public function set($model, $key, $value, $attributes): ?int
     {
-        return isset($value) ? $value*100 : null;
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        return $value * 100;
     }
 }
