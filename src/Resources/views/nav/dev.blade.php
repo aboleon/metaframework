@@ -13,12 +13,16 @@
         <li>
             <a href="#" class="mfw-dev-action" data-action="artisanOptimize">Réinitialiser App</a>
         </li>
-        <li>
-            <a href="#" class="mfw-dev-action" data-action="composerUpdateDev">Composer Update (dev)</a>
-        </li>
-        <li>
-            <a href="#" class="mfw-dev-action" data-action="composerUpdateProd">Composer Update (prod)</a>
-        </li>
+        @if (app()->environment('local'))
+            <li>
+                <a href="#" class="mfw-dev-action" data-action="composerUpdateDev">Composer Update (dev)</a>
+            </li>
+        @endif
+        @if (app()->environment('production'))
+            <li>
+                <a href="#" class="mfw-dev-action" data-action="composerUpdateProd">Composer Update (prod)</a>
+            </li>
+        @endif
         <li>
             <a href="#" class="mfw-dev-action" data-action="composerDumpAutoload">Composer Dump Autoload</a>
         </li>
