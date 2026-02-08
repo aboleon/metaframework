@@ -7,7 +7,14 @@
             <a href="#" class="mfw-dev-action" data-action="artisanMigrate">Migration DB</a>
         </li>
         <li>
-            <a href="#" class="mfw-dev-action" data-action="artisanMigrate" data-param-rollback="1">Migration Rollback DB</a>
+            <x-mfw::simple-modal
+                    id="mfw-dev-migrate-rollback"
+                    :title="__('mfw.migrate_rollback_confirm_title')"
+                    text="<i class='fa fa-undo'></i> Migration Rollback DB"
+                    :body="__('mfw.migrate_rollback_confirm_message')"
+                    :confirm="__('mfw.confirm')"
+                    :cancel="__('mfw.cancel')"
+                    confirmclass="btn-warning mfw-dev-migrate-rollback-confirm"/>
         </li>
         {{-- @endrole --}}
         <li>
@@ -28,16 +35,14 @@
         </li>
     </ul>
 </li>
+
 @push('js')
     <script>
         $(function () {
             let resetAppContainer = $('body'), mfwmessages = $('#mfw-messages');
-            if (mfwmessages.length) {
-                mfwmessages.attr('data-ajax', '{{ route('mfw.ajax') }}');
-            }
-            $('.mfw-dev-action').off('click.mfwDevAction').click(function (event) {
-                event.preventDefault();
-                let action = $(this).data('action');
+
+            let executeDevAction = function (element) {
+                let action = element.data('action');
                 if (!action) {
                     return;
                 }
@@ -47,19 +52,32 @@
                     'callback=removeVeil'
                 ];
 
-                $.each(this.attributes, function () {
-                    if (!this.name || this.name.indexOf('data-param-') !== 0) {
-                        return;
-                    }
-                    let paramName = this.name.substring('data-param-'.length);
-                    if (!paramName || this.value === '') {
-                        return;
-                    }
-                    requestData.push(encodeURIComponent(paramName) + '=' + encodeURIComponent(this.value));
-                });
-
                 setVeil(resetAppContainer);
                 mfwAjax(requestData.join('&'), mfwmessages);
+            };
+
+            if (mfwmessages.length) {
+                mfwmessages.attr('data-ajax', '{{ route('mfw.ajax') }}');
+            }
+            $('.mfw-dev-action').off().click(function (event) {
+                event.preventDefault();
+                executeDevAction($(this));
+            });
+
+            $('#mfw-simple-modal .btn-confirm').off('click.mfwDevRollbackConfirm').click(function (event) {
+                if (!$(this).hasClass('mfw-dev-migrate-rollback-confirm')) {
+                    return;
+                }
+                event.preventDefault();
+                setVeil(resetAppContainer);
+                mfwAjax('action=artisanMigrate&callback=removeVeil&rollback=1&confirmed=1', mfwmessages);
+                let simpleModalEl = document.getElementById('mfw-simple-modal');
+                if (simpleModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    let simpleModalInstance = bootstrap.Modal.getInstance(simpleModalEl);
+                    if (simpleModalInstance) {
+                        simpleModalInstance.hide();
+                    }
+                }
             });
         });
     </script>

@@ -118,5 +118,8 @@ return [
     'translate_action' => 'Translate',
     'translate_service' => 'DeepL',
     'translation_complete' => 'Translation completed.',
+    'migrate_rollback_confirm_title' => 'Confirm rollback',
+    'migrate_rollback_confirm_message' => 'This will rollback the latest migration batch. Do you want to continue?',
+    'migrate_rollback_confirmation_required' => 'Rollback requires explicit confirmation.',
     'translate_target_required' => 'Select at least one target language.',
 ];

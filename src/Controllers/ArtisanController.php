@@ -28,8 +28,14 @@ class ArtisanController
         return $this->fetchResponse();
     }
 
-    public function migrate(bool $rollback = false): array
+    public function migrate(bool $rollback = false, bool $confirmed = false): array
     {
+        if ($rollback && !$confirmed) {
+            $this->responseError(__('mfw.migrate_rollback_confirmation_required'));
+
+            return $this->fetchResponse();
+        }
+
         $this->executeCommand('migrate' . ($rollback ? ':rollback' : ''));
         if ($this->statusCode == 0) {
             $this->responseSuccess('Opération terminée.');

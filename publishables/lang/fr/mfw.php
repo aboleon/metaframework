@@ -133,5 +133,8 @@ return [
     'translate_action' => 'Traduire',
     'translate_service' => 'DeepL',
     'translation_complete' => 'Traduction terminée.',
+    'migrate_rollback_confirm_title' => 'Confirmer le rollback',
+    'migrate_rollback_confirm_message' => 'Cette action va annuler le dernier lot de migrations. Voulez-vous continuer ?',
+    'migrate_rollback_confirmation_required' => 'Le rollback nécessite une confirmation explicite.',
     'translate_target_required' => 'Sélectionnez au moins une langue cible.',
 ];

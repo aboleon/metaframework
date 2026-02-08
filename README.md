@@ -84,6 +84,15 @@ php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw
 
 ---
 
+### 4.1 **Publish Language Files (Force Overwrite)**
+
+To (re)publish MetaFramework language files and overwrite existing files in your app:
+```bash
+php artisan vendor:publish --tag="mfw-lang" --force
+```
+
+---
+
 ### 5. **Admin User & Seeds**
 
 The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role (from `config/mfw-users.php`) should be assigned to that admin.

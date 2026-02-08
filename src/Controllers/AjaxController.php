@@ -71,7 +71,7 @@ class AjaxController extends Controller
 
     public function artisanMigrate(): array
     {
-        return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'));
+        return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'), (bool) request('confirmed'));
     }
 
     public function composerUpdate(): array

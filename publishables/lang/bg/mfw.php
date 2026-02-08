@@ -148,5 +148,8 @@ return [
     'translate_action'       => 'Преведи',
     'translate_service'      => 'DeepL',
     'translation_complete'   => 'Преводът е завършен.',
+    'migrate_rollback_confirm_title' => 'Потвърждение за rollback',
+    'migrate_rollback_confirm_message' => 'Това ще върне последната партида миграции. Желаете ли да продължите?',
+    'migrate_rollback_confirmation_required' => 'Rollback изисква изрично потвърждение.',
     'translate_target_required' => 'Изберете поне един целеви език.',
 ];
