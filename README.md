@@ -153,6 +153,8 @@ Role access is database-driven with:
 - `roles` table (role catalog)
 - `users_roles` table (user/role assignments)
 
+Only `dev` and `super-admin` are core access roles. Role groups are optional and serve as app-level classification/refinement.
+
 Core system roles are reserved and always available:
 - `dev` (`id: 1`)
 - `super-admin` (`id: 2`)

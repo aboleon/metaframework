@@ -21,15 +21,7 @@ class RoleGroup extends Model implements TranslatableInterface
         'key',
         'label',
         'description',
-        'is_system',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'is_system' => 'boolean',
-        ];
-    }
 
     public function setTranslatables(): array
     {

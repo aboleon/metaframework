@@ -16,7 +16,6 @@ return new class extends Migration
                 $table->string('key')->unique();
                 $table->longText('label');
                 $table->longText('description')->nullable();
-                $table->boolean('is_system')->default(false)->index();
                 $table->timestamps();
             });
         }
@@ -28,7 +27,6 @@ return new class extends Migration
                 [
                     'label' => $this->asTranslatedPayload($group['label']),
                     'description' => $this->asTranslatedPayload($group['description']),
-                    'is_system' => $group['is_system'],
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]
@@ -42,7 +40,7 @@ return new class extends Migration
     }
 
     /**
-     * @return array<int, array{key:string,label:string,description:string,is_system:bool}>
+     * @return array<int, array{key:string,label:string,description:string}>
      */
     private function defaultGroups(): array
     {
@@ -51,13 +49,11 @@ return new class extends Migration
                 'key' => RoleGroup::CORE_ADMIN_KEY,
                 'label' => 'Administration',
                 'description' => 'Core administration roles',
-                'is_system' => true,
             ],
             [
                 'key' => RoleGroup::CORE_PUBLIC_KEY,
                 'label' => 'Public',
                 'description' => 'Public-facing roles',
-                'is_system' => true,
             ],
         ];
     }

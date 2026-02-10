@@ -22,7 +22,7 @@ class RoleGroupController extends Controller
 
         return view('mfw::role-groups.index')->with([
             'groups' => RoleGroup::query()
-                ->orderByDesc('is_system')
+                ->orderBy('key')
                 ->orderBy('id')
                 ->get(),
         ]);
@@ -68,7 +68,6 @@ class RoleGroupController extends Controller
                 'key' => $key,
                 'label' => $this->normalizeTranslatablePayload($validated['label'], true),
                 'description' => $this->normalizeTranslatablePayload($validated['description'] ?? null, false),
-                'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
             $this->responseSuccess(__('mfw-users.role_groups.created'));
@@ -92,18 +91,11 @@ class RoleGroupController extends Controller
         $validated = $this->validateGroupPayload($roleGroup);
         $key = strtolower(trim($validated['key']));
 
-        if ($roleGroup->is_system && $key !== $roleGroup->key) {
-            $this->responseError(__('mfw-users.role_groups.cannot_update_system_key'));
-
-            return $this->sendResponse();
-        }
-
         try {
             $roleGroup->update([
                 'key' => $key,
                 'label' => $this->normalizeTranslatablePayload($validated['label'], true),
                 'description' => $this->normalizeTranslatablePayload($validated['description'] ?? null, false),
-                'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
             $this->responseSuccess(__('mfw-users.role_groups.updated'));
@@ -120,12 +112,6 @@ class RoleGroupController extends Controller
     {
         if (!$this->canManageRoleGroups()) {
             $this->responseError(__('mfw-users.errors.access_denied'));
-
-            return $this->sendResponse();
-        }
-
-        if ($roleGroup->is_system) {
-            $this->responseError(__('mfw-users.role_groups.cannot_delete_system'));
 
             return $this->sendResponse();
         }
@@ -162,7 +148,6 @@ class RoleGroupController extends Controller
             'label.*' => ['nullable', 'string'],
             'description' => ['nullable', 'array'],
             'description.*' => ['nullable', 'string'],
-            'is_system' => ['nullable', 'boolean'],
         ]);
 
         $validator->after(function ($validator): void {
@@ -210,15 +195,6 @@ class RoleGroupController extends Controller
             ?? $cleaned[$fallbackLocale]
             ?? reset($cleaned)
             ?: null;
-    }
-
-    private function resolveIsSystemValue(string $key, bool $requested): bool
-    {
-        if (in_array($key, [RoleGroup::CORE_ADMIN_KEY, RoleGroup::CORE_PUBLIC_KEY], true)) {
-            return true;
-        }
-
-        return $requested;
     }
 
     private function canManageRoleGroups(): bool

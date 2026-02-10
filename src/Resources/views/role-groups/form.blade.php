@@ -28,19 +28,9 @@
             @endif
 
             <div class="row">
-                <div class="col-xl-6 mb-3">
+                <div class="col-xl-12 mb-3">
                     <label class="form-label" for="role_group_key">{{ __('mfw-users.role_groups.key') }} *</label>
-                    <input id="role_group_key" name="key" type="text" class="form-control" value="{{ old('key', $group->key) }}" placeholder="{{ __('mfw-users.role_groups.placeholder_key') }}" @readonly($group->is_system) required>
-                </div>
-                <div class="col-xl-6 mb-3">
-                    <input type="hidden" name="is_system" value="0">
-                    <x-mfw-inputable::checkbox
-                        name="is_system"
-                        :label="__('mfw-users.role_groups.system')"
-                        :affected="(bool) old('is_system', $group->is_system)"
-                        :switch="true"
-                        :value="1"
-                    />
+                    <input id="role_group_key" name="key" type="text" class="form-control" value="{{ old('key', $group->key) }}" placeholder="{{ __('mfw-users.role_groups.placeholder_key') }}" required>
                 </div>
             </div>
 

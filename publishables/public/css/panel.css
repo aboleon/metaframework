@@ -46,10 +46,10 @@ ul.mfw-actions {
 }
 
 .btn-danger,.mfw-status.offline, .mfw-bg-red {
-    background: var(--base-1);
+    background: var(--base-1) !important;
 }
 .mfw-bg-green {
-    background: #48a97c;
+    background: #48a97c !important;
 }
 .btn-danger:hover {
     background: #607d8b;
@@ -62,15 +62,15 @@ ul.mfw-actions {
     font-weight: 700;
 }
 .mfw-bg-red {
-    background: var(--base-1);
+    background: var(--base-1) !important;
     color:white
 }
 .mfw-bg-yellow {
-    background: var(--ab-yellow);
+    background: var(--ab-yellow) !important;
     color: #1A1A1A;
 }
 .mfw-bg-default {
-    background: var(--ab-blue-grey);
+    background: var(--ab-blue-grey) !important;
     color: white;
 }
 b {

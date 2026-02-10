@@ -21,36 +21,43 @@
             <table class="table table-sm align-middle">
                 <thead>
                 <tr>
-                    <th>{{ __('mfw-users.roles.key') }}</th>
+                    <th>{{ __('mfw-users.role_groups.key') }}</th>
                     <th>{{ __('mfw-users.roles.label') }}</th>
                     <th>{{ __('mfw-users.roles.group') }}</th>
-                    <th>{{ __('mfw-users.roles.system') }}</th>
+                    <th></th>
                     <th width="220">{{ __('mfw-users.roles.actions') }}</th>
                 </tr>
                 </thead>
                 <tbody>
                 @forelse($roles as $role)
                     <tr>
-                        <td>{{ $role->key }}</td>
+                        <td><code>{{ $role->key }}</code></td>
                         <td>{{ $role->label }}</td>
                         <td>{{ $role->group?->label ?? '-' }}</td>
                         <td>
                             @if($role->is_system)
-                                <span class="badge text-bg-secondary">{{ __('mfw.yes') }}</span>
-                            @else
-                                <span class="badge text-bg-light">{{ __('mfw.no') }}</span>
+                                <span class="badge text-bg-secondary mfw-bg-red">{{ __('mfw-users.roles.system') }}</span>
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('mfw.roles.edit', $role) }}" class="btn btn-sm btn-outline-primary">
-                                {{ __('mfw-users.roles.edit') }}
-                            </a>
+                            <ul class="mfw-actions">
+                                <li>
+                                    <x-mfw::edit-link :route="route('mfw.roles.edit', $role->id)"/>
+                                </li>
+                                @if(!$role->is_system)
+                                    <x-mfw::delete-modal-link
+                                        reference="{{ $role->id }}"
+                                        :title="__('mfw-users.roles.delete')"
+                                    />
+                                @endif
+                            </ul>
                             @if(!$role->is_system)
-                                <form method="post" action="{{ route('mfw.roles.destroy', $role) }}" class="d-inline" onsubmit="return confirm('{{ __('mfw-users.roles.delete_confirm') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">{{ __('mfw-users.roles.delete') }}</button>
-                                </form>
+                                <x-mfw::modal
+                                    :route="route('mfw.roles.destroy', $role->id)"
+                                    :question="__('mfw-users.roles.delete_confirm')"
+                                    :title="__('mfw-users.roles.delete')"
+                                    reference="destroy_{{ $role->id }}"
+                                />
                             @endif
                         </td>
                     </tr>

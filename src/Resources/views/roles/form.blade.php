@@ -29,26 +29,31 @@
 
             <div class="row">
                 <div class="col-xl-6 mb-3">
-                    <label class="form-label" for="role_key">{{ __('mfw-users.roles.key') }} *</label>
-                    <input id="role_key" name="key" type="text" class="form-control" value="{{ old('key', $role->key) }}" placeholder="{{ __('mfw-users.roles.placeholder_key') }}" @readonly($role->is_system) required>
+                    <x-mfw-inputable::input name="key"
+                                            :params="['placeholder' => __('mfw-users.roles.placeholder_key')]"
+                                            :label="__('mfw-users.role_groups.key')"
+                                            :readonly="(bool)$role->is_system"
+                                            :value="old('key', $role->key)"
+                                            :required="true" />
                 </div>
+
                 <div class="col-xl-6 mb-3">
                     <x-mfw-inputable::select
-                        name="group_id"
-                        :label="__('mfw-users.roles.group')"
-                        :values="$groups"
-                        :affected="(int) old('group_id', $role->group_id ?: ($defaultGroupId ?? 0))"
-                        :nullable="false"
+                            name="group_id"
+                            :label="__('mfw-users.roles.group')"
+                            :values="$groups"
+                            :affected="(int) old('group_id', $role->group_id ?: ($defaultGroupId ?? 0))"
+                            :nullable="false"
                     />
                 </div>
                 <div class="col-xl-6 mb-3">
                     <input type="hidden" name="is_system" value="0">
                     <x-mfw-inputable::checkbox
-                        name="is_system"
-                        :label="__('mfw-users.roles.system')"
-                        :affected="(bool) old('is_system', $role->is_system)"
-                        :switch="true"
-                        :value="1"
+                            name="is_system"
+                            :label="__('mfw-users.roles.system')"
+                            :affected="(bool) old('is_system', $role->is_system)"
+                            :switch="true"
+                            :value="1"
                     />
                 </div>
             </div>
