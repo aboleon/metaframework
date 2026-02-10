@@ -2,6 +2,16 @@
     $isRoleLocked = isset($forcedRole) && is_array($forcedRole);
     $selected = collect(old('roles', $selectedRoleIds ?? []))->map(fn ($value) => (int) $value)->all();
     $canAssignDev = auth()->check() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('dev');
+    $forcedRoleKey = strtolower((string) ($forcedRole['key'] ?? ''));
+    $forcedRoleClass = 'bg-secondary text-white';
+    $forcedRoleStyle = '';
+
+    if ($forcedRoleKey === 'super-admin') {
+        $forcedRoleClass = 'text-white';
+        $forcedRoleStyle = 'background-color:#b42757;';
+    } elseif ($forcedRoleKey === 'dev') {
+        $forcedRoleClass = 'bg-dark text-white';
+    }
 @endphp
 
 <div class="col-12 mb-3 mt-4">
@@ -12,7 +22,7 @@
 
     @if($isRoleLocked)
         <input type="hidden" name="roles[]" value="{{ $forcedRole['id'] }}"/>
-        <span class="badge text-bg-secondary">{{ $forcedRole['label'] ?? '' }}</span>
+        <span class="badge {{ $forcedRoleClass }}" @if($forcedRoleStyle !== '') style="{{ $forcedRoleStyle }}" @endif>{{ $forcedRole['label'] ?? '' }}</span>
     @else
         @forelse($roles as $roleKey => $role)
             @continue($roleKey === 'default')
@@ -29,9 +39,6 @@
                 />
                 <label class="form-check-label" for="roles_{{ $roleKey }}">
                     {{ $role['label'] }}
-                    @if(!empty($role['group_key']))
-                        <small class="text-muted">({{ $role['group_key'] }})</small>
-                    @endif
                 </label>
             </div>
         @empty

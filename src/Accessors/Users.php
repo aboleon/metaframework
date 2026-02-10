@@ -19,27 +19,32 @@ class Users
 
     public function usersOfType(string $type): Collection
     {
-        return $this->availableRoles()->where('profile', $type);
+        return $this->availableRoles()->filter(static fn (array $role, string $key): bool => $key === $type);
     }
 
     public function adminUsers(): Collection
     {
-        return $this->availableRoles()->whereIn('profile', ['admin', 'dev']);
+        return $this->availableRoles()->only([
+            UserRoles::CORE_DEV_KEY,
+            UserRoles::CORE_SUPER_ADMIN_KEY,
+        ]);
     }
 
     public function adminContact(): array
     {
-        return $this->availableRoles()->where('profile', 'admin')->first() ?? [];
+        return $this->availableRoles()->get(UserRoles::CORE_SUPER_ADMIN_KEY)
+            ?? $this->availableRoles()->first()
+            ?? [];
     }
 
     public function publicUsers(): Collection
     {
-        return $this->availableRoles()->where('profile', 'public');
+        return $this->availableRoles()->where('group_key', 'public');
     }
 
     public function backendUsers(): Collection
     {
-        return $this->availableRoles()->where('subgroup', '!=', 'public');
+        return $this->availableRoles()->where('group_key', '!=', 'public');
     }
 
     public function userTypes(): array

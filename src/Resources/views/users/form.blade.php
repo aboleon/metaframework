@@ -2,11 +2,11 @@
     <x-slot name="header">
         <h2>{{ $label }}</h2>
         <div class="d-flex align-items-center" id="topbar-actions">
-            <a class="btn btn-sm btn-secondary mx-2" href="{{ route('mfw.users.index', $roleSlug) }}">
+            <a class="btn btn-sm btn-secondary mx-2" href="{{ route('mfw.users.index', $roleKey) }}">
                 <i class="fa-solid fa-bars"></i>
                 {{ __('mfw.goback') }}
             </a>
-            <a class="btn btn-sm btn-success" href="{{ route('mfw.users.create_type', $roleSlug) }}">
+            <a class="btn btn-sm btn-success" href="{{ route('mfw.users.create_type', $roleKey) }}">
                 <i class="fa-solid fa-circle-plus"></i>
                 {{ __('mfw-users.users.add') }}
             </a>

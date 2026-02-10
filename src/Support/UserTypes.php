@@ -32,7 +32,7 @@ final class UserTypes
 
     public static function enabled(): bool
     {
-        return (bool) config('mfw-user-types.enabled', false);
+        return (bool) config('mfw-user-types.enabled', true);
     }
 
     public static function column(): string

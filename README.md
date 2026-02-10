@@ -149,6 +149,7 @@ class User extends Authenticatable
 ### 2) Data model
 
 Role access is database-driven with:
+- `role_groups` table (role group catalog)
 - `roles` table (role catalog)
 - `users_roles` table (user/role assignments)
 
@@ -157,7 +158,11 @@ Core system roles are reserved and always available:
 - `super-admin` (`id: 2`)
 
 Roles can be managed in the back-office at:
+- `route('mfw.role-groups.index')`
 - `route('mfw.roles.index')`
+- System users listing: `route('mfw.users.index', 'super-admin')`
+
+Roles now use `group_id` foreign key to `role_groups` (replacing legacy subgroup/profile/group_key fields).
 
 ### 3) Usage in code and Blade
 
@@ -181,15 +186,15 @@ Blade checks:
 If `users_roles` has no assignment at all (fresh installation), `hasRole()` falls back to authenticated access for protected checks.
 As soon as at least one role assignment exists in database, strict role checks are applied.
 
-## Optional Feature: UserType Segregation (`system` / `account`)
+## Core UserType Segregation (`system` / `account`)
 
-Use this only if your application stores multiple auth domains in the same `users` table.
+MetaFramework supports separating auth domains on the same `users` table via a `type` discriminator.
 
 ### 1) Configure `config/mfw-user-types.php`
 
 ```php
 return [
-    'enabled' => true,
+    'enabled' => true, // core behavior (can still be disabled explicitly)
     'column' => 'type',
     'values' => ['system', 'account'],
     'default' => 'system',
@@ -211,7 +216,7 @@ $credentials = UserTypes::addToCredentials(
 );
 ```
 
-### 3) Optional typed model variants
+### 3) Typed model variants
 
 ```php
 use MetaFramework\Traits\TypedUser;
@@ -237,7 +242,17 @@ class AccountUser extends User
 }
 ```
 
-When `enabled=false`, this feature is a no-op and credentials are not altered.
+When `enabled=false`, credentials are not altered and typed scopes are skipped.
+
+## Administration Nav Links
+
+Typical administration submenu links:
+
+```blade
+<a href="{{ route('mfw.users.index', 'super-admin') }}">{{ __('mfw-users.users.nav') }}</a>
+<a href="{{ route('mfw.role-groups.index') }}">{{ __('mfw-users.role_groups.nav') }}</a>
+<a href="{{ route('mfw.roles.index') }}">{{ __('mfw-users.roles.nav') }}</a>
+```
 
 **Required for AJAX actions:** place this container in a convenient spot in your app layout so the nav actions can post to MFW Ajax:
 ```blade

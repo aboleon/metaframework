@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
+use MetaFramework\Components\TranslatableTabs;
 use MetaFramework\Console\Install;
 use MetaFramework\Polyglote\Events\TranslationHasBeenSetEvent as MetaTranslationHasBeenSetEvent;
 use MetaFramework\Polyglote\Translatable as MetaTranslatable;
@@ -46,6 +47,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
         Blade::componentNamespace('MetaFramework\Components', 'mfw');
+        Blade::component(TranslatableTabs::class, 'mfw-translatables');
 
         $this->loadRoutesFrom(__DIR__ . '/Routes/web.php');
 

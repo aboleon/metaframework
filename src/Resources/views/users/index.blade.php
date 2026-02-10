@@ -4,7 +4,7 @@
             {{ __('mfw-users.users.index_title', ['role' => $roleLabel]) }}
         </h2>
         <div class="d-flex align-items-center" id="topbar-actions">
-            <a class="btn btn-sm btn-success" href="{{ route('mfw.users.create_type', $role) }}">
+            <a class="btn btn-sm btn-success" href="{{ $showAllSystemUsers ? route('mfw.users.create_type') : route('mfw.users.create_type', $role) }}">
                 <i class="fa-solid fa-circle-plus"></i>
                 {{ __('mfw-users.users.add') }}
             </a>
@@ -24,6 +24,20 @@
 
     @php
         $colspan = 1;
+        $resolveRoleBadge = static function (?string $key): array {
+            $normalized = strtolower((string) $key);
+
+            if ($normalized === 'super-admin') {
+                return ['class' => 'text-white', 'style' => 'background-color:#b42757;'];
+            }
+
+            if ($normalized === 'dev') {
+                return ['class' => 'bg-dark text-white', 'style' => ''];
+            }
+
+            return ['class' => 'bg-secondary text-white', 'style' => ''];
+        };
+
         if ($columns['first_name'] && $columns['last_name']) {
             $colspan += 2;
         } elseif ($columns['name']) {
@@ -32,6 +46,7 @@
         if ($columns['email']) {
             $colspan += 1;
         }
+        $colspan += 1; // roles
         $colspan += 1; // last login
     @endphp
 
@@ -50,6 +65,7 @@
                 @if($columns['email'])
                     <th>{{ __('mfw-users.users.email') }}</th>
                 @endif
+                <th>{{ __('mfw-users.users.table_roles') }}</th>
                 <th>{{ __('mfw-users.users.last_login') }}</th>
                 <th width="160"></th>
             </tr>
@@ -66,6 +82,16 @@
                     @if($columns['email'])
                         <td>{{ $user->email }}</td>
                     @endif
+                    <td>
+                        @if(method_exists($user, 'roles') && $user->roles->isNotEmpty())
+                            @foreach($user->roles as $userRole)
+                                @php($badge = $resolveRoleBadge($userRole->role?->key))
+                                <span class="badge {{ $badge['class'] }}" @if($badge['style'] !== '') style="{{ $badge['style'] }}" @endif>{{ $userRole->role?->label ?? $userRole->role_id }}</span>
+                            @endforeach
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td>{{ $user->last_login_at?->format('d.m.Y H:i') ?? '-' }}</td>
                     <td class="text-end">
                         @include('mfw::users.partials.actions', ['data' => $user, 'role' => $role, 'supportsSoftDeletes' => $supportsSoftDeletes])

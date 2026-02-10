@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use MetaFramework\Accessors\Routing;
 use MetaFramework\Controllers\AjaxController;
 use MetaFramework\Controllers\RoleController;
+use MetaFramework\Controllers\RoleGroupController;
 use MetaFramework\Controllers\SettingsController;
 use MetaFramework\Controllers\SiteOwnerController;
 use MetaFramework\Controllers\UserController;
@@ -20,7 +21,8 @@ Route::prefix(Routing::backend())
 
         Route::resource('siteowner', SiteOwnerController::class);
         Route::resource('vat', VatController::class);
-        Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('role-groups', RoleGroupController::class)->except(['show']);
+        Route::resource('roles', RoleController::class)->except(['show']);
         Route::get('users/oftype/{role}', [UserController::class, 'index'])->name('users.index');
         Route::put('users/oftype/{role}', [UserController::class, 'index'])->name('users.index_update');
         Route::get('users/create/{role?}', [UserController::class, 'create'])->name('users.create_type');

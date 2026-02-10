@@ -17,13 +17,20 @@ class UsersTraitRoleManagementTest extends TestCase
     {
         parent::setUp();
 
+        Schema::create('role_groups', function (Blueprint $table): void {
+            $table->id();
+            $table->string('key')->unique();
+            $table->string('label');
+            $table->string('description')->nullable();
+            $table->boolean('is_system')->default(false);
+            $table->timestamps();
+        });
+
         Schema::create('roles', function (Blueprint $table): void {
             $table->id();
-            $table->string('slug')->unique();
+            $table->string('key')->unique();
             $table->string('label');
-            $table->string('profile')->default('public');
-            $table->string('subgroup')->default('public');
-            $table->string('group_key')->default('public');
+            $table->unsignedBigInteger('group_id')->nullable();
             $table->boolean('is_system')->default(false);
             $table->timestamps();
         });
@@ -45,6 +52,7 @@ class UsersTraitRoleManagementTest extends TestCase
         Schema::dropIfExists('users_roles');
         Schema::dropIfExists('test_users');
         Schema::dropIfExists('roles');
+        Schema::dropIfExists('role_groups');
 
         parent::tearDown();
     }
@@ -144,36 +152,51 @@ class UsersTraitRoleManagementTest extends TestCase
 
     private function seedRoles(): void
     {
-        DB::table('roles')->insert([
+        DB::table('role_groups')->insert([
             [
                 'id' => 1,
-                'slug' => 'dev',
-                'label' => 'dev',
-                'profile' => 'dev',
-                'subgroup' => 'admin',
-                'group_key' => 'admin',
+                'key' => 'admin',
+                'label' => 'admin',
+                'description' => 'admin',
                 'is_system' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'slug' => 'super-admin',
+                'key' => 'public',
+                'label' => 'public',
+                'description' => 'public',
+                'is_system' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('roles')->insert([
+            [
+                'id' => 1,
+                'key' => 'dev',
+                'label' => 'dev',
+                'group_id' => 1,
+                'is_system' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 2,
+                'key' => 'super-admin',
                 'label' => 'super-admin',
-                'profile' => 'admin',
-                'subgroup' => 'admin',
-                'group_key' => 'admin',
+                'group_id' => 1,
                 'is_system' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 10,
-                'slug' => 'editor',
+                'key' => 'editor',
                 'label' => 'editor',
-                'profile' => 'admin',
-                'subgroup' => 'admin',
-                'group_key' => 'admin',
+                'group_id' => 1,
                 'is_system' => false,
                 'created_at' => now(),
                 'updated_at' => now(),

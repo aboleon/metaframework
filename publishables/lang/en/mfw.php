@@ -64,7 +64,6 @@ return [
     'needed' => 'required|required',
     'no_data_provided' => 'No data provided',
     'no_records' => 'No record in database',
-    'profile' => 'Profile',
     'user' => 'user|users',
     'with_role' => 'with the role',
     'published' => [

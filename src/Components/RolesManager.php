@@ -7,10 +7,16 @@ namespace MetaFramework\Components;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
+use MetaFramework\Models\RoleGroup;
 
 class RolesManager extends Component
 {
-    public function __construct(public Collection $roles) {}
+    public Collection $groups;
+
+    public function __construct(public Collection $roles)
+    {
+        $this->groups = RoleGroup::query()->orderBy('key')->get();
+    }
 
     public function render(): Renderable
     {

@@ -3,6 +3,7 @@
     <x-mfw::nav-opening-header title="MAINTENANCE" icon="fas fa-code"/>
     <ul class="nav child_menu">
         <x-mfw::nav-link :route="route('mfw.users.index', 'super-admin')" :title="__('mfw-users.users.nav')"/>
+        <x-mfw::nav-link :route="route('mfw.role-groups.index')" :title="__('mfw-users.role_groups.nav')"/>
         <x-mfw::nav-link :route="route('mfw.roles.index')" :title="__('mfw-users.roles.nav')"/>
         <li>
             <a href="#" class="mfw-dev-action" data-action="artisanMigrate">Migration DB</a>

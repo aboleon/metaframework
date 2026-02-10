@@ -19,22 +19,25 @@ trait Users
 
     public function adminUsers(): Collection
     {
-        return $this->availableRoles()->whereIn('profile', ['admin', 'dev']);
+        return $this->availableRoles()->only([
+            UserRoles::CORE_DEV_KEY,
+            UserRoles::CORE_SUPER_ADMIN_KEY,
+        ]);
     }
 
     public function publicUsers(): Collection
     {
-        return $this->availableRoles()->where('profile', 'public');
+        return $this->availableRoles()->where('group_key', 'public');
     }
 
     public function backOfficeUsers(): Collection
     {
-        return $this->availableRoles()->where('subgroup', '!=', 'public');
+        return $this->availableRoles()->where('group_key', '!=', 'public');
     }
 
     public function usersOfType(string $type): Collection
     {
-        return $this->availableRoles()->where('profile', $type);
+        return $this->availableRoles()->filter(static fn (array $role, string $key): bool => $key === $type);
     }
 
     public function userType(string|int|null $type = null): array
@@ -112,12 +115,7 @@ trait Users
 
     public function belongsToSubgroup(string|array $group): bool
     {
-        return $this->userTypeParser('subgroup', $group);
-    }
-
-    public function belongsToProfile(string|array $profile): bool
-    {
-        return $this->userTypeParser('profile', $profile);
+        return $this->userTypeParser('group_key', $group);
     }
 
     public function hasRole(string|array $role, bool $test = false): bool

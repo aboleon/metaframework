@@ -27,8 +27,8 @@ class AdminUserSeeder extends Seeder
 
         $roleId = null;
 
-        if ('{{ role_slug }}' !== 'null') {
-            $roleId = DB::table('roles')->where('slug', '{{ role_slug }}')->value('id');
+        if ('{{ role_key }}' !== 'null') {
+            $roleId = DB::table('roles')->where('key', '{{ role_key }}')->value('id');
         }
 
         $legacyRoleId = '{{ role_id }}';

@@ -6,9 +6,12 @@ namespace MetaFramework\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use MetaFramework\Models\Role;
+use MetaFramework\Models\RoleGroup;
 use MetaFramework\Support\Traits\Responses;
+use MetaFramework\Support\UserRoles;
 use Throwable;
 
 class RoleController extends Controller
@@ -21,9 +24,40 @@ class RoleController extends Controller
 
         return view('mfw::roles.index')->with([
             'roles' => Role::query()
+                ->with('group')
                 ->orderByDesc('is_system')
                 ->orderBy('id')
                 ->get(),
+        ]);
+    }
+
+    public function create(): Renderable
+    {
+        abort_unless($this->canManageRoles(), 403, __('mfw-users.errors.access_denied'));
+        $groups = $this->groupSelectValues();
+
+        return view('mfw::roles.form')->with([
+            'role' => new Role,
+            'groups' => $groups,
+            'defaultGroupId' => (int) (array_key_first($groups) ?? 0),
+            'route' => route('mfw.roles.store'),
+            'method' => null,
+            'title' => __('mfw-users.roles.create_title'),
+        ]);
+    }
+
+    public function edit(Role $role): Renderable
+    {
+        abort_unless($this->canManageRoles(), 403, __('mfw-users.errors.access_denied'));
+        $groups = $this->groupSelectValues();
+
+        return view('mfw::roles.form')->with([
+            'role' => $role,
+            'groups' => $groups,
+            'defaultGroupId' => (int) ($role->group_id ?? array_key_first($groups) ?? 0),
+            'route' => route('mfw.roles.update', $role),
+            'method' => 'PUT',
+            'title' => __('mfw-users.roles.edit_title'),
         ]);
     }
 
@@ -35,22 +69,15 @@ class RoleController extends Controller
             return $this->sendResponse();
         }
 
-        $validated = request()->validate([
-            'slug' => ['required', 'string', 'max:64', 'alpha_dash', Rule::unique('roles', 'slug')],
-            'label' => ['required', 'string', 'max:120'],
-            'profile' => ['nullable', 'string', 'max:64'],
-            'subgroup' => ['nullable', 'string', 'max:64'],
-            'group_key' => ['nullable', 'string', 'max:64'],
-        ]);
+        $validated = $this->validateRolePayload();
 
         try {
+            $key = strtolower(trim($validated['key']));
             Role::query()->create([
-                'slug' => strtolower(trim($validated['slug'])),
-                'label' => trim($validated['label']),
-                'profile' => trim((string) ($validated['profile'] ?? 'public')) ?: 'public',
-                'subgroup' => trim((string) ($validated['subgroup'] ?? 'public')) ?: 'public',
-                'group_key' => trim((string) ($validated['group_key'] ?? ($validated['subgroup'] ?? 'public'))) ?: 'public',
-                'is_system' => false,
+                'key' => $key,
+                'label' => $this->normalizeLabelPayload($validated['label']),
+                'group_id' => (int) $validated['group_id'],
+                'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
             $this->responseSuccess(__('mfw-users.roles.created'));
@@ -71,27 +98,21 @@ class RoleController extends Controller
             return $this->sendResponse();
         }
 
-        if ($role->is_system) {
-            $this->responseError(__('mfw-users.roles.cannot_update_system'));
+        $validated = $this->validateRolePayload($role);
+        $key = strtolower(trim($validated['key']));
+
+        if ($role->is_system && $key !== $role->key) {
+            $this->responseError(__('mfw-users.roles.cannot_update_system_key'));
 
             return $this->sendResponse();
         }
 
-        $validated = request()->validate([
-            'slug' => ['required', 'string', 'max:64', 'alpha_dash', Rule::unique('roles', 'slug')->ignore($role->id)],
-            'label' => ['required', 'string', 'max:120'],
-            'profile' => ['nullable', 'string', 'max:64'],
-            'subgroup' => ['nullable', 'string', 'max:64'],
-            'group_key' => ['nullable', 'string', 'max:64'],
-        ]);
-
         try {
             $role->update([
-                'slug' => strtolower(trim($validated['slug'])),
-                'label' => trim($validated['label']),
-                'profile' => trim((string) ($validated['profile'] ?? 'public')) ?: 'public',
-                'subgroup' => trim((string) ($validated['subgroup'] ?? 'public')) ?: 'public',
-                'group_key' => trim((string) ($validated['group_key'] ?? ($validated['subgroup'] ?? 'public'))) ?: 'public',
+                'key' => $key,
+                'label' => $this->normalizeLabelPayload($validated['label']),
+                'group_id' => (int) $validated['group_id'],
+                'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
             $this->responseSuccess(__('mfw-users.roles.updated'));
@@ -102,6 +123,69 @@ class RoleController extends Controller
         $this->redirect_route = 'mfw.roles.index';
 
         return $this->sendResponse();
+    }
+
+    private function validateRolePayload(?Role $role = null): array
+    {
+        $validator = Validator::make(request()->all(), [
+            'key' => [
+                'required',
+                'string',
+                'max:64',
+                'alpha_dash',
+                Rule::unique('roles', 'key')->ignore($role?->id),
+            ],
+            'label' => ['required', 'array'],
+            'label.*' => ['nullable', 'string'],
+            'group_id' => ['required', 'integer', Rule::exists('role_groups', 'id')],
+            'is_system' => ['nullable', 'boolean'],
+        ]);
+
+        $validator->after(function ($validator): void {
+            if ($this->normalizeLabelPayload(request()->input('label')) === null) {
+                $validator->errors()->add('label', __('validation.required', ['attribute' => __('mfw-users.roles.label')]));
+            }
+        });
+
+        return $validator->validate();
+    }
+
+    /**
+     * @return array<string,string>|string|null
+     */
+    private function normalizeLabelPayload(mixed $label): array|string|null
+    {
+        if (is_string($label)) {
+            $parsed = trim($label);
+
+            return $parsed !== '' ? $parsed : null;
+        }
+
+        if (!is_array($label)) {
+            return null;
+        }
+
+        $cleaned = collect($label)
+            ->filter(static fn ($value, $key): bool => is_string($key))
+            ->map(static fn ($value): string => is_string($value) ? trim($value) : '')
+            ->filter(static fn ($value): bool => $value !== '')
+            ->toArray();
+
+        if ($cleaned === []) {
+            return null;
+        }
+
+        if ((bool) config('mfw.translatable.multilang', false)) {
+            return $cleaned;
+        }
+
+        $fallbackLocale = (string) config('app.fallback_locale', app()->getLocale());
+        $currentLocale = (string) app()->getLocale();
+
+        return $cleaned[$currentLocale]
+            ?? $cleaned[$fallbackLocale]
+            ?? reset($cleaned)
+            ?: null;
     }
 
     public function destroy(Role $role): RedirectResponse
@@ -143,5 +227,26 @@ class RoleController extends Controller
         return (bool) $user
             && method_exists($user, 'hasRole')
             && $user->hasRole('dev|super-admin');
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function groupSelectValues(): array
+    {
+        return RoleGroup::query()
+            ->orderBy('key')
+            ->get()
+            ->pluck('label', 'id')
+            ->all();
+    }
+
+    private function resolveIsSystemValue(string $key, bool $requested): bool
+    {
+        if (in_array($key, [UserRoles::CORE_DEV_KEY, UserRoles::CORE_SUPER_ADMIN_KEY], true)) {
+            return true;
+        }
+
+        return $requested;
     }
 }

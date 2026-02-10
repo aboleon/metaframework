@@ -229,14 +229,14 @@ return [
         $availableRoles = UserRoles::all();
         $roleKeys = array_values(array_filter(array_keys($availableRoles), static fn (string $key): bool => $key !== 'default'));
         $roleId = null;
-        $roleSlug = null;
+        $roleKeyValue = null;
 
         if (!empty($roleKeys)) {
             $defaultRole = array_key_exists(UserRoles::CORE_SUPER_ADMIN_KEY, $availableRoles)
                 ? UserRoles::CORE_SUPER_ADMIN_KEY
                 : $roleKeys[0];
             $roleKey = $this->anticipate('Role key for the admin user', $roleKeys, $defaultRole);
-            $roleSlug = $roleKey;
+            $roleKeyValue = $roleKey;
             $roleId = $availableRoles[$roleKey]['id'] ?? null;
 
             if (!$roleId) {
@@ -246,7 +246,7 @@ return [
             $this->warn('Unable to resolve available roles. The admin user will be created without a role assignment.');
         }
 
-        $this->publishAdminSeederStub($firstName, $lastName, $email, $password, $roleId, $roleSlug);
+        $this->publishAdminSeederStub($firstName, $lastName, $email, $password, $roleId, $roleKeyValue);
         $this->ensureDatabaseSeederCallsAdminSeeder();
 
         $this->newLine();
@@ -272,7 +272,7 @@ return [
         File::put($targetPath, File::get($stubPath));
     }
 
-    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null, ?string $roleSlug = null): void
+    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null, ?string $roleKey = null): void
     {
         $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
         if (!File::exists($stubPath)) {
@@ -287,7 +287,7 @@ return [
             '{{ email }}' => addslashes($email),
             '{{ password }}' => addslashes($password),
             '{{ role_id }}' => $roleId !== null ? (string) $roleId : 'null',
-            '{{ role_slug }}' => $roleSlug !== null ? addslashes($roleSlug) : 'null',
+            '{{ role_key }}' => $roleKey !== null ? addslashes($roleKey) : 'null',
         ];
 
         $content = str_replace(array_keys($replacements), array_values($replacements), File::get($stubPath));

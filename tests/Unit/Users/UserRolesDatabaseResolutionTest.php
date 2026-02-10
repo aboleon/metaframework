@@ -16,13 +16,20 @@ class UserRolesDatabaseResolutionTest extends TestCase
     {
         parent::setUp();
 
+        Schema::create('role_groups', function (Blueprint $table): void {
+            $table->id();
+            $table->string('key')->unique();
+            $table->string('label');
+            $table->string('description')->nullable();
+            $table->boolean('is_system')->default(false);
+            $table->timestamps();
+        });
+
         Schema::create('roles', function (Blueprint $table): void {
             $table->id();
-            $table->string('slug')->unique();
+            $table->string('key')->unique();
             $table->string('label');
-            $table->string('profile')->default('public');
-            $table->string('subgroup')->default('public');
-            $table->string('group_key')->default('public');
+            $table->unsignedBigInteger('group_id')->nullable();
             $table->boolean('is_system')->default(false);
             $table->timestamps();
         });
@@ -31,42 +38,58 @@ class UserRolesDatabaseResolutionTest extends TestCase
     protected function tearDown(): void
     {
         Schema::dropIfExists('roles');
+        Schema::dropIfExists('role_groups');
 
         parent::tearDown();
     }
 
     public function test_it_prefers_database_roles_when_roles_table_exists(): void
     {
-        DB::table('roles')->insert([
+        DB::table('role_groups')->insert([
             [
                 'id' => 1,
-                'slug' => 'dev',
-                'label' => 'Developer',
-                'profile' => 'dev',
-                'subgroup' => 'admin',
-                'group_key' => 'admin',
+                'key' => 'admin',
+                'label' => 'Admin',
+                'description' => 'Admin',
                 'is_system' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'slug' => 'super-admin',
+                'key' => 'content',
+                'label' => 'Content',
+                'description' => 'Content',
+                'is_system' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('roles')->insert([
+            [
+                'id' => 1,
+                'key' => 'dev',
+                'label' => 'Developer',
+                'group_id' => 1,
+                'is_system' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 2,
+                'key' => 'super-admin',
                 'label' => 'Super Admin',
-                'profile' => 'admin',
-                'subgroup' => 'admin',
-                'group_key' => 'admin',
+                'group_id' => 1,
                 'is_system' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 5,
-                'slug' => 'editor',
+                'key' => 'editor',
                 'label' => 'Editor',
-                'profile' => 'admin',
-                'subgroup' => 'content',
-                'group_key' => 'content',
+                'group_id' => 2,
                 'is_system' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -78,6 +101,25 @@ class UserRolesDatabaseResolutionTest extends TestCase
         $this->assertSame('Developer', $roles['dev']['label']);
         $this->assertSame(5, $roles['editor']['id']);
         $this->assertSame('content', $roles['editor']['group_key']);
+        $this->assertSame($roles['super-admin']['id'], $roles['default']['id']);
+    }
+
+    public function test_it_falls_back_to_core_roles_when_database_roles_have_empty_keys(): void
+    {
+        DB::table('roles')->insert([
+            'id' => 50,
+            'key' => '',
+            'label' => 'Invalid',
+            'group_id' => null,
+            'is_system' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $roles = UserRoles::all();
+
+        $this->assertArrayHasKey('dev', $roles);
+        $this->assertArrayHasKey('super-admin', $roles);
         $this->assertSame($roles['super-admin']['id'], $roles['default']['id']);
     }
 }

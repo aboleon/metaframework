@@ -13,25 +13,22 @@ return new class extends Migration
         if (!Schema::hasTable('roles')) {
             Schema::create('roles', function (Blueprint $table): void {
                 $table->id();
-                $table->string('slug')->unique();
-                $table->string('label');
-                $table->string('profile')->default('public')->index();
-                $table->string('subgroup')->default('public')->index();
-                $table->string('group_key')->default('public')->index();
+                $table->string('key')->unique();
+                $table->longText('label');
+                $table->foreignId('group_id')->constrained('role_groups')->cascadeOnUpdate()->restrictOnDelete();
                 $table->boolean('is_system')->default(false)->index();
                 $table->timestamps();
             });
         }
 
         $now = now();
+        $groups = DB::table('role_groups')->pluck('id', 'key')->all();
         foreach (UserRoles::systemDefinitions() as $role) {
             DB::table('roles')->updateOrInsert(
-                ['slug' => $role['slug']],
+                ['key' => $role['key']],
                 [
                     'label' => $role['label'],
-                    'profile' => $role['profile'],
-                    'subgroup' => $role['subgroup'],
-                    'group_key' => $role['group_key'],
+                    'group_id' => $groups[$role['group_key']] ?? $groups['public'] ?? $groups['admin'] ?? 1,
                     'is_system' => $role['is_system'],
                     'created_at' => $now,
                     'updated_at' => $now,

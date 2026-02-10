@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace MetaFramework\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use MetaFramework\Polyglote\Interfaces\TranslatableInterface;
 use MetaFramework\Polyglote\Traits\Translation;
 
-class Role extends Model implements TranslatableInterface
+class RoleGroup extends Model implements TranslatableInterface
 {
     use Translation;
+
+    public const CORE_ADMIN_KEY = 'admin';
+
+    public const CORE_PUBLIC_KEY = 'public';
 
     protected $fillable = [
         'key',
         'label',
-        'group_id',
+        'description',
         'is_system',
     ];
 
     protected function casts(): array
     {
         return [
-            'group_id' => 'integer',
             'is_system' => 'boolean',
         ];
     }
@@ -33,20 +35,20 @@ class Role extends Model implements TranslatableInterface
     {
         return [
             'label' => [
-                'label' => 'mfw-users.roles.label',
+                'label' => 'mfw-users.role_groups.label',
                 'required',
+                'class' => 'col-12',
+            ],
+            'description' => [
+                'label' => 'mfw-users.role_groups.description',
+                'type' => 'textarea',
                 'class' => 'col-12',
             ],
         ];
     }
 
-    public function userRoles(): HasMany
+    public function roles(): HasMany
     {
-        return $this->hasMany(UserRole::class, 'role_id');
-    }
-
-    public function group(): BelongsTo
-    {
-        return $this->belongsTo(RoleGroup::class, 'group_id');
+        return $this->hasMany(Role::class, 'group_id');
     }
 }

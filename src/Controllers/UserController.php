@@ -16,6 +16,7 @@ use MetaFramework\Models\UserRole;
 use MetaFramework\Services\Passwords\PasswordBroker;
 use MetaFramework\Support\Traits\Responses;
 use MetaFramework\Support\UserRoles;
+use MetaFramework\Support\UserTypes;
 use Throwable;
 
 class UserController extends Controller
@@ -31,8 +32,11 @@ class UserController extends Controller
         }
 
         $roles = $this->availableRoles();
+        $showAllSystemUsers = $this->isAdministrationListing($role);
         $archived = request()->routeIs('mfw.users.archived');
         $query = $this->userQuery();
+        $this->eagerLoadRoles($query);
+        $this->applyCoreSystemUsersFilter($query);
 
         if ($archived) {
             if ($this->supportsSoftDeletes()) {
@@ -42,10 +46,14 @@ class UserController extends Controller
             }
         }
 
-        $this->applyRoleFilter($query, $role);
+        if (!$showAllSystemUsers) {
+            $this->applyRoleFilter($query, $role);
+        }
         $this->applyOrder($query);
 
-        $roleLabel = $roles[$role]['label'] ?? $role;
+        $roleLabel = $showAllSystemUsers
+            ? __('mfw-users.users.index_system_title')
+            : ($roles[$role]['label'] ?? $role);
 
         return view('mfw::users.index')->with([
             'users' => $query->paginate(25)->withQueryString(),
@@ -54,6 +62,7 @@ class UserController extends Controller
             'archived' => $archived,
             'columns' => $this->editableColumns(),
             'supportsSoftDeletes' => $this->supportsSoftDeletes(),
+            'showAllSystemUsers' => $showAllSystemUsers,
         ]);
     }
 
@@ -63,11 +72,11 @@ class UserController extends Controller
 
         $user = $this->newUserModel();
         $roles = $this->availableRoles();
-        $roleSlug = $role && array_key_exists($role, $roles) ? $role : null;
-        if ($roleSlug === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers()) {
+        $roleKey = $role && array_key_exists($role, $roles) ? $role : null;
+        if ($roleKey === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers()) {
             abort(403, __('mfw-users.errors.access_denied'));
         }
-        $forcedRole = $roleSlug ? $roles[$roleSlug] : null;
+        $forcedRole = $roleKey ? $roles[$roleKey] : null;
 
         return view('mfw::users.form')->with([
             'account' => $user,
@@ -76,9 +85,9 @@ class UserController extends Controller
             'forcedRole' => $forcedRole,
             'route' => route('mfw.users.store'),
             'label' => __('mfw-users.users.add_title', [
-                'role' => $roleSlug ? ($forcedRole['label'] ?? $roleSlug) : __('mfw-users.users.any_role'),
+                'role' => $roleKey ? ($forcedRole['label'] ?? $roleKey) : __('mfw-users.users.any_role'),
             ]),
-            'roleSlug' => $roleSlug ?: $this->defaultRoleSlug(),
+            'roleKey' => $roleKey ?: $this->defaultRoleKey(),
             'columns' => $this->editableColumns(),
             'supportsSoftDeletes' => $this->supportsSoftDeletes(),
         ]);
@@ -91,7 +100,7 @@ class UserController extends Controller
         $user = $this->findUserOrFail($userId, true);
         $this->assertCanManageTargetUser($user);
         $roles = $this->availableRoles();
-        $roleSlug = $this->resolveRoleSlug($user);
+        $roleKey = $this->resolveRoleKey($user);
 
         return view('mfw::users.form')->with([
             'account' => $user,
@@ -101,9 +110,9 @@ class UserController extends Controller
             'method' => 'put',
             'route' => route('mfw.users.update', $user->getKey()),
             'label' => __('mfw-users.users.edit_title', [
-                'role' => $roles[$roleSlug]['label'] ?? $roleSlug,
+                'role' => $roles[$roleKey]['label'] ?? $roleKey,
             ]),
-            'roleSlug' => $roleSlug,
+            'roleKey' => $roleKey,
             'columns' => $this->editableColumns(),
             'supportsSoftDeletes' => $this->supportsSoftDeletes(),
         ]);
@@ -132,7 +141,7 @@ class UserController extends Controller
 
             $this->responseSuccess(__('mfw-users.users.created'));
             $this->responseNotice($passwordBroker->printPublicPassword());
-            $this->redirect_to = route('mfw.users.index', $this->defaultRoleSlug());
+            $this->redirect_to = route('mfw.users.index', $this->defaultRoleKey());
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -167,7 +176,7 @@ class UserController extends Controller
             $this->syncUserRoles($user, $this->requestedRoleIds());
 
             $this->responseSuccess(__('mfw-users.users.updated'));
-            $this->redirect_to = route('mfw.users.index', $this->resolveRoleSlug($user));
+            $this->redirect_to = route('mfw.users.index', $this->resolveRoleKey($user));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -198,7 +207,7 @@ class UserController extends Controller
             $this->responseException($e);
         }
 
-        $this->redirect_to = route('mfw.users.index', $this->resolveRoleSlug($user));
+        $this->redirect_to = route('mfw.users.index', $this->resolveRoleKey($user));
 
         return $this->sendResponse();
     }
@@ -230,7 +239,7 @@ class UserController extends Controller
             $this->responseException($e);
         }
 
-        $this->redirect_to = route('mfw.users.index', $this->defaultRoleSlug());
+        $this->redirect_to = route('mfw.users.index', $this->defaultRoleKey());
 
         return $this->sendResponse();
     }
@@ -281,6 +290,27 @@ class UserController extends Controller
                 ->whereColumn('users_roles.user_id', $model->getTable() . '.' . $model->getKeyName())
                 ->where('users_roles.role_id', $roleId);
         });
+    }
+
+    private function applyCoreSystemUsersFilter(Builder $query): void
+    {
+        $table = $this->usersTable();
+        $column = UserTypes::column();
+        if (!Schema::hasColumn($table, $column)) {
+            return;
+        }
+
+        $query->where($column, UserTypes::resolve(UserTypes::typeForGuard('web') ?? 'system', 'web'));
+    }
+
+    private function eagerLoadRoles(Builder $query): void
+    {
+        $model = $query->getModel();
+        if (!method_exists($model, 'roles')) {
+            return;
+        }
+
+        $query->with(['roles.role']);
     }
 
     private function applyOrder(Builder $query): void
@@ -371,7 +401,7 @@ class UserController extends Controller
         }
 
         $availableRoleIds = collect($this->availableRoles())
-            ->reject(fn (array $role, string $slug): bool => $slug === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers())
+            ->reject(fn (array $role, string $key): bool => $key === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers())
             ->pluck('id')
             ->map(static fn ($item): int => (int) $item)
             ->all();
@@ -433,20 +463,20 @@ class UserController extends Controller
             ->toArray();
     }
 
-    private function resolveRoleSlug(Model $user): string
+    private function resolveRoleKey(Model $user): string
     {
         $selectedRoleIds = $this->selectedRoleIds($user);
         $roles = $this->availableRoles();
-        foreach ($roles as $slug => $meta) {
+        foreach ($roles as $key => $meta) {
             if (in_array((int) $meta['id'], $selectedRoleIds, true)) {
-                return $slug;
+                return $key;
             }
         }
 
-        return $this->defaultRoleSlug();
+        return $this->defaultRoleKey();
     }
 
-    private function defaultRoleSlug(): string
+    private function defaultRoleKey(): string
     {
         $roles = $this->availableRoles();
         if (array_key_exists(UserRoles::CORE_SUPER_ADMIN_KEY, $roles)) {
@@ -458,8 +488,13 @@ class UserController extends Controller
         return $firstRole ? (string) $firstRole : UserRoles::CORE_SUPER_ADMIN_KEY;
     }
 
+    private function isAdministrationListing(string $role): bool
+    {
+        return $role === UserRoles::CORE_SUPER_ADMIN_KEY;
+    }
+
     /**
-     * @return array<string, array{id:int,label:string,profile:string,subgroup:string,group_key:string,is_system:bool}>
+     * @return array<string, array{id:int,key:string,label:string,group_id:int|null,group_key:string,is_system:bool}>
      */
     private function availableRoles(): array
     {

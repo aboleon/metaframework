@@ -3,14 +3,14 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Optional User Type Segregation
+    | Core User Type Segregation
     |--------------------------------------------------------------------------
     |
-    | Keep this disabled unless your app uses a single users table for
-    | multiple authentication domains (for example: system and account users).
+    | MetaFramework supports separating auth domains on a single users table
+    | (for example: system and account users) through this discriminator.
     |
     */
-    'enabled' => false,
+    'enabled' => true,
 
     // Column used to discriminate user domains inside the users table.
     'column' => 'type',
