@@ -6,6 +6,7 @@ namespace MetaFramework\Accessors;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
+use MetaFramework\Support\UserRoles;
 
 class Users
 {
@@ -13,32 +14,32 @@ class Users
 
     public function __construct()
     {
-        $this->user_types = config('mfw-users');
+        $this->user_types = UserRoles::all();
     }
 
     public function usersOfType(string $type): Collection
     {
-        return collect($this->user_types)->where('profile', $type);
+        return $this->availableRoles()->where('profile', $type);
     }
 
     public function adminUsers(): Collection
     {
-        return collect($this->user_types)->whereIn('profile', ['admin', 'dev']);
+        return $this->availableRoles()->whereIn('profile', ['admin', 'dev']);
     }
 
     public function adminContact(): array
     {
-        return collect($this->user_types)->where('profile', 'admin')->first();
+        return $this->availableRoles()->where('profile', 'admin')->first() ?? [];
     }
 
     public function publicUsers(): Collection
     {
-        return collect($this->user_types)->where('profile', 'public');
+        return $this->availableRoles()->where('profile', 'public');
     }
 
     public function backendUsers(): Collection
     {
-        return collect($this->user_types)->where('subgroup', '!=', 'public');
+        return $this->availableRoles()->where('subgroup', '!=', 'public');
     }
 
     public function userTypes(): array
@@ -57,17 +58,25 @@ class Users
 
     public function user_roles(): array
     {
-        return $this->user_types;
+        return $this->availableRoles()->toArray();
     }
 
     public function printRoles(Authenticatable $user): string
     {
         if ($user->roles->isNotEmpty()) {
             foreach ($user->roles as $role) {
-                echo '<span class="role btn btn-sm btn-secondary">' . trans('user_type.' . $this->userType($role->role_id)['label'] . '.label') . '</span>';
+                $roleLabel = (string) ($this->userType((int) $role->role_id)['label'] ?? $role->role_id);
+                $translationKey = 'user_type.' . $roleLabel . '.label';
+                $translatedRoleLabel = trans($translationKey);
+                echo '<span class="role btn btn-sm btn-secondary">' . ($translatedRoleLabel === $translationKey ? $roleLabel : $translatedRoleLabel) . '</span>';
             }
         }
 
         return '';
+    }
+
+    private function availableRoles(): Collection
+    {
+        return collect($this->user_types)->except('default');
     }
 }

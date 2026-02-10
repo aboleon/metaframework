@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('users_roles', function (Blueprint $table) {
-            $table->unsignedTinyInteger('role_id')->index();
+            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->onUpdate('no action');
+            $table->unique(['user_id', 'role_id']);
         });
     }
 

@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace MetaFramework\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserRole extends Model
 {
+    protected $table = 'users_roles';
+
     protected $guarded = [];
 
     public $timestamps = false;
 
-    public function __construct(array $attributes = [])
+    public function role(): BelongsTo
     {
-        parent::__construct($attributes);
-
-        $this->table = 'users_roles';
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

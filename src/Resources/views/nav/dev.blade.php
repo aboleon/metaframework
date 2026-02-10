@@ -1,8 +1,9 @@
+@role('dev|super-admin')
 <li>
     <x-mfw::nav-opening-header title="MAINTENANCE" icon="fas fa-code"/>
     <ul class="nav child_menu">
-        {{-- @role('dev') --}}
-        <x-mfw::nav-link :route="route('panel.roles', 'super-admin')" title="Rôles"/>
+        <x-mfw::nav-link :route="route('mfw.users.index', 'super-admin')" :title="__('mfw-users.users.nav')"/>
+        <x-mfw::nav-link :route="route('mfw.roles.index')" :title="__('mfw-users.roles.nav')"/>
         <li>
             <a href="#" class="mfw-dev-action" data-action="artisanMigrate">Migration DB</a>
         </li>
@@ -16,7 +17,6 @@
                     :cancel="__('mfw.cancel')"
                     confirmclass="btn-warning mfw-dev-migrate-rollback-confirm"/>
         </li>
-        {{-- @endrole --}}
         <li>
             <a href="#" class="mfw-dev-action" data-action="artisanOptimize">Réinitialiser App</a>
         </li>
@@ -79,6 +79,7 @@
                     }
                 }
             });
-        });
+            });
     </script>
 @endpush
+@endrole

@@ -95,7 +95,9 @@ php artisan vendor:publish --tag="mfw-lang" --force
 
 ### 5. **Admin User & Seeds**
 
-The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role (from `config/mfw-users.php`) should be assigned to that admin.
+The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role should be assigned to that admin.
+
+The generated seeder writes the selected role into `users_roles` for the created admin account.
 
 After the wizard completes, run:
 ```bash
@@ -129,7 +131,113 @@ Published to: `resources/views/vendor/mfw/nav/dev.blade.php`
 @include('mfw::nav.dev')         {{-- package version --}}
 ```
 
-**Note:** Uses `@role('dev')` directive for role-based visibility.
+**Note:** Uses `@role('dev|super-admin')` directive for role-based visibility.
+
+## Roles & Access Management
+
+### 1) Enable role capabilities on your User model
+
+```php
+use MetaFramework\Traits\Users;
+
+class User extends Authenticatable
+{
+    use Users;
+}
+```
+
+### 2) Data model
+
+Role access is database-driven with:
+- `roles` table (role catalog)
+- `users_roles` table (user/role assignments)
+
+Core system roles are reserved and always available:
+- `dev` (`id: 1`)
+- `super-admin` (`id: 2`)
+
+Roles can be managed in the back-office at:
+- `route('mfw.roles.index')`
+
+### 3) Usage in code and Blade
+
+Model checks:
+```php
+$user->hasRole('dev');
+$user->hasRole('dev|super-admin');
+$user->hasRole(['dev', 'super-admin']);
+$user->hasRole('2'); // by role id
+```
+
+Blade checks:
+```blade
+@role('dev|super-admin')
+    ...
+@endrole
+```
+
+### 4) Fresh install fallback behavior
+
+If `users_roles` has no assignment at all (fresh installation), `hasRole()` falls back to authenticated access for protected checks.
+As soon as at least one role assignment exists in database, strict role checks are applied.
+
+## Optional Feature: UserType Segregation (`system` / `account`)
+
+Use this only if your application stores multiple auth domains in the same `users` table.
+
+### 1) Configure `config/mfw-user-types.php`
+
+```php
+return [
+    'enabled' => true,
+    'column' => 'type',
+    'values' => ['system', 'account'],
+    'default' => 'system',
+    'guards' => [
+        'web' => 'system',
+        'account' => 'account',
+    ],
+];
+```
+
+### 2) Build guard-aware credentials
+
+```php
+use MetaFramework\Support\UserTypes;
+
+$credentials = UserTypes::addToCredentials(
+    $request->only('email', 'password'),
+    guard: 'account'
+);
+```
+
+### 3) Optional typed model variants
+
+```php
+use MetaFramework\Traits\TypedUser;
+
+class SystemUser extends User
+{
+    use TypedUser;
+
+    protected static function typedUserScopeType(): ?string
+    {
+        return 'system';
+    }
+}
+
+class AccountUser extends User
+{
+    use TypedUser;
+
+    protected static function typedUserScopeType(): ?string
+    {
+        return 'account';
+    }
+}
+```
+
+When `enabled=false`, this feature is a no-op and credentials are not altered.
 
 **Required for AJAX actions:** place this container in a convenient spot in your app layout so the nav actions can post to MFW Ajax:
 ```blade

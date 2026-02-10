@@ -7,6 +7,7 @@ namespace MetaFramework\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use MetaFramework\Support\UserRoles;
 
 class Install extends Command
 {
@@ -199,6 +200,7 @@ return [
         $this->comment('Configuring default admin user and authentication scaffolding...');
         $this->comment('------------------------------------------');
 
+        $this->ensureUserModelUsesMetaFrameworkUsersTrait();
         $this->publishUserFactoryStub();
 
         if (!$this->confirm('Would you like to configure a default admin user now?', true)) {
@@ -224,24 +226,27 @@ return [
             $this->info('Generated password: ' . $password);
         }
 
-        $rolesConfigPath = config_path('mfw-users.php');
-        $rolesConfig = File::exists($rolesConfigPath) ? include $rolesConfigPath : [];
+        $availableRoles = UserRoles::all();
+        $roleKeys = array_values(array_filter(array_keys($availableRoles), static fn (string $key): bool => $key !== 'default'));
         $roleId = null;
+        $roleSlug = null;
 
-        if (!empty($rolesConfig) && is_array($rolesConfig)) {
-            $roleKeys = array_keys($rolesConfig);
-            $defaultRole = array_key_exists('super-admin', $rolesConfig) ? 'super-admin' : $roleKeys[0];
+        if (!empty($roleKeys)) {
+            $defaultRole = array_key_exists(UserRoles::CORE_SUPER_ADMIN_KEY, $availableRoles)
+                ? UserRoles::CORE_SUPER_ADMIN_KEY
+                : $roleKeys[0];
             $roleKey = $this->anticipate('Role key for the admin user', $roleKeys, $defaultRole);
-            $roleId = $rolesConfig[$roleKey]['id'] ?? null;
+            $roleSlug = $roleKey;
+            $roleId = $availableRoles[$roleKey]['id'] ?? null;
 
             if (!$roleId) {
-                $this->warn("Role [$roleKey] does not define an id in config/mfw-users.php. The admin user will be created without a role assignment.");
+                $this->warn("Role [$roleKey] does not define an id. The admin user will be created without a role assignment.");
             }
         } else {
-            $this->warn('Unable to locate roles from config/mfw-users.php. The admin user will be created without a role assignment.');
+            $this->warn('Unable to resolve available roles. The admin user will be created without a role assignment.');
         }
 
-        $this->publishAdminSeederStub($firstName, $lastName, $email, $password, $roleId);
+        $this->publishAdminSeederStub($firstName, $lastName, $email, $password, $roleId, $roleSlug);
         $this->ensureDatabaseSeederCallsAdminSeeder();
 
         $this->newLine();
@@ -267,7 +272,7 @@ return [
         File::put($targetPath, File::get($stubPath));
     }
 
-    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null): void
+    private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null, ?string $roleSlug = null): void
     {
         $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
         if (!File::exists($stubPath)) {
@@ -282,6 +287,7 @@ return [
             '{{ email }}' => addslashes($email),
             '{{ password }}' => addslashes($password),
             '{{ role_id }}' => $roleId !== null ? (string) $roleId : 'null',
+            '{{ role_slug }}' => $roleSlug !== null ? addslashes($roleSlug) : 'null',
         ];
 
         $content = str_replace(array_keys($replacements), array_values($replacements), File::get($stubPath));
@@ -326,6 +332,31 @@ return [
         }
 
         File::put($databaseSeederPath, $content);
+    }
+
+    private function ensureUserModelUsesMetaFrameworkUsersTrait(): void
+    {
+        $userModelPath = app_path('Models/User.php');
+        if (!File::exists($userModelPath)) {
+            $this->warn('App\\Models\\User.php was not found; unable to auto-wire MetaFramework role trait.');
+
+            return;
+        }
+
+        $content = File::get($userModelPath);
+        $updated = $content;
+
+        $updated = str_replace('use App\\Traits\\Users;', 'use MetaFramework\\Traits\\Users;', $updated);
+        $updated = str_replace('use \\App\\Traits\\Users;', 'use \\MetaFramework\\Traits\\Users;', $updated);
+
+        $hasUsersTrait = preg_match('/class\s+User[^{]*\{[\s\S]*?\buse\s+[^;]*\b(?:Users|\\\\MetaFramework\\\\Traits\\\\Users)\b[^;]*;/', $updated) === 1;
+        if (!$hasUsersTrait) {
+            $updated = preg_replace('/(class\s+User[^{]*\{\R)/', '$1    use \MetaFramework\Traits\Users;' . PHP_EOL . PHP_EOL, $updated, 1) ?? $updated;
+        }
+
+        if ($updated !== $content) {
+            File::put($userModelPath, $updated);
+        }
     }
 
     private function views()

@@ -7,6 +7,7 @@ namespace MetaFramework\Controllers;
 use Illuminate\Support\Facades\DB;
 use MetaFramework\Actions\TranslatableActions;
 use MetaFramework\Services\Validation\ValidationTrait;
+use MetaFramework\Support\UserRoles;
 use MetaFramework\Support\Traits\Ajax;
 
 class AjaxController extends Controller
@@ -66,31 +67,71 @@ class AjaxController extends Controller
 
     public function artisanOptimize(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->optimizeClear();
     }
 
     public function artisanMigrate(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'), (bool) request('confirmed'));
     }
 
     public function composerUpdate(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->composerUpdate();
     }
 
     public function composerUpdateDev(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->composerUpdateDev();
     }
 
     public function composerUpdateProd(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->composerUpdateProd();
     }
 
     public function composerDumpAutoload(): array
     {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
         return new ArtisanController()->ajaxMode()->composerDumpAutoload();
+    }
+
+    private function canRunMaintenanceActions(): bool
+    {
+        $user = auth()->user();
+
+        return (bool) $user
+            && method_exists($user, 'hasRole')
+            && $user->hasRole([UserRoles::CORE_DEV_KEY, UserRoles::CORE_SUPER_ADMIN_KEY]);
+    }
+
+    private function denyMaintenanceAccess(): array
+    {
+        $this->responseError(__('mfw-users.errors.access_denied'));
+
+        return $this->fetchResponse();
     }
 }

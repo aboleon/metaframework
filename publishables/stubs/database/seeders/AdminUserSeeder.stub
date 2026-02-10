@@ -4,13 +4,14 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['email' => '{{ email }}'],
             [
                 'first_name' => '{{ first_name }}',
@@ -21,5 +22,25 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        DB::table('users_roles')->where('user_id', $user->id)->delete();
+
+        $roleId = null;
+
+        if ('{{ role_slug }}' !== 'null') {
+            $roleId = DB::table('roles')->where('slug', '{{ role_slug }}')->value('id');
+        }
+
+        $legacyRoleId = '{{ role_id }}';
+        if ($roleId === null && $legacyRoleId !== 'null') {
+            $roleId = (int) $legacyRoleId;
+        }
+
+        if ($roleId !== null) {
+            DB::table('users_roles')->insert([
+                'user_id' => $user->id,
+                'role_id' => (int) $roleId,
+            ]);
+        }
     }
 }

@@ -36,11 +36,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             ));
         });
 
-        Blade::directive('role', function ($arguments) {
-            return "<?php if (auth()->check() && auth()->user()->hasRole({$arguments})) { ?>";
-        });
-        Blade::directive('endrole', function () {
-            return '<?php } ?>';
+        Blade::if('role', static function ($arguments): bool {
+            $user = auth()->user();
+
+            return (bool) $user
+                && method_exists($user, 'hasRole')
+                && $user->hasRole($arguments);
         });
 
         $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
