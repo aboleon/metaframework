@@ -42,16 +42,24 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('mfw.role-groups.edit', $group) }}" class="btn btn-sm btn-outline-primary">
-                                {{ __('mfw-users.role_groups.edit') }}
-                            </a>
-                            @if(!$group->is_system)
-                                <form method="post" action="{{ route('mfw.role-groups.destroy', $group) }}" class="d-inline" onsubmit="return confirm('{{ __('mfw-users.role_groups.delete_confirm') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">{{ __('mfw-users.role_groups.delete') }}</button>
-                                </form>
-                            @endif
+                            <ul class="mfw-actions">
+                                <li>
+                                    <x-mfw::edit-link :route="route('mfw.role-groups.edit', $group->id)"/>
+                                </li>
+                                @if(!$group->is_system)
+                                    <li>
+                                        <form method="post" action="{{ route('mfw.role-groups.destroy', $group) }}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('{{ __('mfw-users.role_groups.delete_confirm') }}');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger"><i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endif
+                            </ul>
                         </td>
                     </tr>
                 @empty

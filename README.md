@@ -162,7 +162,10 @@ Roles can be managed in the back-office at:
 - `route('mfw.roles.index')`
 - System users listing: `route('mfw.users.index', 'super-admin')`
 
-Roles now use `group_id` foreign key to `role_groups` (replacing legacy subgroup/profile/group_key fields).
+Published role migration stubs (install baseline):
+- `publishables/database/migrations/2022_05_15_214450_create_role_groups_table.php`
+- `publishables/database/migrations/2022_05_15_214500_create_roles_table.php`
+- `publishables/database/migrations/2022_05_15_214516_create_user_roles_table.php`
 
 ### 3) Usage in code and Blade
 
