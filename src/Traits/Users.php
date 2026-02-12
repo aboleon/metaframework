@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use MetaFramework\Models\RoleGroup;
 use MetaFramework\Models\UserRole;
+use MetaFramework\Polyglote\Interfaces\TranslatableInterface;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Support\UserRoles;
 use Throwable;
@@ -27,17 +29,27 @@ trait Users
 
     public function publicUsers(): Collection
     {
-        return $this->availableRoles()->where('group_key', 'public');
+        $publicGroupKey = RoleGroup::CORE_PUBLIC_KEY;
+        $publicGroupIds = $this->resolveGroupIds([$publicGroupKey]);
+
+        return $this->availableRoles()->filter(
+            fn(array $role): bool => $this->roleMatchesGroup($role, $publicGroupIds),
+        );
     }
 
     public function backOfficeUsers(): Collection
     {
-        return $this->availableRoles()->where('group_key', '!=', 'public');
+        $publicGroupKey = RoleGroup::CORE_PUBLIC_KEY;
+        $publicGroupIds = $this->resolveGroupIds([$publicGroupKey]);
+
+        return $this->availableRoles()->filter(
+            fn(array $role): bool => !$this->roleMatchesGroup($role, $publicGroupIds),
+        );
     }
 
     public function usersOfType(string $type): Collection
     {
-        return $this->availableRoles()->filter(static fn (array $role, string $key): bool => $key === $type);
+        return $this->availableRoles()->filter(static fn(array $role, string $key): bool => $key === $type);
     }
 
     public function userType(string|int|null $type = null): array
@@ -54,9 +66,33 @@ trait Users
         return UserRoles::all();
     }
 
-    public function names(): string
+    /**
+     * Returns users first and last name, possibly localized
+     * @param  string|null  $locale
+     *
+     * @return string
+     */
+
+    public function names(?string $locale = null): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        $names = trim((string)($this->first_name ?? '').' '.(string)($this->last_name ?? '')) ?: 'NC';
+
+        if (!$locale || $locale === app()->getLocale()) {
+            return $names;
+        }
+
+        if (is_subclass_of(static::class, TranslatableInterface::class) && !method_exists($this, 'getTranslation')) {
+            return $names;
+        }
+
+        if (!method_exists($this, 'isTranslatableAttribute')
+            || !$this->isTranslatableAttribute('first_name')
+            || !$this->isTranslatableAttribute('last_name')
+        ) {
+            return $names;
+        }
+
+        return trim((string)$this->getTranslation('first_name', $locale).' '.(string)$this->getTranslation('last_name', $locale));
     }
 
     public function user_roles(): array
@@ -91,10 +127,10 @@ trait Users
     {
         if ($this->roles->isNotEmpty()) {
             foreach ($this->roles as $role) {
-                $roleLabel = (string) ($this->userType((int) $role->role_id)['label'] ?? $role->role_id);
-                $translationKey = 'user_type.' . $roleLabel . '.label';
+                $roleLabel           = (string)($this->userType((int)$role->role_id)['label'] ?? $role->role_id);
+                $translationKey      = 'user_type.'.$roleLabel.'.label';
                 $translatedRoleLabel = trans($translationKey);
-                echo '<span class="role btn btn-sm btn-secondary">' . ($translatedRoleLabel === $translationKey ? $roleLabel : $translatedRoleLabel) . '</span>';
+                echo '<span class="role btn btn-sm btn-secondary">'.($translatedRoleLabel === $translationKey ? $roleLabel : $translatedRoleLabel).'</span>';
             }
         }
 
@@ -103,54 +139,40 @@ trait Users
 
     public function userRolesKeys(): array
     {
-        return $this->roles->pluck('role_id')->map(static fn ($item): int => (int) $item)->unique()->values()->toArray();
+        return $this->roles->pluck('role_id')->map(static fn($item): int => (int)$item)->unique()->values()->toArray();
     }
 
     public function userRole(): ?int
     {
         $role = $this->roles->first();
 
-        return $role ? (int) $role->role_id : null;
+        return $role ? (int)$role->role_id : null;
     }
 
     public function belongsToSubgroup(string|array $group): bool
     {
-        return $this->userTypeParser('group_key', $group);
+        $groupRoleKeys = $this->targetRoleKeysByGroup($group);
+
+        return $this->hasRole($groupRoleKeys);
     }
 
     public function hasRole(string|array $role, bool $test = false): bool
     {
+        unset($test);
+
         if (!$role) {
             return false;
         }
 
-        $targets = $this->targetRoles($role);
-        $targeted = $this->targetRoleIds($targets);
+        $targets   = $this->targetRoles($role);
+        $targeted  = $this->targetRoleIds($targets);
         $userRoles = $this->userRolesKeys();
-
-        if ($test) {
-            d($targets, 'Parsed roles from input');
-            d($targeted, 'Targeted');
-            d($userRoles, 'User Roles');
-            d(array_intersect($targeted, $userRoles), 'CUT');
-        }
 
         if ($this->shouldFallbackToAuthenticatedRoleAccess()) {
             return true;
         }
 
-        return (bool) array_intersect($targeted, $userRoles);
-    }
-
-    private function userTypeParser(string $parser, string|array $group): bool
-    {
-        if (is_string($group)) {
-            $collection = $this->availableRoles()->where($parser, '=', $group)->keys()->toArray();
-        } else {
-            $collection = $this->availableRoles()->whereIn($parser, $group)->keys()->toArray();
-        }
-
-        return $this->hasRole($collection);
+        return (bool)array_intersect($targeted, $userRoles);
     }
 
     private function targetRoles(string|array $role): array
@@ -158,25 +180,86 @@ trait Users
         if (is_string($role)) {
             $separator = str_contains($role, '|') ? '|' : ',';
 
-            return array_values(array_filter(array_map(
-                static fn ($item): string => trim(str_replace(["'", '"', '[', ']'], '', $item)),
-                explode($separator, $role)
-            )));
+            return array_values(
+                array_filter(
+                    array_map(
+                        static fn($item): string => trim(str_replace(["'", '"', '[', ']'], '', $item)),
+                        explode($separator, $role),
+                    ),
+                ),
+            );
         }
 
-        return array_values(array_filter($role, static fn ($item): bool => is_string($item) || is_numeric($item)));
+        return array_values(array_filter($role, static fn($item): bool => is_string($item) || is_numeric($item)));
     }
 
     private function targetRoleIds(string|array $role): array
     {
-        $targets = is_array($role) ? $role : $this->targetRoles($role);
+        $targets        = is_array($role) ? $role : $this->targetRoles($role);
         $availableRoles = $this->availableRoles();
-        $stringable = $availableRoles->filter(static function (array $item, string $key) use ($targets): bool {
+        $stringable     = $availableRoles->filter(static function (array $item, string $key) use ($targets): bool {
             return in_array($key, $targets, true);
-        })->pluck('id')->map(static fn ($item): int => (int) $item)->toArray();
-        $numeric = collect($targets)->filter(static fn ($item): bool => is_numeric($item))->map(static fn ($item): int => (int) $item)->toArray();
+        })->pluck('id')->map(static fn($item): int => (int)$item)->toArray();
+        $numeric        = collect($targets)->filter(static fn($item): bool => is_numeric($item))->map(static fn($item): int => (int)$item)->toArray();
 
         return array_values(array_unique(array_merge($stringable, $numeric)));
+    }
+
+    private function targetRoleKeysByGroup(string|array $group): array
+    {
+        $targets  = $this->targetRoles($group);
+        $groupIds = $this->resolveGroupIds($targets);
+
+        return $this->availableRoles()->filter(
+            fn(array $role): bool => $this->roleMatchesGroup($role, $groupIds),
+        )->keys()->values()->toArray();
+    }
+
+    /**
+     * @param  array<int, int|string>  $targets
+     *
+     * @return array<int, int>
+     */
+    private function resolveGroupIds(array $targets): array
+    {
+        $numeric = collect($targets)
+            ->filter(static fn($item): bool => is_numeric($item))
+            ->map(static fn($item): int => (int)$item)
+            ->values()
+            ->toArray();
+        $keys    = array_values(array_filter($targets, static fn($item): bool => is_string($item) && !is_numeric($item)));
+
+        if ($keys === []) {
+            return array_values(array_unique($numeric));
+        }
+
+        try {
+            if (!Schema::hasTable('role_groups')) {
+                return array_values(array_unique($numeric));
+            }
+
+            $resolved = RoleGroup::query()
+                ->whereIn('key', $keys)
+                ->pluck('id')
+                ->map(static fn($item): int => (int)$item)
+                ->values()
+                ->toArray();
+
+            return array_values(array_unique(array_merge($numeric, $resolved)));
+        } catch (Throwable) {
+            return array_values(array_unique($numeric));
+        }
+    }
+
+    /**
+     * @param  array{id?:int,key?:string,label?:string,group_id?:int|null,is_system?:bool}  $role
+     * @param  array<int, int>                                                              $groupIds
+     */
+    private function roleMatchesGroup(array $role, array $groupIds): bool
+    {
+        $groupId = $role['group_id'] ?? null;
+
+        return is_numeric($groupId) && in_array((int)$groupId, $groupIds, true);
     }
 
     private function availableRoles(): Collection
@@ -200,7 +283,7 @@ trait Users
             return false;
         }
 
-        return (string) $authenticatedUser->getKey() === (string) $this->getKey();
+        return (string)$authenticatedUser->getKey() === (string)$this->getKey();
     }
 
     private function anyRoleAssignmentExists(): bool

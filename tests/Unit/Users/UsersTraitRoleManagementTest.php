@@ -150,6 +150,41 @@ class UsersTraitRoleManagementTest extends TestCase
         $this->assertFalse($authenticatedUser->fresh()->hasRole('editor'));
     }
 
+    public function test_group_filters_and_subgroup_checks_are_resolved_from_group_assignments(): void
+    {
+        $this->seedRoles();
+
+        DB::table('roles')->insert([
+            'id' => 11,
+            'key' => 'customer',
+            'label' => 'customer',
+            'group_id' => 2,
+            'is_system' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $user = TestUserWithRoles::query()->create([
+            'first_name' => 'Public',
+            'last_name' => 'User',
+        ]);
+
+        DB::table('users_roles')->insert([
+            'user_id' => $user->id,
+            'role_id' => 11,
+        ]);
+
+        $freshUser = $user->fresh();
+        $publicRoles = $freshUser->publicUsers();
+        $backOfficeRoles = $freshUser->backOfficeUsers();
+
+        $this->assertArrayHasKey('customer', $publicRoles->toArray());
+        $this->assertArrayNotHasKey('customer', $backOfficeRoles->toArray());
+        $this->assertTrue($freshUser->belongsToSubgroup('public'));
+        $this->assertTrue($freshUser->belongsToSubgroup('2'));
+        $this->assertFalse($freshUser->belongsToSubgroup('admin'));
+    }
+
     private function seedRoles(): void
     {
         DB::table('role_groups')->insert([
