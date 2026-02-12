@@ -60,11 +60,6 @@ class ArtisanController
         }
     }
 
-    public function composerUpdate(): array
-    {
-        return $this->composerUpdateProd();
-    }
-
     public function composerUpdateDev(): array
     {
         $this->executeShellCommand([
@@ -81,13 +76,13 @@ class ArtisanController
     {
         $this->executeShellCommand([
             'composer',
-            'update',
+            'install',
             '--no-dev',
             '--optimize-autoloader',
             '--no-interaction',
             '--no-progress',
             '--no-ansi',
-        ]);
+        ], 'Composer install (no-dev) completed successfully.', 'Composer install (no-dev) failed.');
 
         return $this->fetchResponse();
     }
@@ -162,4 +157,5 @@ class ArtisanController
             $this->responseError(nl2br($exception->getMessage()));
         }
     }
+
 }

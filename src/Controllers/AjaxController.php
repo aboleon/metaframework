@@ -83,15 +83,6 @@ class AjaxController extends Controller
         return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'), (bool) request('confirmed'));
     }
 
-    public function composerUpdate(): array
-    {
-        if (!$this->canRunMaintenanceActions()) {
-            return $this->denyMaintenanceAccess();
-        }
-
-        return new ArtisanController()->ajaxMode()->composerUpdate();
-    }
-
     public function composerUpdateDev(): array
     {
         if (!$this->canRunMaintenanceActions()) {
