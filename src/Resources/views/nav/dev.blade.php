@@ -28,6 +28,9 @@
         @endif
         @if (app()->environment('production'))
             <li>
+                <a href="#" class="mfw-dev-action" data-action="composerInstallProd">Composer Install (prod)</a>
+            </li>
+            <li>
                 <a href="#" class="mfw-dev-action" data-action="composerUpdateProd">Composer Update (prod)</a>
             </li>
         @endif

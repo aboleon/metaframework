@@ -101,6 +101,15 @@ class AjaxController extends Controller
         return new ArtisanController()->ajaxMode()->composerUpdateProd();
     }
 
+    public function composerInstallProd(): array
+    {
+        if (!$this->canRunMaintenanceActions()) {
+            return $this->denyMaintenanceAccess();
+        }
+
+        return new ArtisanController()->ajaxMode()->composerInstallProd();
+    }
+
     public function composerDumpAutoload(): array
     {
         if (!$this->canRunMaintenanceActions()) {

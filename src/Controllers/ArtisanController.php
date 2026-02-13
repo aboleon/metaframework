@@ -76,6 +76,21 @@ class ArtisanController
     {
         $this->executeShellCommand([
             'composer',
+            'update',
+            '--no-dev',
+            '--optimize-autoloader',
+            '--no-interaction',
+            '--no-progress',
+            '--no-ansi',
+        ], 'Composer update (no-dev) completed successfully.', 'Composer update (no-dev) failed.');
+
+        return $this->fetchResponse();
+    }
+
+    public function composerInstallProd(): array
+    {
+        $this->executeShellCommand([
+            'composer',
             'install',
             '--no-dev',
             '--optimize-autoloader',
