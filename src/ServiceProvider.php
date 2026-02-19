@@ -45,11 +45,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 && $user->hasRole($arguments);
         });
 
-        $this->loadViewsFrom(__DIR__ . '/Resources/views', 'mfw');
+        $this->loadViewsFrom(__DIR__.'/Resources/views', 'mfw');
         Blade::componentNamespace('MetaFramework\Components', 'mfw');
         Blade::component(TranslatableTabs::class, 'mfw-translatables');
 
-        $this->loadRoutesFrom(__DIR__ . '/Routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/Routes/web.php');
 
         View::share('current_locale', App::getLocale());
 
@@ -57,6 +57,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->publishInstall();
         $this->publishAuth();
+        $this->publishAccount();
         $this->publishAssets();
         $this->publishLang();
         $this->publishViews();
@@ -71,11 +72,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function publishInstall(): void
     {
         $this->publishes([
-            __DIR__ . '/../publishables/config/' => config_path(),
-            __DIR__ . '/../publishables/public/' => public_path(),
-            __DIR__ . '/../publishables/lang/' => base_path('lang'),
-            __DIR__ . '/../publishables/database/' => database_path(),
-            __DIR__ . '/../publishables/resources/' => resource_path(),
+            __DIR__.'/../publishables/config/' => config_path(),
+            __DIR__.'/../publishables/public/' => public_path(),
+            __DIR__.'/../publishables/lang/' => base_path('lang'),
+            __DIR__.'/../publishables/database/' => database_path(),
+            __DIR__.'/../publishables/resources/' => resource_path(),
         ], 'mfw-install');
     }
 
@@ -85,28 +86,35 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function publishAuth(): void
     {
         $this->publishes([
-            __DIR__ . '/../publishables/auth/' => base_path(),
+            __DIR__.'/../publishables/auth/' => base_path(),
         ], 'mfw-auth');
+    }
+
+    private function publishAccount(): void
+    {
+        $this->publishes([
+            __DIR__.'/../publishables/account/' => base_path(),
+        ], 'mfw-account');
     }
 
     private function publishAssets(): void
     {
         $this->publishes([
-            __DIR__ . '/../publishables/public/vendor/' => public_path('vendor/'),
+            __DIR__.'/../publishables/public/vendor/' => public_path('vendor/'),
         ], 'mfw-assets');
     }
 
     private function publishLang(): void
     {
         $this->publishes([
-            __DIR__ . '/../publishables/lang/' => base_path('lang'),
+            __DIR__.'/../publishables/lang/' => base_path('lang'),
         ], 'mfw-lang');
     }
 
     private function publishViews(): void
     {
         $this->publishes([
-            __DIR__ . '/Resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
+            __DIR__.'/Resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
         ], 'mfw-views');
     }
 }

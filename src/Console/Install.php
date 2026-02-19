@@ -33,7 +33,7 @@ class Install extends Command
         if (method_exists($this, $this->argument('argument'))) {
             $this->{$this->argument('argument')}();
         } else {
-            $this->error("MetaFramework: unknown console command '" . $this->argument('argument') . "'");
+            $this->error("MetaFramework: unknown console command '".$this->argument('argument')."'");
         }
     }
 
@@ -43,9 +43,9 @@ class Install extends Command
         $this->comment('Publishing configuration...');
         $this->comment('------------------------------------------');
 
-        $app_name       = $this->ask('What is the name of your app');
+        $app_name = $this->ask('What is the name of your app');
         $app_default_lg = $this->ask('What is the app default language locale (en, fr, de..) ? Default is en', 'en');
-        $panel_prefix   = $this->ask('What is the prefix for your back-office routes');
+        $panel_prefix = $this->ask('What is the prefix for your back-office routes');
 
         // Validate input
         if (empty($app_name) || empty($app_default_lg) || empty($panel_prefix)) {
@@ -56,22 +56,22 @@ class Install extends Command
 
         // Update app.php configuration
         $this->updateConfigFile(config_path('app.php'), [
-            "'name'"            => "    'name' => '" . addslashes($app_name) . "',",
-            "'timezone'"        => "    'timezone' => 'Europe/Paris',",
-            "'locale'"          => "    'locale' => '" . $app_default_lg . "',",
-            "'fallback_locale'" => "    'fallback_locale' => '" . $app_default_lg . "',",
+            "'name'" => "    'name' => '".addslashes($app_name)."',",
+            "'timezone'" => "    'timezone' => 'Europe/Paris',",
+            "'locale'" => "    'locale' => '".$app_default_lg."',",
+            "'fallback_locale'" => "    'fallback_locale' => '".$app_default_lg."',",
         ]);
 
         // Create mfw.php configuration
-        $mfwConfigPath    = base_path('config/mfw.php');
+        $mfwConfigPath = base_path('config/mfw.php');
         $mfwConfigContent = "<?php
 return [
-    'route' => '" . $panel_prefix . "',
-    'locales' => ['" . $app_default_lg . "'],
-    'active_locales' => ['" . $app_default_lg . "']
+    'route' => '".$panel_prefix."',
+    'locales' => ['".$app_default_lg."'],
+    'active_locales' => ['".$app_default_lg."']
 ];";
 
-        if (!File::put($mfwConfigPath, $mfwConfigContent)) {
+        if (! File::put($mfwConfigPath, $mfwConfigContent)) {
             $this->error('Failed to write mfw configuration file.');
 
             return;
@@ -79,7 +79,7 @@ return [
 
         // Update routes in bootstrap/app.php or routes/web.php
         $routeFilePath = base_path('routes/web.php'); // or base_path('routes/web.php')
-        $this->replaceInFile("view('dashboard", "view('" . $panel_prefix . '/dashboard', $routeFilePath);
+        $this->replaceInFile("view('dashboard", "view('".$panel_prefix.'/dashboard', $routeFilePath);
 
         $this->callPublishConfiguration();
         $this->setupUserFactoryAndSeeder();
@@ -93,7 +93,7 @@ return [
 
         $routeFilePath = base_path('routes/web.php');
 
-        $auth_routes     = <<<'PHP'
+        $auth_routes = <<<'PHP'
             Route::get('/dashboard', function () {
                 return view('dashboard');
             })->middleware(['auth', 'verified'])->name('dashboard');
@@ -105,15 +105,15 @@ return [
         $pattern = '/^use .*?;/m';
         preg_match_all($pattern, $existingContent, $matches);
 
-        if (!empty($matches[0])) {
+        if (! empty($matches[0])) {
             $lastUseStatement = end($matches[0]);
-            $position         = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
+            $position = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
 
-            $newContent = substr($existingContent, 0, $position) . PHP_EOL . PHP_EOL . $auth_routes . substr($existingContent, $position);
+            $newContent = substr($existingContent, 0, $position).PHP_EOL.PHP_EOL.$auth_routes.substr($existingContent, $position);
 
             File::put($routeFilePath, $newContent);
         } else {
-            File::append($routeFilePath, "\n" . $auth_routes);
+            File::append($routeFilePath, "\n".$auth_routes);
         }
 
         $this->callAuthPackage();
@@ -121,20 +121,33 @@ return [
         $this->comment('Auth Package published successfully.');
     }
 
+    private function account(): void
+    {
+        $this->newLine();
+        $this->comment('Publishing Front Account Package...');
+        $this->comment('------------------------------------------');
+
+        $this->callAccountPackage();
+        $this->ensureAccountRoutesAreLoaded();
+        $this->ensureAccountGuardConfiguration();
+
+        $this->comment('Front Account Package published successfully.');
+    }
+
     /**
      * Update configuration file by replacing specific lines.
      */
     private function updateConfigFile(string $filePath, array $replacements): void
     {
-        if (!File::exists($filePath)) {
-            $this->error('Configuration file not found: ' . $filePath);
+        if (! File::exists($filePath)) {
+            $this->error('Configuration file not found: '.$filePath);
 
             return;
         }
 
         $lines = file($filePath, FILE_IGNORE_NEW_LINES);
         if ($lines === false) {
-            $this->error('Failed to read configuration file: ' . $filePath);
+            $this->error('Failed to read configuration file: '.$filePath);
 
             return;
         }
@@ -143,13 +156,13 @@ return [
             $seek = array_filter($lines, function ($line) use ($search) {
                 return strstr($line, $search);
             });
-            if (!empty($seek)) {
+            if (! empty($seek)) {
                 $lines[key($seek)] = $replace;
             }
         }
 
-        if (!File::put($filePath, implode("\n", $lines))) {
-            $this->error('Failed to update configuration file: ' . $filePath);
+        if (! File::put($filePath, implode("\n", $lines))) {
+            $this->error('Failed to update configuration file: '.$filePath);
         }
     }
 
@@ -158,17 +171,17 @@ return [
      */
     private function replaceInFile(string $search, string $replace, string $filePath): void
     {
-        if (!File::exists($filePath)) {
-            $this->error('File not found: ' . $filePath);
+        if (! File::exists($filePath)) {
+            $this->error('File not found: '.$filePath);
 
             return;
         }
 
-        $content    = File::get($filePath);
+        $content = File::get($filePath);
         $newContent = str_replace($search, $replace, $content);
 
-        if (!File::put($filePath, $newContent)) {
-            $this->error('Failed to update file: ' . $filePath);
+        if (! File::put($filePath, $newContent)) {
+            $this->error('Failed to update file: '.$filePath);
         }
     }
 
@@ -179,7 +192,7 @@ return [
     {
         $this->call('vendor:publish', [
             '--provider' => 'MetaFramework\ServiceProvider',
-            '--tag'      => 'mfw-install',
+            '--tag' => 'mfw-install',
         ]);
     }
 
@@ -190,8 +203,158 @@ return [
     {
         $this->call('vendor:publish', [
             '--provider' => 'MetaFramework\ServiceProvider',
-            '--tag'      => 'mfw-auth',
+            '--tag' => 'mfw-auth',
         ]);
+    }
+
+    private function callAccountPackage(): void
+    {
+        $this->call('vendor:publish', [
+            '--provider' => 'MetaFramework\ServiceProvider',
+            '--tag' => 'mfw-account',
+        ]);
+    }
+
+    private function ensureAccountRoutesAreLoaded(): void
+    {
+        $routeFilePath = base_path('routes/web.php');
+
+        if (! File::exists($routeFilePath)) {
+            $this->warn('routes/web.php was not found; skipping account routes registration.');
+
+            return;
+        }
+
+        $existingContent = File::get($routeFilePath);
+        $routeRequire = "require __DIR__ . '/account.php';";
+
+        if (preg_match("/require\\s+__DIR__\\s*\\.\\s*['\"]\\/account\\.php['\"];/", $existingContent) === 1) {
+            return;
+        }
+
+        $updatedContent = preg_replace(
+            "/require\\s+__DIR__\\s*\\.\\s*['\"]\\/auth\\.php['\"];/",
+            "$0\n".$routeRequire,
+            $existingContent,
+            1,
+            $authReplacementCount
+        );
+
+        if ($authReplacementCount === 0 || ! is_string($updatedContent)) {
+            $updatedContent = preg_replace(
+                "/include\\s+__DIR__\\s*\\.\\s*['\"]\\/panel\\/routes\\.php['\"];/",
+                $routeRequire."\n$0",
+                $existingContent,
+                1,
+                $panelReplacementCount
+            );
+
+            if ($panelReplacementCount === 0 || ! is_string($updatedContent)) {
+                $updatedContent = rtrim($existingContent).PHP_EOL.PHP_EOL.$routeRequire.PHP_EOL;
+            }
+        }
+
+        File::put($routeFilePath, $updatedContent);
+    }
+
+    private function ensureAccountGuardConfiguration(): void
+    {
+        $authConfigPath = config_path('auth.php');
+
+        if (! File::exists($authConfigPath)) {
+            $this->warn('config/auth.php was not found; skipping account guard setup.');
+
+            return;
+        }
+
+        $existingContent = File::get($authConfigPath);
+        $updatedContent = $this->ensureAuthSectionEntry(
+            $existingContent,
+            'guards',
+            'account',
+            "            'driver' => 'session',\n            'provider' => 'accounts',"
+        );
+
+        $updatedContent = $this->ensureAuthSectionEntry(
+            $updatedContent,
+            'providers',
+            'accounts',
+            "            'driver' => 'eloquent',\n            'model' => env('AUTH_ACCOUNT_MODEL', Modules\\Thesaurus\\Models\\Account::class),"
+        );
+
+        $updatedContent = $this->ensureAuthSectionEntry(
+            $updatedContent,
+            'passwords',
+            'accounts',
+            "            'provider' => 'accounts',\n            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),\n            'expire' => 60,\n            'throttle' => 60,"
+        );
+
+        if ($updatedContent !== $existingContent) {
+            File::put($authConfigPath, $updatedContent);
+        }
+    }
+
+    private function ensureAuthSectionEntry(string $content, string $section, string $entryKey, string $entryBody): string
+    {
+        $sectionPosition = strpos($content, "'".$section."' => [");
+
+        if ($sectionPosition === false) {
+            $this->warn("Unable to locate auth config section [{$section}].");
+
+            return $content;
+        }
+
+        $openBracketPosition = strpos($content, '[', $sectionPosition);
+
+        if ($openBracketPosition === false) {
+            $this->warn("Unable to parse auth config section [{$section}].");
+
+            return $content;
+        }
+
+        $closeBracketPosition = $this->findMatchingBracketPosition($content, $openBracketPosition);
+
+        if ($closeBracketPosition === null) {
+            $this->warn("Unable to resolve closing bracket for auth config section [{$section}].");
+
+            return $content;
+        }
+
+        $sectionContent = substr($content, $openBracketPosition + 1, $closeBracketPosition - $openBracketPosition - 1);
+
+        if (preg_match("/'".preg_quote($entryKey, '/')."'\\s*=>\\s*\\[/", $sectionContent) === 1) {
+            return $content;
+        }
+
+        $entry = "\n        '".$entryKey."' => [\n".$entryBody."\n        ],";
+
+        return substr($content, 0, $closeBracketPosition).$entry.substr($content, $closeBracketPosition);
+    }
+
+    private function findMatchingBracketPosition(string $content, int $openBracketPosition): ?int
+    {
+        $depth = 0;
+        $contentLength = strlen($content);
+
+        for ($index = $openBracketPosition; $index < $contentLength; $index++) {
+            $character = $content[$index];
+
+            if ($character === '[') {
+                $depth++;
+
+                continue;
+            }
+
+            if ($character === ']') {
+                $depth--;
+
+                if ($depth === 0) {
+                    return $index;
+                }
+            }
+        }
+
+        return null;
     }
 
     private function setupUserFactoryAndSeeder(): void
@@ -203,27 +366,27 @@ return [
         $this->ensureUserModelUsesMetaFrameworkUsersTrait();
         $this->publishUserFactoryStub();
 
-        if (!$this->confirm('Would you like to configure a default admin user now?', true)) {
+        if (! $this->confirm('Would you like to configure a default admin user now?', true)) {
             $this->info('User factory has been updated. You can create your admin seeder later using: php artisan make:seeder AdminUserSeeder');
 
             return;
         }
 
         $firstName = $this->ask('Admin first name');
-        $lastName  = $this->ask('Admin last name');
-        $email     = $this->ask('Admin email address', 'admin@example.com');
+        $lastName = $this->ask('Admin last name');
+        $email = $this->ask('Admin email address', 'admin@example.com');
 
-        if (!$firstName || !$lastName || !$email) {
+        if (! $firstName || ! $lastName || ! $email) {
             $this->error('First name, last name and email are required to create the admin user.');
 
             return;
         }
 
         $password = $this->secret('Admin password (leave blank to auto-generate)');
-        if (!$password) {
+        if (! $password) {
             $password = Str::password(12);
             $this->info('');
-            $this->info('Generated password: ' . $password);
+            $this->info('Generated password: '.$password);
         }
 
         $availableRoles = UserRoles::all();
@@ -231,7 +394,7 @@ return [
         $roleId = null;
         $roleKeyValue = null;
 
-        if (!empty($roleKeys)) {
+        if (! empty($roleKeys)) {
             $defaultRole = array_key_exists(UserRoles::CORE_SUPER_ADMIN_KEY, $availableRoles)
                 ? UserRoles::CORE_SUPER_ADMIN_KEY
                 : $roleKeys[0];
@@ -239,7 +402,7 @@ return [
             $roleKeyValue = $roleKey;
             $roleId = $availableRoles[$roleKey]['id'] ?? null;
 
-            if (!$roleId) {
+            if (! $roleId) {
                 $this->warn("Role [$roleKey] does not define an id. The admin user will be created without a role assignment.");
             }
         } else {
@@ -256,8 +419,8 @@ return [
 
     private function publishUserFactoryStub(): void
     {
-        $stubPath = __DIR__ . '/../../publishables/stubs/database/factories/UserFactory.stub';
-        if (!File::exists($stubPath)) {
+        $stubPath = __DIR__.'/../../publishables/stubs/database/factories/UserFactory.stub';
+        if (! File::exists($stubPath)) {
             $this->error('User factory stub not found.');
 
             return;
@@ -265,7 +428,7 @@ return [
 
         $targetPath = database_path('factories/UserFactory.php');
         $directory = dirname($targetPath);
-        if (!File::isDirectory($directory)) {
+        if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -274,8 +437,8 @@ return [
 
     private function publishAdminSeederStub(string $firstName, string $lastName, string $email, string $password, ?int $roleId = null, ?string $roleKey = null): void
     {
-        $stubPath = __DIR__ . '/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
-        if (!File::exists($stubPath)) {
+        $stubPath = __DIR__.'/../../publishables/stubs/database/seeders/AdminUserSeeder.stub';
+        if (! File::exists($stubPath)) {
             $this->error('Admin user seeder stub not found.');
 
             return;
@@ -294,7 +457,7 @@ return [
 
         $targetPath = database_path('seeders/AdminUserSeeder.php');
         $directory = dirname($targetPath);
-        if (!File::isDirectory($directory)) {
+        if (! File::isDirectory($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -304,7 +467,7 @@ return [
     private function ensureDatabaseSeederCallsAdminSeeder(): void
     {
         $databaseSeederPath = database_path('seeders/DatabaseSeeder.php');
-        if (!File::exists($databaseSeederPath)) {
+        if (! File::exists($databaseSeederPath)) {
             $this->warn('DatabaseSeeder.php was not found; skipping automatic wiring of the admin seeder.');
 
             return;
@@ -320,8 +483,8 @@ return [
 
         $content = preg_replace('/\s*User::factory\(\)->create\(\[[\s\S]*?\]\);\s*/m', PHP_EOL, $content);
 
-        if (!str_contains($content, 'User::')) {
-            $content = str_replace('use App\\Models\\User;' . PHP_EOL, '', $content);
+        if (! str_contains($content, 'User::')) {
+            $content = str_replace('use App\\Models\\User;'.PHP_EOL, '', $content);
         }
 
         $pattern = '/public function run\(\): void\s*\{\s*/';
@@ -337,7 +500,7 @@ return [
     private function ensureUserModelUsesMetaFrameworkUsersTrait(): void
     {
         $userModelPath = app_path('Models/User.php');
-        if (!File::exists($userModelPath)) {
+        if (! File::exists($userModelPath)) {
             $this->warn('App\\Models\\User.php was not found; unable to auto-wire MetaFramework role trait.');
 
             return;
@@ -350,8 +513,8 @@ return [
         $updated = str_replace('use \\App\\Traits\\Users;', 'use \\MetaFramework\\Traits\\Users;', $updated);
 
         $hasUsersTrait = preg_match('/class\s+User[^{]*\{[\s\S]*?\buse\s+[^;]*\b(?:Users|\\\\MetaFramework\\\\Traits\\\\Users)\b[^;]*;/', $updated) === 1;
-        if (!$hasUsersTrait) {
-            $updated = preg_replace('/(class\s+User[^{]*\{\R)/', '$1    use \MetaFramework\Traits\Users;' . PHP_EOL . PHP_EOL, $updated, 1) ?? $updated;
+        if (! $hasUsersTrait) {
+            $updated = preg_replace('/(class\s+User[^{]*\{\R)/', '$1    use \MetaFramework\Traits\Users;'.PHP_EOL.PHP_EOL, $updated, 1) ?? $updated;
         }
 
         if ($updated !== $content) {
@@ -367,7 +530,7 @@ return [
 
         $this->call('vendor:publish', [
             '--provider' => 'MetaFramework\ServiceProvider',
-            '--tag'      => 'mfw-views',
+            '--tag' => 'mfw-views',
         ]);
 
         $this->comment('Views published successfully.');
