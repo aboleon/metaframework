@@ -93,6 +93,31 @@ php artisan vendor:publish --tag="mfw-lang" --force
 
 ---
 
+### 4.2 **Publish Auth Sub-Package (Optional)**
+
+MetaFramework ships an auth scaffold as a publishable sub-package (`mfw-auth`).
+
+Publish directly:
+```bash
+php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-auth"
+```
+
+Or use the helper command (publishes files and wires auth routes in `routes/web.php`):
+```bash
+php artisan mfw auth
+```
+
+Published auth files include:
+- `app/Http/Controllers/Auth/*`
+- `app/Http/Requests/Auth/LoginRequest.php`
+- `app/View/Components/GuestLayout.php`
+- `resources/views/auth/*`
+- `routes/auth.php`
+- `lang/en/mfw-auth.php` and `lang/fr/mfw-auth.php`
+- `public/front/css/auth.css`
+
+---
+
 ### 5. **Admin User & Seeds**
 
 The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role should be assigned to that admin.
