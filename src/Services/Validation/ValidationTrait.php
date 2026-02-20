@@ -6,7 +6,6 @@ namespace MetaFramework\Services\Validation;
 
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
@@ -148,7 +147,7 @@ trait ValidationTrait
             throw new InvalidArgumentException('Validation request must extend FormRequest.');
         }
 
-        $formRequest = HttpRequest::createFrom(request(), $validation);
+        $formRequest = FormRequest::createFrom(request(), $validation);
         $formRequest->setContainer(app());
         $formRequest->setRedirector(app('redirect'));
 
