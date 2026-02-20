@@ -123,10 +123,6 @@ return [
     'passwords' => [
         'is' => "Le mot de passe est <strong>:password</strong>"
     ],
-    'dictionnary' => [
-        'add' => "Ajouter un dictionnaire",
-        '503' => "Vous ne pouvez pas créer de nouveau dictionnaires."
-    ],
     'translate_from' => 'De',
     'translate_to' => 'Vers',
     'translate_action' => 'Traduire',
