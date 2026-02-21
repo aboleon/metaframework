@@ -92,28 +92,24 @@ return [
         $this->comment('------------------------------------------');
 
         $routeFilePath = base_path('routes/web.php');
-
-        $auth_routes = <<<'PHP'
-            Route::get('/dashboard', function () {
-                return view('dashboard');
-            })->middleware(['auth', 'verified'])->name('dashboard');
-            
-            require __DIR__.'/auth.php';
-            PHP;
         $existingContent = File::get($routeFilePath);
 
-        $pattern = '/^use .*?;/m';
-        preg_match_all($pattern, $existingContent, $matches);
+        if (preg_match("/require\\s+__DIR__\\s*\\.\\s*['\"]\\/auth\\.php['\"];/", $existingContent) !== 1) {
+            $auth_routes = "require __DIR__.'/auth.php';";
 
-        if (! empty($matches[0])) {
-            $lastUseStatement = end($matches[0]);
-            $position = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
+            $pattern = '/^use .*?;/m';
+            preg_match_all($pattern, $existingContent, $matches);
 
-            $newContent = substr($existingContent, 0, $position).PHP_EOL.PHP_EOL.$auth_routes.substr($existingContent, $position);
+            if (! empty($matches[0])) {
+                $lastUseStatement = end($matches[0]);
+                $position = strrpos($existingContent, $lastUseStatement) + strlen($lastUseStatement);
 
-            File::put($routeFilePath, $newContent);
-        } else {
-            File::append($routeFilePath, "\n".$auth_routes);
+                $newContent = substr($existingContent, 0, $position).PHP_EOL.PHP_EOL.$auth_routes.substr($existingContent, $position);
+
+                File::put($routeFilePath, $newContent);
+            } else {
+                File::append($routeFilePath, "\n".$auth_routes);
+            }
         }
 
         $this->callAuthPackage();
