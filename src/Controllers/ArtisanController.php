@@ -163,6 +163,7 @@ class ArtisanController
             if ($errorOutput !== '') {
                 $this->responseNotice('<div style="' . $errorStyle . '">' . $errorOutput . '</div>');
             }
+            $this->appendPhpPathHintIfMissing($output, $errorOutput);
             if ($isSuccessful) {
                 $this->responseSuccess($successMessage);
             } else {
@@ -171,6 +172,22 @@ class ArtisanController
         } catch (ProcessFailedException $exception) {
             $this->responseError(nl2br($exception->getMessage()));
         }
+    }
+
+    private function appendPhpPathHintIfMissing(string $output, string $errorOutput): void
+    {
+        $plainText = html_entity_decode(strip_tags($output . "\n" . $errorOutput));
+        if (!preg_match('/\/usr\/bin\/env:\s*[\'"]?php[\'"]?:\s*No such file or directory/i', $plainText)) {
+            return;
+        }
+
+        $hintStyle = 'font-size: 13px; line-height: 1.5; color: #dc3545; margin-bottom: 8px;';
+        $this->responseError(
+            '<div style="' . $hintStyle . '">'
+            . 'Did you add <code>MF_SHELL_PATH_PREFIX=\'path-to-php\'</code> to your <code>.env</code> file? '
+            . 'Example for Plesk server: <code>/opt/plesk/php/8.5/bin</code>.'
+            . '</div>'
+        );
     }
 
 }
