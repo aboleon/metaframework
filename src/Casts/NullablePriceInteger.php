@@ -14,9 +14,9 @@ class NullablePriceInteger implements CastsAttributes
     public function get($model, $key, $value, $attributes): int|float|null
     {
         if (!is_numeric($value)) {
-            return $value / 100;
+            return null;
         }
-        return null;
+        return $value / 100;
     }
 
     public function set($model, $key, $value, $attributes): ?int
@@ -25,6 +25,6 @@ class NullablePriceInteger implements CastsAttributes
             return null;
         }
 
-        return $value * 100;
+        return (int) $value * 100;
     }
 }
