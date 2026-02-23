@@ -220,6 +220,8 @@ As soon as at least one role assignment exists in database, strict role checks a
 
 MetaFramework supports separating auth domains on the same `users` table via a `type` discriminator.
 
+When using `aboleon/metaframework-accounts`, the `config/mfw-user-types.php` file is now owned/published by the accounts package (not by `metaframework`). MetaFramework still provides the runtime helpers (`MetaFramework\Support\UserTypes`, `MetaFramework\Traits\TypedUser`) that consume this configuration.
+
 ### 1) Configure `config/mfw-user-types.php`
 
 ```php
