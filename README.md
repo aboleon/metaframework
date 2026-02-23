@@ -118,37 +118,6 @@ Published auth files include:
 
 ---
 
-### 4.3 **Publish Front Account Skeleton (Optional)**
-
-MetaFramework provides a minimal front account skeleton as a publishable sub-package (`mfw-account`).
-
-Publish directly:
-```bash
-php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-account"
-```
-
-Or use the helper command (publishes files, wires `routes/account.php` in `routes/web.php`, and ensures `config/auth.php` includes account guard/provider/password broker entries):
-```bash
-php artisan mfw account
-```
-
-Published account files include:
-- `app/Http/Controllers/Front/Account/AccountAuthController.php`
-- `app/Http/Controllers/Front/Account/AccountPortalController.php`
-- `app/Http/Requests/Front/Account/AccountLoginRequest.php`
-- `app/Http/Middleware/Front/AccountLocale.php`
-- `app/Http/Middleware/Front/AccountLoginLocale.php`
-- `routes/account.php`
-- `resources/views/front/account/login.blade.php`
-- `resources/views/front/account/dashboard.blade.php`
-
-The scaffold is intentionally minimal:
-- login/logout on `account` guard
-- locale middleware support
-- empty dashboard placeholder ready for customization
-
----
-
 ### 5. **Admin User & Seeds**
 
 The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role should be assigned to that admin.

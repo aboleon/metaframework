@@ -57,7 +57,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->publishInstall();
         $this->publishAuth();
-        $this->publishAccount();
         $this->publishAssets();
         $this->publishLang();
         $this->publishViews();
@@ -88,13 +87,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__.'/../publishables/auth/' => base_path(),
         ], 'mfw-auth');
-    }
-
-    private function publishAccount(): void
-    {
-        $this->publishes([
-            __DIR__.'/../publishables/account/' => base_path(),
-        ], 'mfw-account');
     }
 
     private function publishAssets(): void
