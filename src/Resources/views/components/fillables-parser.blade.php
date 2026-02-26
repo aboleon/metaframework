@@ -30,6 +30,7 @@
                                      :label="__($value['label'] ?? '')"
                                      :class="$value['class'] ?? ''"
                                      :required="in_array('required',$value)"
+                                     :content-type="$value['contentType'] ?? false"
                                      :params="$params"/>
                 </div>
                 @break
