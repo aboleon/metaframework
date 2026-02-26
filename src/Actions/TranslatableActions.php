@@ -13,6 +13,10 @@ class TranslatableActions
 
     public function translateTranslatables(): self
     {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
         $sourceLocale = (string) request('source_locale');
         $targetLocales = (array) request('target_locales', []);
         $payloadItems = (array) request('payload', []);
