@@ -17,7 +17,7 @@
     "symfony/mime": "^7.2",
     "spatie/laravel-translatable": "^6.12",
     "aboleon/metaframework-support": "^1.0",
-    "aboleon/metaframework-inputable": "^2.0"
+    "aboleon/metaframework-inputable": "^1.0"
   },
   "require-dev": {
     "orchestra/testbench": "^10.6",
