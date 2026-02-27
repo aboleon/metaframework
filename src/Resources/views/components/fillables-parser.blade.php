@@ -15,7 +15,7 @@
                 if (array_key_exists('height', $value) && (int)$value['height'] > 0) {
                     $params['height'] = (int)$value['height'];
                 }
-                $mode = (string)($value['mode'] ?? 'markdown');
+                $mode = (string)($value['mode'] ?? MetaFramework\Inputable\Enum\ContentTypeEnum::default());
             }
         @endphp
 
