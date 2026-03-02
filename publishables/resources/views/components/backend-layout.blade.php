@@ -63,7 +63,7 @@
 @livewireScripts
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-4.0.0.min.js" integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
 <script src="{{ asset('vendor/mfw/js/gentellela.js') }}"></script>
 <script src="{{ asset('vendor/mfw-support/js/mfw-ajax.js') }}"></script>
 <script src="{!! asset('vendor/mfw/js/common.js') !!}"></script>
