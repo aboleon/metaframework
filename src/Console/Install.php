@@ -187,6 +187,7 @@ return [
         $this->call('vendor:publish', [
             '--provider' => 'MetaFramework\ServiceProvider',
             '--tag' => 'mfw-auth',
+            '--force' => true,
         ]);
     }
 

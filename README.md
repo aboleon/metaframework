@@ -102,7 +102,7 @@ Publish directly:
 php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-auth"
 ```
 
-Or use the helper command (publishes files and wires auth routes in `routes/web.php`):
+Or use the helper command (publishes files with overwrite enabled and wires auth routes in `routes/web.php`):
 ```bash
 php artisan mfw auth
 ```
