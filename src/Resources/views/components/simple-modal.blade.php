@@ -13,12 +13,14 @@
    data-btn-confirm-class="{!! $confirmclass !!}"
    data-btn-cancel="{!! $cancel !!}"
    data-modalsize="{{ $modalsize }}"
+   data-show-header="{{ $title ? 1 : 0 }}"
+   data-show-footer="{{ $footer ? 1 : 0 }}"
 >
     @if($linktitle)
         <span
-            data-bs-toggle="tooltip"
-            data-bs-placement="top"
-            data-bs-title="{{ $linktitle }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-title="{{ $linktitle }}"
         >
             @endif
             {!! $text !!}
@@ -51,18 +53,54 @@
         $(document).ready(function () {
 
             let jQuery_mfwSimpleModal = $('#mfw-simple-modal');
+            let toBoolean = function (value) {
+                return value === true || value === 1 || value === '1';
+            };
 
             jQuery_mfwSimpleModal.off().on('show.bs.modal', function (event) {
-                let button = $(event.relatedTarget),
+                let button = $(event.relatedTarget || []),
                     callback = button.data('callback'),
-                    onshow = button.data('onshow');
+                    onshow = button.data('onshow'),
+                    showHeader = toBoolean(button.data('show-header')),
+                    showFooter = toBoolean(button.data('show-footer')),
+                    modalDialog = jQuery_mfwSimpleModal.find('.modal-dialog'),
+                    modalHeader = jQuery_mfwSimpleModal.find('.modal-header'),
+                    modalTitle = jQuery_mfwSimpleModal.find('.modal-title'),
+                    modalBody = jQuery_mfwSimpleModal.find('.modal-body'),
+                    modalFooter = jQuery_mfwSimpleModal.find('.modal-footer'),
+                    cancelButton = jQuery_mfwSimpleModal.find('.btn-cancel'),
+                    confirmButton = jQuery_mfwSimpleModal.find('.btn-confirm');
 
-                jQuery_mfwSimpleModal.find('.modal-dialog').addClass(button.data('modalsize')).end().find('.modal-title').html(button.data('title')).end().find('.modal-body').html(button.data('body')).end().find('.btn-cancel').html(button.data('btn-cancel')).end().find('.btn-confirm')
-                    .addClass(button.data('btn-confirm-class'))
-                    .addClass(button.data('modal-id'))
-                    .attr('data-model-id', button.data('model-id'))
-                    .attr('data-identifier', button.data('identifier'))
-                    .html(button.data('btn-confirm'));
+                if (!button.length) {
+                    return;
+                }
+
+                modalDialog
+                    .removeClass('modal-sm modal-lg modal-xl')
+                    .addClass(button.data('modalsize'));
+
+                modalHeader.toggleClass('d-none', !showHeader);
+                modalFooter.toggleClass('d-none', !showFooter);
+
+                modalTitle.html(showHeader ? (button.data('title') || '') : '');
+                modalBody.html(button.data('body') || '');
+
+                if (showFooter) {
+                    cancelButton.html(button.data('btn-cancel') || '');
+                    confirmButton
+                        .addClass(button.data('btn-confirm-class'))
+                        .addClass(button.data('modal-id'))
+                        .attr('data-model-id', button.data('model-id'))
+                        .attr('data-identifier', button.data('identifier'))
+                        .html(button.data('btn-confirm') || '');
+                } else {
+                    cancelButton.html('');
+                    confirmButton
+                        .attr('class', 'btn btn-confirm')
+                        .removeAttr('data-model-id')
+                        .removeAttr('data-identifier')
+                        .html('');
+                }
 
                 if (callback !== undefined && typeof window[callback] === 'function') {
                     window[callback]();
@@ -72,6 +110,8 @@
                 }
 
             }).on('hide.bs.modal', function () {
+                jQuery_mfwSimpleModal.find('.modal-dialog').removeClass('modal-sm modal-lg modal-xl');
+                jQuery_mfwSimpleModal.find('.modal-header, .modal-footer').removeClass('d-none');
                 jQuery_mfwSimpleModal.find('.modal-title, .modal-body, .btn-confirm, .btn-cancel').html('').end().find('.btn-confirm').attr('class', 'btn btn-confirm').removeAttr('data-model-id').removeAttr('data-identifier');
                 jQuery_mfwSimpleModal.find('button, a, input, select, textarea, [tabindex]').blur();
             });
