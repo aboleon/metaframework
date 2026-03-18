@@ -29,6 +29,12 @@ return [
             'was_reset'     => "Le mot de passe a été réinitialisé.",
             'token'         => "Ce lien de réinitialisation de mot de passe n'est plus valide.",
             'throttled'     => "Vous avez déjà demandé un lien pour la réinitialisation du mot de passe. Veuillez patienter avant de demander un nouveau.",
+            'validation'    => [
+                'email_required' => 'Veuillez saisir votre adresse e-mail.',
+                'email_invalid' => 'Veuillez saisir une adresse e-mail valide.',
+                'password_required' => 'Veuillez saisir un nouveau mot de passe.',
+                'password_confirmation_required' => 'Veuillez confirmer le nouveau mot de passe.',
+            ],
         ],
     ],
     'meta'                         => [

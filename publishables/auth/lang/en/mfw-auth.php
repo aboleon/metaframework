@@ -29,6 +29,12 @@ return [
             'was_reset'     => "Password has been reset.",
             'token'         => "This password reset link is no longer valid.",
             'throttled'     => "You have already requested a password reset link. Please wait before requesting a new one.",
+            'validation'    => [
+                'email_required' => 'Please enter your email address.',
+                'email_invalid' => 'Please enter a valid email address.',
+                'password_required' => 'Please enter a new password.',
+                'password_confirmation_required' => 'Please confirm the new password.',
+            ],
         ],
     ],
     'meta'                         => [
