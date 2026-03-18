@@ -6,6 +6,7 @@ namespace MetaFramework\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use ReflectionClass;
 use Illuminate\Support\Facades\Schema;
 use MetaFramework\Support\UserTypes;
 use Throwable;
@@ -18,7 +19,7 @@ trait TypedUser
             return;
         }
 
-        $model = new static;
+        $model = static::newModelForTypedUserBoot();
         if (!self::hasUserTypeColumn($model)) {
             return;
         }
@@ -88,5 +89,13 @@ trait TypedUser
         } catch (Throwable) {
             return false;
         }
+    }
+
+    private static function newModelForTypedUserBoot(): Model
+    {
+        /** @var Model $model */
+        $model = (new ReflectionClass(static::class))->newInstanceWithoutConstructor();
+
+        return $model;
     }
 }
