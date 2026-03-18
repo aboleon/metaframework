@@ -28,7 +28,16 @@ class Prices
         string $thousand_separator = ' ',
         bool $showDecimals = true,
         bool $stripZeros = false,
+        bool $round = false,
     ): string {
+        if ($round && $price !== null) {
+            $absolute_price = abs($price);
+            $decimal_part = $absolute_price - floor($absolute_price);
+            $rounded_price = $decimal_part >= 0.5 ? ceil($absolute_price) : floor($absolute_price);
+
+            $price = $price < 0 ? -$rounded_price : $rounded_price;
+        }
+
         $formatted_price = number_format($price, 2, $decimal_separator, $thousand_separator);
 
         [$integer_part, $decimal_part] = explode($decimal_separator, $formatted_price);
