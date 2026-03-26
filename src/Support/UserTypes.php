@@ -53,7 +53,7 @@ final class UserTypes
     }
 
     /**
-     * @return array<string,string>
+     * @return array<string, string|list<string>>
      */
     public static function guards(): array
     {
@@ -63,20 +63,71 @@ final class UserTypes
         }
 
         return collect($guards)
-            ->filter(static fn ($type, $guard): bool => is_string($guard) && trim($guard) !== '' && is_string($type) && trim($type) !== '')
-            ->mapWithKeys(static fn (string $type, string $guard): array => [trim($guard) => trim($type)])
+            ->mapWithKeys(static function ($types, $guard): array {
+                if (!is_string($guard) || trim($guard) === '') {
+                    return [];
+                }
+
+                if (is_string($types) && trim($types) !== '') {
+                    return [trim($guard) => trim($types)];
+                }
+
+                if (!is_array($types)) {
+                    return [];
+                }
+
+                $sanitized = collect($types)
+                    ->filter(static fn ($type): bool => is_string($type) && trim($type) !== '')
+                    ->map(static fn (string $type): string => trim($type))
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if ($sanitized === []) {
+                    return [];
+                }
+
+                return [trim($guard) => count($sanitized) === 1 ? $sanitized[0] : $sanitized];
+            })
             ->toArray();
     }
 
-    public static function typeForGuard(?string $guard = null): ?string
+    /**
+     * @return list<string>
+     */
+    public static function typesForGuard(?string $guard = null): array
     {
         if (!is_string($guard) || trim($guard) === '') {
-            return null;
+            return [];
         }
 
         $mapped = self::guards()[trim($guard)] ?? null;
 
-        return is_string($mapped) && trim($mapped) !== '' ? trim($mapped) : null;
+        if (is_string($mapped) && trim($mapped) !== '') {
+            return [trim($mapped)];
+        }
+
+        if (!is_array($mapped)) {
+            return [];
+        }
+
+        return collect($mapped)
+            ->filter(static fn ($type): bool => is_string($type) && trim($type) !== '')
+            ->map(static fn (string $type): string => trim($type))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public static function typeForGuard(?string $guard = null): ?string
+    {
+        $types = self::typesForGuard($guard);
+
+        if (count($types) !== 1) {
+            return null;
+        }
+
+        return $types[0];
     }
 
     public static function resolve(?string $type = null, ?string $guard = null): string
@@ -116,7 +167,18 @@ final class UserTypes
             return $credentials;
         }
 
-        $credentials[self::column()] = self::resolve($type, $guard);
+        $resolvedType = trim((string) $type);
+
+        if ($resolvedType !== '') {
+            $credentials[self::column()] = self::resolve($resolvedType, $guard);
+
+            return $credentials;
+        }
+
+        $guardTypes = self::typesForGuard($guard);
+        if (count($guardTypes) === 1) {
+            $credentials[self::column()] = self::resolve($guardTypes[0], $guard);
+        }
 
         return $credentials;
     }

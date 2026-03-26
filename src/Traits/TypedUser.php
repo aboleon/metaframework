@@ -6,9 +6,10 @@ namespace MetaFramework\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use ReflectionClass;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Arr;
 use MetaFramework\Support\UserTypes;
+use ReflectionClass;
 use Throwable;
 
 trait TypedUser
@@ -24,13 +25,24 @@ trait TypedUser
             return;
         }
 
-        $scopeType = trim((string) (static::typedUserScopeType() ?? ''));
-        if ($scopeType !== '') {
-            static::addGlobalScope('mfw-user-type', static function (Builder $query) use ($scopeType): void {
-                $query->where(
-                    $query->getModel()->qualifyColumn(UserTypes::column()),
-                    UserTypes::resolve($scopeType)
-                );
+        $scopeTypes = collect(Arr::wrap(static::typedUserScopeType()))
+            ->filter(static fn ($type): bool => is_string($type) && trim($type) !== '')
+            ->map(static fn (string $type): string => UserTypes::resolve($type))
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($scopeTypes !== []) {
+            static::addGlobalScope('mfw-user-type', static function (Builder $query) use ($scopeTypes): void {
+                $column = $query->getModel()->qualifyColumn(UserTypes::column());
+
+                if (count($scopeTypes) === 1) {
+                    $query->where($column, $scopeTypes[0]);
+
+                    return;
+                }
+
+                $query->whereIn($column, $scopeTypes);
             });
         }
 
@@ -49,26 +61,40 @@ trait TypedUser
         });
     }
 
-    protected static function typedUserScopeType(): ?string
+    protected static function typedUserScopeType(): array|string|null
     {
         return null;
     }
 
-    protected static function typedUserCreateType(): ?string
+    protected static function typedUserCreateType(): array|string|null
     {
         return static::typedUserScopeType();
     }
 
-    public function scopeOfUserType(Builder $query, ?string $type = null): Builder
+    public function scopeOfUserType(Builder $query, array|string|null $type = null): Builder
     {
         if (!UserTypes::enabled() || !self::hasUserTypeColumn($query->getModel())) {
             return $query;
         }
 
-        return $query->where(
-            $query->getModel()->qualifyColumn(UserTypes::column()),
-            UserTypes::resolve($type)
-        );
+        $types = collect(Arr::wrap($type))
+            ->filter(static fn ($item): bool => is_string($item) && trim($item) !== '')
+            ->map(static fn (string $item): string => UserTypes::resolve($item))
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($types === []) {
+            return $query;
+        }
+
+        $column = $query->getModel()->qualifyColumn(UserTypes::column());
+
+        if (count($types) === 1) {
+            return $query->where($column, $types[0]);
+        }
+
+        return $query->whereIn($column, $types);
     }
 
     public function assignUserType(?string $type = null, ?string $guard = null): static
