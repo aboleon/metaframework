@@ -1,6 +1,6 @@
 <?php
 /**
- * composer require google/recaptcha "^1.3"
+ * composer require google/recaptcha "^1.5"
  * Usage:
  *  - in blade file : GoogleRecaptcha::form(form_id)
  *  - in controller: GoogleRecaptcha::check()

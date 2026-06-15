@@ -1,5 +1,5 @@
 <div class="{{  $class }}">
-    <x-mfw-input::input :name="$name" class="iban" :value="$value" :label="$label"/>
+    <x-mfw-inputable::input :name="$name" class="iban" :value="$value" :label="$label"/>
     <div class="feedback invalid-feedback d-none">IBAN invalide</div>
     <div class="feedback valid-feedback d-none">IBAN valide</div>
 </div>

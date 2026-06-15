@@ -25,22 +25,22 @@
                     @endphp
                     @switch($field['type'])
                         @case('textarea')
-                            <x-mfw-input::textarea :name="$field['name']" :label="$label" :value="old($field['name'])"/>
+                            <x-mfw-inputable::textarea :name="$field['name']" :label="$label" :value="old($field['name'])"/>
                             @break
                         @case('radio')
-                            <x-mfw-input::radio :name="$field['name']" :label="$label" :values="$field['values']" :affected="old($field['name'])"/>
+                            <x-mfw-inputable::radio :name="$field['name']" :label="$label" :values="$field['values']" :affected="old($field['name'])"/>
                             @break
                         @case('btn-group')
                             <x-mfw::btn-group :name="$field['name']" :label="$label" :values="$field['values']" :affected="old($field['name']) ?: $field['default']"/>
                             @break
                         @case('checkbox')
-                            <x-mfw-input::checkbox :name="$field['name']" :label="$label" value="1" :affected="null"/>
+                            <x-mfw-inputable::checkbox :name="$field['name']" :label="$label" value="1" :affected="null"/>
                             @break
                         @case('select')
-                            <x-mfw-input::select :name="$field['name']" :label="$label" :values="$field['values']" :affected="null" />
+                            <x-mfw-inputable::select :name="$field['name']" :label="$label" :values="$field['values']" :affected="null" />
                             @break
                         @default
-                            <x-mfw-input::input type="{{ $field['type'] }}" :name="$field['name']" :label="$label" :value="old($field['name'])" autocomplete="off"/>
+                            <x-mfw-inputable::input type="{{ $field['type'] }}" :name="$field['name']" :label="$label" :value="old($field['name'])" autocomplete="off"/>
                     @endswitch
                 </div>
             @endforeach
