@@ -1,7 +1,7 @@
 @props([
     'label' => __('mfw.browser-link'),
     'route' => '#',
-    'tag' => 'li',
+    'tag' => null,
     'with_label' => false,
     'target' => '_blank'
     ])
