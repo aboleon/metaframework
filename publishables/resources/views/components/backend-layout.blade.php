@@ -43,6 +43,7 @@
                     @yield('slot_header')
                 @endif
             </div>
+            <x-mfw::sql-query />
         </div>
 
         @section('messages')

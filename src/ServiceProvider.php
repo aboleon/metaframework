@@ -13,6 +13,8 @@ use MetaFramework\Components\TranslatableTabs;
 use MetaFramework\Console\Install;
 use MetaFramework\Polyglote\Events\TranslationHasBeenSetEvent as MetaTranslationHasBeenSetEvent;
 use MetaFramework\Polyglote\Translatable as MetaTranslatable;
+use MetaFramework\Services\SqlQueryIndexFilterRegistry;
+use MetaFramework\Services\SqlQueryService;
 use Spatie\Translatable\Events\TranslationHasBeenSetEvent as SpatieTranslationHasBeenSetEvent;
 use Spatie\Translatable\Translatable as SpatieTranslatable;
 
@@ -23,6 +25,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->singleton(MetaTranslatable::class, static fn () => new MetaTranslatable);
         $this->app->bind(SpatieTranslatable::class, MetaTranslatable::class);
         $this->app->bind('translatable', SpatieTranslatable::class);
+        $this->app->singleton(SqlQueryIndexFilterRegistry::class);
+        $this->app->scoped(SqlQueryService::class);
     }
 
     public function boot(): void
@@ -46,6 +50,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         });
 
         $this->loadViewsFrom(__DIR__.'/Resources/views', 'mfw');
+        $this->loadTranslationsFrom(__DIR__.'/Resources/lang', 'mfw');
         Blade::componentNamespace('MetaFramework\Components', 'mfw');
         Blade::component(TranslatableTabs::class, 'mfw-translatables');
 

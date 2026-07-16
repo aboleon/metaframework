@@ -9,6 +9,7 @@ use MetaFramework\Controllers\RoleController;
 use MetaFramework\Controllers\RoleGroupController;
 use MetaFramework\Controllers\SettingsController;
 use MetaFramework\Controllers\SiteOwnerController;
+use MetaFramework\Controllers\SqlQueryController;
 use MetaFramework\Controllers\UserController;
 use MetaFramework\Controllers\VatController;
 
@@ -18,6 +19,7 @@ Route::prefix(Routing::backend())
 
         // Ajax requests
         Route::post('mfw-ajax', [AjaxController::class, 'distribute'])->name('ajax');
+        Route::post('sql-query', [SqlQueryController::class, 'execute'])->name('sql-query.execute');
 
         Route::resource('siteowner', SiteOwnerController::class);
         Route::resource('vat', VatController::class);
