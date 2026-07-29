@@ -16,7 +16,7 @@
 
 <div class="col-12 mb-3 mt-4">
     <div class="d-flex align-items-center mb-2">
-        <b class="d-block">{{ __('mfw-users.users.roles') }}</b>
+        <b class="d-block">{{ __('mfw::mfw-users.users.roles') }}</b>
         <x-mfw::devmark/>
     </div>
 
@@ -42,7 +42,7 @@
                 </label>
             </div>
         @empty
-            <div class="text-muted">{{ __('mfw-users.users.no_roles_available') }}</div>
+            <div class="text-muted">{{ __('mfw::mfw-users.users.no_roles_available') }}</div>
         @endforelse
     @endif
 </div>

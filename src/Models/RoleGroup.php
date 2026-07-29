@@ -27,12 +27,12 @@ class RoleGroup extends Model implements TranslatableInterface
     {
         return [
             'label' => [
-                'label' => 'mfw-users.role_groups.label',
+                'label' => 'mfw::mfw-users.role_groups.label',
                 'required',
                 'class' => 'col-12',
             ],
             'description' => [
-                'label' => 'mfw-users.role_groups.description',
+                'label' => 'mfw::mfw-users.role_groups.description',
                 'type' => 'textarea',
                 'class' => 'col-12',
             ],

@@ -42,7 +42,7 @@ class Locale
     public static function localesAsSelectable(bool $useOriginal = false): array
     {
         $locales = config('mfw.translatable.locales', array_unique([app()->getLocale(), app()->getFallbackLocale()]));
-        $allTranslations = trans('mfw-lang');
+        $allTranslations = trans('mfw::mfw-lang');
         $labelKey = $useOriginal ? 'label_original' : 'label';
 
         return collect($locales)
@@ -66,12 +66,12 @@ class Locale
         $output = '';
 
         foreach (config('mfw.translatable.active_locales') as $locale) {
-            $output.= '<link rel="alternate" hreflang="' . $locale . '" href="' . url($locale) . '" />' . "\n";
+            $output .= '<link rel="alternate" hreflang="'.$locale.'" href="'.url($locale).'" />'."\n";
             if ($locale == app()->getLocale()) {
-                $output.= '<link rel="alternate" hreflang="x-default" href="' . url($locale) . '" />' . "\n";
-                $output.= '<meta property="og:locale" content="' . $locale . '" />' . "\n";
+                $output .= '<link rel="alternate" hreflang="x-default" href="'.url($locale).'" />'."\n";
+                $output .= '<meta property="og:locale" content="'.$locale.'" />'."\n";
             } else {
-                $output.= '<meta property="og:locale:alternate" content="' . $locale . '" />' . "\n";
+                $output .= '<meta property="og:locale:alternate" content="'.$locale.'" />'."\n";
             }
 
         }

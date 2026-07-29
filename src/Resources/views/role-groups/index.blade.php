@@ -1,14 +1,14 @@
 <x-backend-layout>
     <x-slot name="header">
-        <h2>{{ __('mfw-users.role_groups.title') }}</h2>
+        <h2>{{ __('mfw::mfw-users.role_groups.title') }}</h2>
         <div class="d-flex align-items-center" id="topbar-actions">
             <a class="btn btn-sm btn-outline-secondary mx-2" href="{{ route('mfw.roles.index') }}">
                 <i class="fa-solid fa-shield"></i>
-                {{ __('mfw-users.roles.nav') }}
+                {{ __('mfw::mfw-users.roles.nav') }}
             </a>
             <a class="btn btn-sm btn-success" href="{{ route('mfw.role-groups.create') }}">
                 <i class="fa-solid fa-circle-plus"></i>
-                {{ __('mfw-users.role_groups.create') }}
+                {{ __('mfw::mfw-users.role_groups.create') }}
             </a>
         </div>
     </x-slot>
@@ -21,10 +21,10 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th>{{ __('mfw-users.role_groups.key') }}</th>
-                    <th>{{ __('mfw-users.role_groups.label') }}</th>
-                    <th>{{ __('mfw-users.role_groups.description') }}</th>
-                    <th width="220">{{ __('mfw-users.role_groups.actions') }}</th>
+                    <th>{{ __('mfw::mfw-users.role_groups.key') }}</th>
+                    <th>{{ __('mfw::mfw-users.role_groups.label') }}</th>
+                    <th>{{ __('mfw::mfw-users.role_groups.description') }}</th>
+                    <th width="220">{{ __('mfw::mfw-users.role_groups.actions') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -40,20 +40,20 @@
                                 </li>
                                 <x-mfw::delete-modal-link
                                     reference="{{ $group->id }}"
-                                    :title="__('mfw-users.role_groups.delete')"
+                                    :title="__('mfw::mfw-users.role_groups.delete')"
                                 />
                             </ul>
                             <x-mfw::modal
                                 :route="route('mfw.role-groups.destroy', $group->id)"
-                                :question="__('mfw-users.role_groups.delete_confirm')"
-                                :title="__('mfw-users.role_groups.delete')"
+                                :question="__('mfw::mfw-users.role_groups.delete_confirm')"
+                                :title="__('mfw::mfw-users.role_groups.delete')"
                                 reference="destroy_{{ $group->id }}"
                             />
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4">{{ __('mfw-users.role_groups.empty') }}</td>
+                        <td colspan="4">{{ __('mfw::mfw-users.role_groups.empty') }}</td>
                     </tr>
                 @endforelse
                 </tbody>

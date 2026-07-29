@@ -7,7 +7,7 @@
      data-locales='@json($localeKeys)'
      data-selected-locale="{{ $selectedlocale }}"
      data-ajax="{{ route('mfw.ajax') }}"
-     data-translate-target-required="{{ __('mfw.translate_target_required') }}">
+     data-translate-target-required="{{ __('mfw::mfw.translate_target_required') }}">
     <x-mfw::language-tabs id="{{ $id }}" :selectedlocale="$selectedlocale"/>
     <div class="tab-content pt-4">
         @foreach(config('mfw.translatable.locales') as $locale)
@@ -33,7 +33,7 @@
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <x-mfw-inputable::radio
-                        :label="__('mfw.translate_from')"
+                        :label="__('mfw::mfw.translate_from')"
                         name="mfw_translate_from.{{ $id }}"
                         :values="$locales"
                         :affected="$selectedlocale"
@@ -41,7 +41,7 @@
                     />
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label d-block">{{ __('mfw.translate_to') }}</label>
+                    <label class="form-label d-block">{{ __('mfw::mfw.translate_to') }}</label>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($locales as $locale => $label)
                             <x-mfw-inputable::checkbox
@@ -64,8 +64,8 @@
                                 <path fill="currentColor" d="M20 8h-5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm0 12h-5V10h5v10z"/>
                                 <path fill="currentColor" d="M7 8h4v2H7V8zm0 4h4v2H7v-2zm0 4h3v2H7v-2z"/>
                             </svg>
-                            <span>{{ __('mfw.translate_action') }}</span>
-                            <img src="{!! asset('vendor/mfw/components/deepl.svg') !!}" alt="{{ __('mfw.translate_service') }}" height="30" style="width:auto;"/>
+                            <span>{{ __('mfw::mfw.translate_action') }}</span>
+                            <img src="{!! asset('vendor/mfw/components/deepl.svg') !!}" alt="{{ __('mfw::mfw.translate_service') }}" height="30" style="width:auto;"/>
                             <span class="mfw-translate-spinner ms-2" style="display:none;">
                                 <i class="core spinner fa fa-cog fa-spin fa-fw"></i>
                             </span>

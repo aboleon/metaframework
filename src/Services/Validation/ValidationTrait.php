@@ -41,7 +41,7 @@ trait ValidationTrait
 
     public function validatedDataStringable(string $key): string|int|float|null
     {
-        return isset($this->validated_data[$key]) && !is_array($this->validated_data[$key]) ? $this->validated_data[$key] : null;
+        return isset($this->validated_data[$key]) && ! is_array($this->validated_data[$key]) ? $this->validated_data[$key] : null;
     }
 
     public function validation(ValidationAbstract|FormRequest|string|null $validation = null): void
@@ -74,7 +74,7 @@ trait ValidationTrait
     {
         $validation = $this->resolveValidationDefinition($validation);
 
-        if (!$validation->authorize()) {
+        if (! $validation->authorize()) {
             throw new AuthorizationException;
         }
 
@@ -83,7 +83,7 @@ trait ValidationTrait
         $rules = array_merge($this->validation_rules, $validation->rules());
         $messages = array_merge($this->validation_messages, $validation->messages());
 
-        if (!$rules) {
+        if (! $rules) {
             return [];
         }
 
@@ -130,7 +130,7 @@ trait ValidationTrait
             $validation = app($validation);
         }
 
-        if (!$validation instanceof ValidationAbstract) {
+        if (! $validation instanceof ValidationAbstract) {
             throw new InvalidArgumentException('Validation definition must extend ValidationAbstract.');
         }
 
@@ -143,7 +143,7 @@ trait ValidationTrait
             $validation = app($validation);
         }
 
-        if (!$validation instanceof FormRequest) {
+        if (! $validation instanceof FormRequest) {
             throw new InvalidArgumentException('Validation request must extend FormRequest.');
         }
 
@@ -160,11 +160,11 @@ trait ValidationTrait
         $this->validated_data[$key] = is_array($request->validated()) && array_key_exists($key, $request->validated())
             ? (array) $request->validated($key)
             : [];
-        if (!$this->validated_data[$key]) {
-            $this->responseWarning(__('mfw.errors.composing_data'));
+        if (! $this->validated_data[$key]) {
+            $this->responseWarning(__('mfw::mfw.errors.composing_data'));
         }
 
-        return !$this->hasErrors();
+        return ! $this->hasErrors();
 
     }
 }

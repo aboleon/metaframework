@@ -1,6 +1,6 @@
 @props([
     'id' => '',
-    'text' => __('mfw.loading'),
+    'text' => __('mfw::mfw.loading'),
     'texthidden' => false
 ])
 

@@ -30,13 +30,13 @@ class ArtisanController
 
     public function migrate(bool $rollback = false, bool $confirmed = false): array
     {
-        if ($rollback && !$confirmed) {
-            $this->responseError(__('mfw.migrate_rollback_confirmation_required'));
+        if ($rollback && ! $confirmed) {
+            $this->responseError(__('mfw::mfw.migrate_rollback_confirmation_required'));
 
             return $this->fetchResponse();
         }
 
-        $this->executeCommand('migrate' . ($rollback ? ':rollback' : ''));
+        $this->executeCommand('migrate'.($rollback ? ':rollback' : ''));
         if ($this->statusCode == 0) {
             $this->responseSuccess('Opération terminée.');
         }
@@ -118,8 +118,7 @@ class ArtisanController
         array $command,
         string $successMessage = 'Composer update completed successfully.',
         string $failureMessage = 'Composer update failed.'
-    ): void
-    {
+    ): void {
         $pathPrefix = trim((string) env('MF_SHELL_PATH_PREFIX', ''));
         $existingPath = (string) env('PATH', (string) getenv('PATH'));
         $processEnv = [
@@ -129,7 +128,7 @@ class ArtisanController
             'COMPOSER_DISABLE_XDEBUG_WARN' => '1',
         ];
         if ($pathPrefix !== '') {
-            $processEnv['PATH'] = rtrim($pathPrefix, ':') . ':' . $existingPath;
+            $processEnv['PATH'] = rtrim($pathPrefix, ':').':'.$existingPath;
         }
 
         $process = new Process($command, base_path(), $processEnv);
@@ -158,10 +157,10 @@ class ArtisanController
             $errorStyle = $isSuccessful
                 ? $noticeStyle
                 : 'font-size: 13px; line-height: 1.5; color: #dc3545; margin-bottom: 8px;';
-            $this->responseNotice('<div style="' . $noticeStyle . '"><strong>Command:</strong> ' . $commandLine . '</div>');
-            $this->responseNotice('<div style="' . $noticeStyle . '">' . $output . '</div>');
+            $this->responseNotice('<div style="'.$noticeStyle.'"><strong>Command:</strong> '.$commandLine.'</div>');
+            $this->responseNotice('<div style="'.$noticeStyle.'">'.$output.'</div>');
             if ($errorOutput !== '') {
-                $this->responseNotice('<div style="' . $errorStyle . '">' . $errorOutput . '</div>');
+                $this->responseNotice('<div style="'.$errorStyle.'">'.$errorOutput.'</div>');
             }
             $this->appendPhpPathHintIfMissing($output, $errorOutput);
             if ($isSuccessful) {
@@ -176,18 +175,17 @@ class ArtisanController
 
     private function appendPhpPathHintIfMissing(string $output, string $errorOutput): void
     {
-        $plainText = html_entity_decode(strip_tags($output . "\n" . $errorOutput));
-        if (!preg_match('/\/usr\/bin\/env:\s*[\'"]?php[\'"]?:\s*No such file or directory/i', $plainText)) {
+        $plainText = html_entity_decode(strip_tags($output."\n".$errorOutput));
+        if (! preg_match('/\/usr\/bin\/env:\s*[\'"]?php[\'"]?:\s*No such file or directory/i', $plainText)) {
             return;
         }
 
         $hintStyle = 'font-size: 13px; line-height: 1.5; color: #dc3545; margin-bottom: 8px;';
         $this->responseError(
-            '<div style="' . $hintStyle . '">'
-            . 'Did you add <code>MF_SHELL_PATH_PREFIX=\'path-to-php\'</code> to your <code>.env</code> file? '
-            . 'Example for Plesk server: <code>/opt/plesk/php/8.5/bin</code>.'
-            . '</div>'
+            '<div style="'.$hintStyle.'">'
+            .'Did you add <code>MF_SHELL_PATH_PREFIX=\'path-to-php\'</code> to your <code>.env</code> file? '
+            .'Example for Plesk server: <code>/opt/plesk/php/8.5/bin</code>.'
+            .'</div>'
         );
     }
-
 }

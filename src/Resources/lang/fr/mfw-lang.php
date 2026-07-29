@@ -1,20 +1,22 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 return [
     'fr' => [
-        'label' => 'French',
+        'label' => 'Français',
         'label_original' => 'Français',
         'code' => 'fr',
     ],
     'en' => [
-        'label' => 'English',
+        'label' => 'Anglais',
         'label_original' => 'English',
         'code' => 'en',
     ],
-    'de'=> [
-        'label' => 'German',
+    'de' => [
+        'label' => 'Allemand',
         'label_original' => 'Deutsch',
-        'code' => 'de'
+        'code' => 'de',
     ],
 
 ];

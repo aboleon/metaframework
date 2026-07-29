@@ -1,11 +1,11 @@
 <button form="mfw-form" class="btn btn-sm btn-warning mx-2">
     <i class="fa-solid fa-check"></i>
-    {{ __('mfw.save') }}
+    {{ __('mfw::mfw.save') }}
 </button>
 
 <button form="mfw-form" class="btn btn-sm btn-info mx-2" id="mfw-save-redirect-btn">
     <i class="fa-solid fa-check"></i>
-    {{ __('mfw.save_quit') }}
+    {{ __('mfw::mfw.save_quit') }}
 </button>
 @push('js')
     <script>

@@ -15,15 +15,15 @@
                 @csrf
                 <div class="modal-header">
                     <h5>{{ $title }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true" aria-label="{{ __('mfw.close') }}">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true" aria-label="{{ __('mfw::mfw.close') }}">
                     </button>
                 </div>
                 <div class="modal-body text-start">
                     <p>{!! $question !!}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-cancel btn btn-sm" data-bs-dismiss="modal" aria-hidden="true">{{ __('mfw.cancel') }}</button>
-                    <button class="btn-confirm btn btn-warning btn-sm">{{ __('mfw.confirm') }}</button>
+                    <button type="button" class="btn-cancel btn btn-sm" data-bs-dismiss="modal" aria-hidden="true">{{ __('mfw::mfw.cancel') }}</button>
+                    <button class="btn-confirm btn btn-warning btn-sm">{{ __('mfw::mfw.confirm') }}</button>
                 </div>
                 @if ($params)
                     @foreach($params as $key=>$value)

@@ -17,7 +17,7 @@ class RestoreModalLink extends Component
         public string $reference,
         public ?string $title = null,
     ) {
-        $this->title = $this->title ?: __('mfw.restore');
+        $this->title = $this->title ?: __('mfw::mfw.restore');
     }
 
     /**

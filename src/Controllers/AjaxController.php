@@ -7,8 +7,8 @@ namespace MetaFramework\Controllers;
 use Illuminate\Support\Facades\DB;
 use MetaFramework\Actions\TranslatableActions;
 use MetaFramework\Services\Validation\ValidationTrait;
-use MetaFramework\Support\UserRoles;
 use MetaFramework\Support\Traits\Ajax;
+use MetaFramework\Support\UserRoles;
 
 class AjaxController extends Controller
 {
@@ -67,7 +67,7 @@ class AjaxController extends Controller
 
     public function artisanOptimize(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -76,7 +76,7 @@ class AjaxController extends Controller
 
     public function artisanMigrate(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -85,7 +85,7 @@ class AjaxController extends Controller
 
     public function composerUpdateDev(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -94,7 +94,7 @@ class AjaxController extends Controller
 
     public function composerUpdateProd(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -103,7 +103,7 @@ class AjaxController extends Controller
 
     public function composerInstallProd(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -112,7 +112,7 @@ class AjaxController extends Controller
 
     public function composerDumpAutoload(): array
     {
-        if (!$this->canRunMaintenanceActions()) {
+        if (! $this->canRunMaintenanceActions()) {
             return $this->denyMaintenanceAccess();
         }
 
@@ -130,7 +130,7 @@ class AjaxController extends Controller
 
     private function denyMaintenanceAccess(): array
     {
-        $this->responseError(__('mfw-users.errors.access_denied'));
+        $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
         return $this->fetchResponse();
     }

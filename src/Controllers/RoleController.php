@@ -20,7 +20,7 @@ class RoleController extends Controller
 
     public function index(): Renderable
     {
-        abort_unless($this->canManageRoles(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoles(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         return view('mfw::roles.index')->with([
             'roles' => Role::query()
@@ -33,7 +33,7 @@ class RoleController extends Controller
 
     public function create(): Renderable
     {
-        abort_unless($this->canManageRoles(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoles(), 403, __('mfw::mfw-users.errors.access_denied'));
         $groups = $this->groupSelectValues();
 
         return view('mfw::roles.form')->with([
@@ -42,13 +42,13 @@ class RoleController extends Controller
             'defaultGroupId' => (int) (array_key_first($groups) ?? 0),
             'route' => route('mfw.roles.store'),
             'method' => null,
-            'title' => __('mfw-users.roles.create_title'),
+            'title' => __('mfw::mfw-users.roles.create_title'),
         ]);
     }
 
     public function edit(Role $role): Renderable
     {
-        abort_unless($this->canManageRoles(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoles(), 403, __('mfw::mfw-users.errors.access_denied'));
         $groups = $this->groupSelectValues();
 
         return view('mfw::roles.form')->with([
@@ -57,14 +57,14 @@ class RoleController extends Controller
             'defaultGroupId' => (int) ($role->group_id ?? array_key_first($groups) ?? 0),
             'route' => route('mfw.roles.update', $role),
             'method' => 'PUT',
-            'title' => __('mfw-users.roles.edit_title'),
+            'title' => __('mfw::mfw-users.roles.edit_title'),
         ]);
     }
 
     public function store(): RedirectResponse
     {
-        if (!$this->canManageRoles()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoles()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -80,7 +80,7 @@ class RoleController extends Controller
                 'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
-            $this->responseSuccess(__('mfw-users.roles.created'));
+            $this->responseSuccess(__('mfw::mfw-users.roles.created'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -92,8 +92,8 @@ class RoleController extends Controller
 
     public function update(Role $role): RedirectResponse
     {
-        if (!$this->canManageRoles()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoles()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -102,7 +102,7 @@ class RoleController extends Controller
         $key = strtolower(trim($validated['key']));
 
         if ($role->is_system && $key !== $role->key) {
-            $this->responseError(__('mfw-users.roles.cannot_update_system_key'));
+            $this->responseError(__('mfw::mfw-users.roles.cannot_update_system_key'));
 
             return $this->sendResponse();
         }
@@ -115,7 +115,7 @@ class RoleController extends Controller
                 'is_system' => $this->resolveIsSystemValue($key, request()->boolean('is_system')),
             ]);
 
-            $this->responseSuccess(__('mfw-users.roles.updated'));
+            $this->responseSuccess(__('mfw::mfw-users.roles.updated'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -143,7 +143,7 @@ class RoleController extends Controller
 
         $validator->after(function ($validator): void {
             if ($this->normalizeLabelPayload(request()->input('label')) === null) {
-                $validator->errors()->add('label', __('validation.required', ['attribute' => __('mfw-users.roles.label')]));
+                $validator->errors()->add('label', __('validation.required', ['attribute' => __('mfw::mfw-users.roles.label')]));
             }
         });
 
@@ -161,7 +161,7 @@ class RoleController extends Controller
             return $parsed !== '' ? $parsed : null;
         }
 
-        if (!is_array($label)) {
+        if (! is_array($label)) {
             return null;
         }
 
@@ -190,27 +190,27 @@ class RoleController extends Controller
 
     public function destroy(Role $role): RedirectResponse
     {
-        if (!$this->canManageRoles()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoles()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
 
         if ($role->is_system) {
-            $this->responseError(__('mfw-users.roles.cannot_delete_system'));
+            $this->responseError(__('mfw::mfw-users.roles.cannot_delete_system'));
 
             return $this->sendResponse();
         }
 
         if ($role->userRoles()->exists()) {
-            $this->responseError(__('mfw-users.roles.assigned_cannot_delete'));
+            $this->responseError(__('mfw::mfw-users.roles.assigned_cannot_delete'));
 
             return $this->sendResponse();
         }
 
         try {
             $role->delete();
-            $this->responseSuccess(__('mfw-users.roles.deleted'));
+            $this->responseSuccess(__('mfw::mfw-users.roles.deleted'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }

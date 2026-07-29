@@ -28,7 +28,7 @@ class VatController extends Controller
     {
         $data = [
             'data' => new Vat,
-            'route' => route('mfw.vat.store')
+            'route' => route('mfw.vat.store'),
         ];
 
         return view('mfw::vat.edit')->with($data);
@@ -38,7 +38,7 @@ class VatController extends Controller
     {
         $this->validation_rules = [
             'vat.rate' => 'numeric|unique:vat,rate',
-            'vat.default' => 'nullable'
+            'vat.default' => 'nullable',
         ];
         $this->validation_messages = [
             'vat.rate.numeric' => __('validation.integer', ['attribute' => __('mfw-sellable.vat.label')]),
@@ -53,7 +53,7 @@ class VatController extends Controller
 
             $vat->manageDefaultState();
 
-            $this->responseSuccess(__('mfw.record_created'));
+            $this->responseSuccess(__('mfw::mfw.record_created'));
             $this->redirect_route = 'mfw.vat.index';
 
         } catch (Throwable $e) {
@@ -67,7 +67,7 @@ class VatController extends Controller
     {
         $data = [
             'data' => $vat,
-            'route' => route('mfw.vat.update', $vat)
+            'route' => route('mfw.vat.update', $vat),
         ];
 
         return view('mfw::vat.edit')->with($data);
@@ -76,8 +76,8 @@ class VatController extends Controller
     public function update(Vat $vat): RedirectResponse
     {
         $this->validation_rules = [
-            'vat.rate' => 'numeric|unique:vat,rate,' . $vat->id,
-            'vat.default' => 'nullable'
+            'vat.rate' => 'numeric|unique:vat,rate,'.$vat->id,
+            'vat.default' => 'nullable',
         ];
         $this->validation_messages = [
             'vat.rate.numeric' => __('validation.integer', ['attribute' => __('mfw-sellable.vat.label')]),
@@ -92,7 +92,7 @@ class VatController extends Controller
 
             $vat->manageDefaultState();
 
-            $this->responseSuccess(__('mfw.record_created'));
+            $this->responseSuccess(__('mfw::mfw.record_created'));
             $this->redirect_route = 'mfw.vat.index';
 
         } catch (Throwable $e) {

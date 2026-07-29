@@ -1,6 +1,6 @@
 @if($columns['first_name'] && $columns['last_name'])
     <div class="col-xl-6 mb-3">
-        <label class="form-label" for="user_first_name">{{ __('mfw-users.users.first_name') }} *</label>
+        <label class="form-label" for="user_first_name">{{ __('mfw::mfw-users.users.first_name') }} *</label>
         <input
             id="user_first_name"
             type="text"
@@ -11,7 +11,7 @@
         />
     </div>
     <div class="col-xl-6 mb-3">
-        <label class="form-label" for="user_last_name">{{ __('mfw-users.users.last_name') }} *</label>
+        <label class="form-label" for="user_last_name">{{ __('mfw::mfw-users.users.last_name') }} *</label>
         <input
             id="user_last_name"
             type="text"
@@ -23,7 +23,7 @@
     </div>
 @elseif($columns['name'])
     <div class="col-lg-12 mb-3">
-        <label class="form-label" for="user_name">{{ __('mfw-users.users.name') }} *</label>
+        <label class="form-label" for="user_name">{{ __('mfw::mfw-users.users.name') }} *</label>
         <input
             id="user_name"
             type="text"
@@ -37,7 +37,7 @@
 
 @if($columns['email'])
     <div class="col-lg-12 mb-3">
-        <label class="form-label" for="user_email">{{ __('mfw-users.users.email') }} *</label>
+        <label class="form-label" for="user_email">{{ __('mfw::mfw-users.users.email') }} *</label>
         <input
             id="user_email"
             type="email"

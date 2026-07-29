@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 return [
     'fr' => [
@@ -16,10 +18,10 @@ return [
         'label_original' => 'Български',
         'code' => 'bg',
     ],
-    'de'=> [
+    'de' => [
         'label' => 'Немски',
         'label_original' => 'Deutsch',
-        'code' => 'de'
+        'code' => 'de',
     ],
 
 ];

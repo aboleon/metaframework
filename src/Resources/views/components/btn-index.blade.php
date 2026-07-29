@@ -3,5 +3,5 @@
 ])
 <a class="btn btn-secondary"
    id="mfw-index-button" {!! $route ? 'href="'.$route.'"' : '' !!}>
-    <i class="bi bi-list"></i> <span class="btn-text">{{ __('mfw.index') }}</span>
+    <i class="bi bi-list"></i> <span class="btn-text">{{ __('mfw::mfw.index') }}</span>
 </a>

@@ -81,7 +81,7 @@ trait TranslatableValidationTrait
      */
     protected function buildTranslatableRules(array $translatableFields): array
     {
-        $rules   = [];
+        $rules = [];
         $locales = $this->getActiveLocales();
 
         foreach ($translatableFields as $field => $rule) {
@@ -101,19 +101,19 @@ trait TranslatableValidationTrait
      *
      * Example usage:
      * $this->buildTranslatableMessages([
-     *     'title.required' => __('validation.required', ['attribute' => __('mfw.title')]),
-     *     'description.required' => __('validation.required', ['attribute' => __('mfw.description')])
+     *     'title.required' => __('validation.required', ['attribute' => __('mfw::mfw.title')]),
+     *     'description.required' => __('validation.required', ['attribute' => __('mfw::mfw.description')])
      * ])
      */
     protected function buildTranslatableMessages(array $translatableMessages): array
     {
         $messages = [];
-        $locales  = $this->getActiveLocales();
+        $locales = $this->getActiveLocales();
 
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('mwf-lang.' . $locale . '.label');
+                $localeLabel = __('mwf-lang.'.$locale.'.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
@@ -137,7 +137,7 @@ trait TranslatableValidationTrait
      */
     protected function buildTranslatableRulesWithPrefix(string $prefix, array $translatableFields): array
     {
-        $rules   = [];
+        $rules = [];
         $locales = $this->getActiveLocales();
 
         foreach ($translatableFields as $field => $rule) {
@@ -158,12 +158,12 @@ trait TranslatableValidationTrait
     protected function buildTranslatableMessagesWithPrefix(string $prefix, array $translatableMessages): array
     {
         $messages = [];
-        $locales  = $this->getActiveLocales();
+        $locales = $this->getActiveLocales();
 
         foreach ($translatableMessages as $fieldRule => $message) {
             foreach ($locales as $locale) {
                 [$field, $ruleType] = explode('.', $fieldRule, 2);
-                $localeLabel = __('mfw-lang.' . $locale . '.label');
+                $localeLabel = __('mfw::mfw-lang.'.$locale.'.label');
 
                 // Add locale info to the message
                 $localizedMessage = $message;
@@ -186,8 +186,8 @@ trait TranslatableValidationTrait
      */
     protected function buildTranslatableRulesWithFallbackRequired(array $translatableFields): array
     {
-        $rules          = [];
-        $locales        = $this->getActiveLocales();
+        $rules = [];
+        $locales = $this->getActiveLocales();
         $fallbackLocale = $this->getFallbackLocale();
 
         foreach ($translatableFields as $field => $rule) {
@@ -197,7 +197,7 @@ trait TranslatableValidationTrait
                     $rules["{$field}.{$locale}"] = $rule;
                 } else {
                     // Make optional for other locales
-                    $optionalRule                = str_replace('required', 'nullable', $rule);
+                    $optionalRule = str_replace('required', 'nullable', $rule);
                     $rules["{$field}.{$locale}"] = $optionalRule;
                 }
             }
@@ -215,8 +215,8 @@ trait TranslatableValidationTrait
      */
     protected function buildTranslatableRulesWithPrefixFallbackRequired(string $prefix, array $translatableFields): array
     {
-        $rules          = [];
-        $locales        = $this->getActiveLocales();
+        $rules = [];
+        $locales = $this->getActiveLocales();
         $fallbackLocale = $this->getFallbackLocale();
 
         foreach ($translatableFields as $field => $rule) {
@@ -226,7 +226,7 @@ trait TranslatableValidationTrait
                     $rules["{$prefix}{$field}.{$locale}"] = $rule;
                 } else {
                     // Make optional for other locales
-                    $optionalRule                         = str_replace('required', 'nullable', $rule);
+                    $optionalRule = str_replace('required', 'nullable', $rule);
                     $rules["{$prefix}{$field}.{$locale}"] = $optionalRule;
                 }
             }

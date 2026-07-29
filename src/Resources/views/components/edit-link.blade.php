@@ -1,5 +1,5 @@
 @props([
-    'label' => __('mfw.edit'),
+    'label' => __('mfw::mfw.edit'),
     'route' => '#',
     'tag' => null,
     'with_label' => false,

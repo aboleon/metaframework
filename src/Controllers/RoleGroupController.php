@@ -18,7 +18,7 @@ class RoleGroupController extends Controller
 
     public function index(): Renderable
     {
-        abort_unless($this->canManageRoleGroups(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoleGroups(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         return view('mfw::role-groups.index')->with([
             'groups' => RoleGroup::query()
@@ -30,32 +30,32 @@ class RoleGroupController extends Controller
 
     public function create(): Renderable
     {
-        abort_unless($this->canManageRoleGroups(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoleGroups(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         return view('mfw::role-groups.form')->with([
             'group' => new RoleGroup,
             'route' => route('mfw.role-groups.store'),
             'method' => null,
-            'title' => __('mfw-users.role_groups.create_title'),
+            'title' => __('mfw::mfw-users.role_groups.create_title'),
         ]);
     }
 
     public function edit(RoleGroup $roleGroup): Renderable
     {
-        abort_unless($this->canManageRoleGroups(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageRoleGroups(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         return view('mfw::role-groups.form')->with([
             'group' => $roleGroup,
             'route' => route('mfw.role-groups.update', $roleGroup),
             'method' => 'PUT',
-            'title' => __('mfw-users.role_groups.edit_title'),
+            'title' => __('mfw::mfw-users.role_groups.edit_title'),
         ]);
     }
 
     public function store(): RedirectResponse
     {
-        if (!$this->canManageRoleGroups()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoleGroups()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -70,7 +70,7 @@ class RoleGroupController extends Controller
                 'description' => $this->normalizeTranslatablePayload($validated['description'] ?? null, false),
             ]);
 
-            $this->responseSuccess(__('mfw-users.role_groups.created'));
+            $this->responseSuccess(__('mfw::mfw-users.role_groups.created'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -82,8 +82,8 @@ class RoleGroupController extends Controller
 
     public function update(RoleGroup $roleGroup): RedirectResponse
     {
-        if (!$this->canManageRoleGroups()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoleGroups()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -98,7 +98,7 @@ class RoleGroupController extends Controller
                 'description' => $this->normalizeTranslatablePayload($validated['description'] ?? null, false),
             ]);
 
-            $this->responseSuccess(__('mfw-users.role_groups.updated'));
+            $this->responseSuccess(__('mfw::mfw-users.role_groups.updated'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -110,21 +110,21 @@ class RoleGroupController extends Controller
 
     public function destroy(RoleGroup $roleGroup): RedirectResponse
     {
-        if (!$this->canManageRoleGroups()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageRoleGroups()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
 
         if ($roleGroup->roles()->exists()) {
-            $this->responseError(__('mfw-users.role_groups.assigned_cannot_delete'));
+            $this->responseError(__('mfw::mfw-users.role_groups.assigned_cannot_delete'));
 
             return $this->sendResponse();
         }
 
         try {
             $roleGroup->delete();
-            $this->responseSuccess(__('mfw-users.role_groups.deleted'));
+            $this->responseSuccess(__('mfw::mfw-users.role_groups.deleted'));
         } catch (Throwable $e) {
             $this->responseException($e);
         }
@@ -152,7 +152,7 @@ class RoleGroupController extends Controller
 
         $validator->after(function ($validator): void {
             if ($this->normalizeTranslatablePayload(request()->input('label'), true) === null) {
-                $validator->errors()->add('label', __('validation.required', ['attribute' => __('mfw-users.role_groups.label')]));
+                $validator->errors()->add('label', __('validation.required', ['attribute' => __('mfw::mfw-users.role_groups.label')]));
             }
         });
 
@@ -170,7 +170,7 @@ class RoleGroupController extends Controller
             return $parsed !== '' ? $parsed : null;
         }
 
-        if (!is_array($payload)) {
+        if (! is_array($payload)) {
             return $required ? null : null;
         }
 

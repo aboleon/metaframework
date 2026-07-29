@@ -17,7 +17,7 @@ class ReplicateModalLink extends Component
         public string $reference,
         public ?string $title = null,
     ) {
-        $this->title = $this->title ?: __('mfw.replicate');
+        $this->title = $this->title ?: __('mfw::mfw.replicate');
     }
 
     /**

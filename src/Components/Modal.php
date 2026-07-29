@@ -17,9 +17,9 @@ class Modal extends Component
         public array $params = [],
         public string $class = '',
     ) {
-        $this->question = $this->question ?? __('mfw.should_i_delete_record');
-        $this->reference = $this->reference ?? 'myModal' . $this->reference;
-        $this->title = $this->title ?? __('mfw.deletion');
+        $this->question = $this->question ?? __('mfw::mfw.should_i_delete_record');
+        $this->reference = $this->reference ?? 'myModal'.$this->reference;
+        $this->title = $this->title ?? __('mfw::mfw.deletion');
     }
 
     public function render(): Renderable

@@ -4,15 +4,15 @@
         <div class="d-flex align-items-center" id="topbar-actions">
             <a class="btn btn-sm btn-secondary mx-2" href="{{ route('mfw.roles.index') }}">
                 <i class="fa-solid fa-bars"></i>
-                {{ __('mfw.goback') }}
+                {{ __('mfw::mfw.goback') }}
             </a>
             <a class="btn btn-sm btn-outline-secondary mx-2" href="{{ route('mfw.role-groups.index') }}">
                 <i class="fa-solid fa-layer-group"></i>
-                {{ __('mfw-users.role_groups.nav') }}
+                {{ __('mfw::mfw-users.role_groups.nav') }}
             </a>
             <a class="btn btn-sm btn-success" href="{{ route('mfw.roles.create') }}">
                 <i class="fa-solid fa-circle-plus"></i>
-                {{ __('mfw-users.roles.create') }}
+                {{ __('mfw::mfw-users.roles.create') }}
             </a>
         </div>
     </x-slot>
@@ -30,8 +30,8 @@
             <div class="row">
                 <div class="col-xl-6 mb-3">
                     <x-mfw-inputable::input name="key"
-                                            :params="['placeholder' => __('mfw-users.roles.placeholder_key')]"
-                                            :label="__('mfw-users.role_groups.key')"
+                                            :params="['placeholder' => __('mfw::mfw-users.roles.placeholder_key')]"
+                                            :label="__('mfw::mfw-users.role_groups.key')"
                                             :readonly="(bool)$role->is_system"
                                             :value="old('key', $role->key)"
                                             :required="true" />
@@ -40,7 +40,7 @@
                 <div class="col-xl-6 mb-3">
                     <x-mfw-inputable::select
                             name="group_id"
-                            :label="__('mfw-users.roles.group')"
+                            :label="__('mfw::mfw-users.roles.group')"
                             :values="$groups"
                             :affected="(int) old('group_id', $role->group_id ?: ($defaultGroupId ?? 0))"
                             :nullable="false"
@@ -50,7 +50,7 @@
                     <input type="hidden" name="is_system" value="0">
                     <x-mfw-inputable::checkbox
                             name="is_system"
-                            :label="__('mfw-users.roles.system')"
+                            :label="__('mfw::mfw-users.roles.system')"
                             :affected="(bool) old('is_system', $role->is_system)"
                             :switch="true"
                             :value="1"

@@ -1,5 +1,5 @@
 @props([
-    'label' => __('mfw.browser-link'),
+    'label' => __('mfw::mfw.browser-link'),
     'route' => '#',
     'tag' => null,
     'with_label' => false,

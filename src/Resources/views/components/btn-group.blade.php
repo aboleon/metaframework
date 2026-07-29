@@ -10,6 +10,6 @@
             {{ str_starts_with($title, 'trans.') ? trans(str_replace('trans.','', $title)) : $title }}
         </label>
     @empty
-        {{ __('mfw.no_data_provided') }}
+        {{ __('mfw::mfw.no_data_provided') }}
     @endforelse
 </div>

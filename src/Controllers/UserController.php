@@ -25,10 +25,10 @@ class UserController extends Controller
 
     public function index(string $role): Renderable
     {
-        abort_unless($this->canManageUsers(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageUsers(), 403, __('mfw::mfw-users.errors.access_denied'));
 
-        if ($role === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers()) {
-            abort(403, __('mfw-users.errors.access_denied'));
+        if ($role === UserRoles::CORE_DEV_KEY && ! $this->canAccessDevUsers()) {
+            abort(403, __('mfw::mfw-users.errors.access_denied'));
         }
 
         $roles = $this->availableRoles();
@@ -46,13 +46,13 @@ class UserController extends Controller
             }
         }
 
-        if (!$showAllSystemUsers) {
+        if (! $showAllSystemUsers) {
             $this->applyRoleFilter($query, $role);
         }
         $this->applyOrder($query);
 
         $roleLabel = $showAllSystemUsers
-            ? __('mfw-users.users.index_system_title')
+            ? __('mfw::mfw-users.users.index_system_title')
             : ($roles[$role]['label'] ?? $role);
 
         return view('mfw::users.index')->with([
@@ -68,13 +68,13 @@ class UserController extends Controller
 
     public function create(?string $role = null): Renderable
     {
-        abort_unless($this->canManageUsers(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageUsers(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         $user = $this->newUserModel();
         $roles = $this->availableRoles();
         $roleKey = $role && array_key_exists($role, $roles) ? $role : null;
-        if ($roleKey === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers()) {
-            abort(403, __('mfw-users.errors.access_denied'));
+        if ($roleKey === UserRoles::CORE_DEV_KEY && ! $this->canAccessDevUsers()) {
+            abort(403, __('mfw::mfw-users.errors.access_denied'));
         }
         $forcedRole = $roleKey ? $roles[$roleKey] : null;
 
@@ -84,8 +84,8 @@ class UserController extends Controller
             'selectedRoleIds' => [],
             'forcedRole' => $forcedRole,
             'route' => route('mfw.users.store'),
-            'label' => __('mfw-users.users.add_title', [
-                'role' => $roleKey ? ($forcedRole['label'] ?? $roleKey) : __('mfw-users.users.any_role'),
+            'label' => __('mfw::mfw-users.users.add_title', [
+                'role' => $roleKey ? ($forcedRole['label'] ?? $roleKey) : __('mfw::mfw-users.users.any_role'),
             ]),
             'roleKey' => $roleKey ?: $this->defaultRoleKey(),
             'columns' => $this->editableColumns(),
@@ -95,7 +95,7 @@ class UserController extends Controller
 
     public function edit(int $userId): Renderable
     {
-        abort_unless($this->canManageUsers(), 403, __('mfw-users.errors.access_denied'));
+        abort_unless($this->canManageUsers(), 403, __('mfw::mfw-users.errors.access_denied'));
 
         $user = $this->findUserOrFail($userId, true);
         $this->assertCanManageTargetUser($user);
@@ -109,7 +109,7 @@ class UserController extends Controller
             'forcedRole' => null,
             'method' => 'put',
             'route' => route('mfw.users.update', $user->getKey()),
-            'label' => __('mfw-users.users.edit_title', [
+            'label' => __('mfw::mfw-users.users.edit_title', [
                 'role' => $roles[$roleKey]['label'] ?? $roleKey,
             ]),
             'roleKey' => $roleKey,
@@ -120,8 +120,8 @@ class UserController extends Controller
 
     public function store(): RedirectResponse
     {
-        if (!$this->canManageUsers()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageUsers()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -139,7 +139,7 @@ class UserController extends Controller
 
             $this->syncUserRoles($user, $this->requestedRoleIds());
 
-            $this->responseSuccess(__('mfw-users.users.created'));
+            $this->responseSuccess(__('mfw::mfw-users.users.created'));
             $this->responseNotice($passwordBroker->printPublicPassword());
             $this->redirect_to = route('mfw.users.index', $this->defaultRoleKey());
         } catch (Throwable $e) {
@@ -151,8 +151,8 @@ class UserController extends Controller
 
     public function update(int $userId): RedirectResponse
     {
-        if (!$this->canManageUsers()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageUsers()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -175,7 +175,7 @@ class UserController extends Controller
 
             $this->syncUserRoles($user, $this->requestedRoleIds());
 
-            $this->responseSuccess(__('mfw-users.users.updated'));
+            $this->responseSuccess(__('mfw::mfw-users.users.updated'));
             $this->redirect_to = route('mfw.users.index', $this->resolveRoleKey($user));
         } catch (Throwable $e) {
             $this->responseException($e);
@@ -186,8 +186,8 @@ class UserController extends Controller
 
     public function destroy(int $userId): RedirectResponse
     {
-        if (!$this->canManageUsers()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageUsers()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
@@ -198,10 +198,10 @@ class UserController extends Controller
         try {
             if ($this->supportsSoftDeletes()) {
                 $user->delete();
-                $this->responseSuccess(__('mfw-users.users.archived_success'));
+                $this->responseSuccess(__('mfw::mfw-users.users.archived_success'));
             } else {
                 $user->delete();
-                $this->responseSuccess(__('mfw-users.users.deleted_success'));
+                $this->responseSuccess(__('mfw::mfw-users.users.deleted_success'));
             }
         } catch (Throwable $e) {
             $this->responseException($e);
@@ -214,14 +214,14 @@ class UserController extends Controller
 
     public function restore(int $userId): RedirectResponse
     {
-        if (!$this->canManageUsers()) {
-            $this->responseError(__('mfw-users.errors.access_denied'));
+        if (! $this->canManageUsers()) {
+            $this->responseError(__('mfw::mfw-users.errors.access_denied'));
 
             return $this->sendResponse();
         }
 
-        if (!$this->supportsSoftDeletes()) {
-            $this->responseError(__('mfw-users.users.restore_not_supported'));
+        if (! $this->supportsSoftDeletes()) {
+            $this->responseError(__('mfw::mfw-users.users.restore_not_supported'));
 
             return $this->sendResponse();
         }
@@ -231,9 +231,9 @@ class UserController extends Controller
             $this->assertCanManageTargetUser($user);
             if (method_exists($user, 'restore')) {
                 $user->restore();
-                $this->responseSuccess(__('mfw-users.users.restored_success'));
+                $this->responseSuccess(__('mfw::mfw-users.users.restored_success'));
             } else {
-                $this->responseError(__('mfw-users.users.restore_not_supported'));
+                $this->responseError(__('mfw::mfw-users.users.restore_not_supported'));
             }
         } catch (Throwable $e) {
             $this->responseException($e);
@@ -250,7 +250,7 @@ class UserController extends Controller
 
         return (bool) $user
             && method_exists($user, 'hasRole')
-            && $user->hasRole(UserRoles::CORE_DEV_KEY . '|' . UserRoles::CORE_SUPER_ADMIN_KEY);
+            && $user->hasRole(UserRoles::CORE_DEV_KEY.'|'.UserRoles::CORE_SUPER_ADMIN_KEY);
     }
 
     private function canAccessDevUsers(): bool
@@ -264,13 +264,13 @@ class UserController extends Controller
 
     private function applyRoleFilter(Builder $query, string $role): void
     {
-        if (!$this->anyRoleAssignmentExists()) {
+        if (! $this->anyRoleAssignmentExists()) {
             return;
         }
 
         $roles = $this->availableRoles();
         $roleId = $roles[$role]['id'] ?? null;
-        if (!$roleId) {
+        if (! $roleId) {
             $query->whereRaw('1 = 0');
 
             return;
@@ -287,7 +287,7 @@ class UserController extends Controller
             $subQuery
                 ->select(DB::raw(1))
                 ->from('users_roles')
-                ->whereColumn('users_roles.user_id', $model->getTable() . '.' . $model->getKeyName())
+                ->whereColumn('users_roles.user_id', $model->getTable().'.'.$model->getKeyName())
                 ->where('users_roles.role_id', $roleId);
         });
     }
@@ -296,7 +296,7 @@ class UserController extends Controller
     {
         $table = $this->usersTable();
         $column = UserTypes::column();
-        if (!Schema::hasColumn($table, $column)) {
+        if (! Schema::hasColumn($table, $column)) {
             return;
         }
 
@@ -306,7 +306,7 @@ class UserController extends Controller
     private function eagerLoadRoles(Builder $query): void
     {
         $model = $query->getModel();
-        if (!method_exists($model, 'roles')) {
+        if (! method_exists($model, 'roles')) {
             return;
         }
 
@@ -352,7 +352,7 @@ class UserController extends Controller
         if ($columns['last_name']) {
             $rules['user.last_name'] = ['required', 'string', 'max:120'];
         }
-        if ($columns['name'] && (!$columns['first_name'] || !$columns['last_name'])) {
+        if ($columns['name'] && (! $columns['first_name'] || ! $columns['last_name'])) {
             $rules['user.name'] = ['required', 'string', 'max:160'];
         }
         if ($columns['email']) {
@@ -364,7 +364,7 @@ class UserController extends Controller
         }
 
         $mustValidatePassword = $user === null || request()->boolean('password_change');
-        if ($mustValidatePassword && !request()->boolean('random_password')) {
+        if ($mustValidatePassword && ! request()->boolean('random_password')) {
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
         }
 
@@ -375,7 +375,7 @@ class UserController extends Controller
     {
         $data = request()->input('user', []);
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return [];
         }
 
@@ -396,12 +396,12 @@ class UserController extends Controller
     private function requestedRoleIds(): array
     {
         $roles = request()->input('roles', []);
-        if (!is_array($roles)) {
+        if (! is_array($roles)) {
             return [];
         }
 
         $availableRoleIds = collect($this->availableRoles())
-            ->reject(fn (array $role, string $key): bool => $key === UserRoles::CORE_DEV_KEY && !$this->canAccessDevUsers())
+            ->reject(fn (array $role, string $key): bool => $key === UserRoles::CORE_DEV_KEY && ! $this->canAccessDevUsers())
             ->pluck('id')
             ->map(static fn ($item): int => (int) $item)
             ->all();
@@ -417,7 +417,7 @@ class UserController extends Controller
 
     private function syncUserRoles(Model $user, array $roleIds): void
     {
-        if (!Schema::hasTable('users_roles')) {
+        if (! Schema::hasTable('users_roles')) {
             return;
         }
 
@@ -446,7 +446,7 @@ class UserController extends Controller
      */
     private function selectedRoleIds(Model $user): array
     {
-        if (!Schema::hasTable('users_roles')) {
+        if (! Schema::hasTable('users_roles')) {
             return [];
         }
 
@@ -529,7 +529,7 @@ class UserController extends Controller
     private function anyRoleAssignmentExists(): bool
     {
         try {
-            if (!Schema::hasTable('users_roles')) {
+            if (! Schema::hasTable('users_roles')) {
                 return false;
             }
 
@@ -552,11 +552,11 @@ class UserController extends Controller
     private function assertCanManageTargetUser(Model $user): void
     {
         if (
-            !$this->canAccessDevUsers()
+            ! $this->canAccessDevUsers()
             && method_exists($user, 'hasRole')
             && $user->hasRole(UserRoles::CORE_DEV_KEY)
         ) {
-            abort(403, __('mfw-users.errors.access_denied'));
+            abort(403, __('mfw::mfw-users.errors.access_denied'));
         }
     }
 
@@ -571,8 +571,8 @@ class UserController extends Controller
     {
         $userClass = $this->userModelClass();
         $model = new $userClass;
-        if (!$model instanceof Model) {
-            abort(500, __('mfw-users.users.invalid_user_model'));
+        if (! $model instanceof Model) {
+            abort(500, __('mfw::mfw-users.users.invalid_user_model'));
         }
 
         return $model;
@@ -581,8 +581,8 @@ class UserController extends Controller
     private function userModelClass(): string
     {
         $userClass = config('auth.providers.users.model');
-        if (!is_string($userClass) || $userClass === '' || !class_exists($userClass)) {
-            abort(500, __('mfw-users.users.invalid_user_model'));
+        if (! is_string($userClass) || $userClass === '' || ! class_exists($userClass)) {
+            abort(500, __('mfw::mfw-users.users.invalid_user_model'));
         }
 
         return $userClass;

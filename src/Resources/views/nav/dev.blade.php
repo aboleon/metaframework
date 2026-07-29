@@ -2,20 +2,20 @@
 <li>
     <x-mfw::nav-opening-header title="MAINTENANCE" icon="fas fa-code"/>
     <ul class="nav child_menu">
-        <x-mfw::nav-link :route="route('mfw.users.index', 'super-admin')" :title="__('mfw-users.users.nav')"/>
-        <x-mfw::nav-link :route="route('mfw.role-groups.index')" :title="__('mfw-users.role_groups.nav')"/>
-        <x-mfw::nav-link :route="route('mfw.roles.index')" :title="__('mfw-users.roles.nav')"/>
+        <x-mfw::nav-link :route="route('mfw.users.index', 'super-admin')" :title="__('mfw::mfw-users.users.nav')"/>
+        <x-mfw::nav-link :route="route('mfw.role-groups.index')" :title="__('mfw::mfw-users.role_groups.nav')"/>
+        <x-mfw::nav-link :route="route('mfw.roles.index')" :title="__('mfw::mfw-users.roles.nav')"/>
         <li>
             <a href="#" class="mfw-dev-action" data-action="artisanMigrate">Migration DB</a>
         </li>
         <li>
             <x-mfw::simple-modal
                     id="mfw-dev-migrate-rollback"
-                    :title="__('mfw.migrate_rollback_confirm_title')"
+                    :title="__('mfw::mfw.migrate_rollback_confirm_title')"
                     text="<i class='fa fa-undo'></i> Migration Rollback DB"
-                    :body="__('mfw.migrate_rollback_confirm_message')"
-                    :confirm="__('mfw.confirm')"
-                    :cancel="__('mfw.cancel')"
+                    :body="__('mfw::mfw.migrate_rollback_confirm_message')"
+                    :confirm="__('mfw::mfw.confirm')"
+                    :cancel="__('mfw::mfw.cancel')"
                     confirmclass="btn-warning mfw-dev-migrate-rollback-confirm"/>
         </li>
         <li>

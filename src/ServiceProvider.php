@@ -78,7 +78,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__.'/../publishables/config/' => config_path(),
             __DIR__.'/../publishables/public/' => public_path(),
-            __DIR__.'/../publishables/lang/' => base_path('lang'),
             __DIR__.'/../publishables/database/' => database_path(),
             __DIR__.'/../publishables/resources/' => resource_path(),
         ], 'mfw-install');
@@ -104,7 +103,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function publishLang(): void
     {
         $this->publishes([
-            __DIR__.'/../publishables/lang/' => base_path('lang'),
+            __DIR__.'/Resources/lang/' => $this->app->langPath('vendor/mfw'),
         ], 'mfw-lang');
     }
 

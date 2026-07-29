@@ -4,11 +4,11 @@
         <div class="d-flex align-items-center" id="topbar-actions">
             <a class="btn btn-sm btn-secondary mx-2" href="{{ route('mfw.users.index', $roleKey) }}">
                 <i class="fa-solid fa-bars"></i>
-                {{ __('mfw.goback') }}
+                {{ __('mfw::mfw.goback') }}
             </a>
             <a class="btn btn-sm btn-success" href="{{ route('mfw.users.create_type', $roleKey) }}">
                 <i class="fa-solid fa-circle-plus"></i>
-                {{ __('mfw-users.users.add') }}
+                {{ __('mfw::mfw-users.users.add') }}
             </a>
         </div>
     </x-slot>
@@ -26,13 +26,13 @@
 
             @if(method_exists($account, 'trashed') && $account->trashed())
                 <div class="mb-3">
-                    <span class="mfw-status offline">{{ __('mfw.account_archived') }}</span>
+                    <span class="mfw-status offline">{{ __('mfw::mfw.account_archived') }}</span>
                 </div>
             @endif
 
             <div class="row gx-5 mb-4">
                 <div class="col-lg-6">
-                    <h4>{{ __('mfw-users.users.identity') }}</h4>
+                    <h4>{{ __('mfw::mfw-users.users.identity') }}</h4>
                     <div class="row">
                         @include('mfw::users.partials.identity', ['account' => $account, 'columns' => $columns])
                     </div>

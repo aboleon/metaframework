@@ -1,23 +1,23 @@
 <x-backend-layout>
     <x-slot name="header">
         <h2>
-            {{ __('mfw-users.users.index_title', ['role' => $roleLabel]) }}
+            {{ __('mfw::mfw-users.users.index_title', ['role' => $roleLabel]) }}
         </h2>
         <div class="d-flex align-items-center" id="topbar-actions">
             <a class="btn btn-sm btn-success" href="{{ $showAllSystemUsers ? route('mfw.users.create_type') : route('mfw.users.create_type', $role) }}">
                 <i class="fa-solid fa-circle-plus"></i>
-                {{ __('mfw-users.users.add') }}
+                {{ __('mfw::mfw-users.users.add') }}
             </a>
         </div>
     </x-slot>
 
     <div class="wg-tabs nav nav-tabs mb-3">
         <a href="{{ route('mfw.users.index', $role) }}" class="nav-link tab @if(!$archived) active @endif">
-            {{ __('mfw.active') }}
+            {{ __('mfw::mfw.active') }}
         </a>
         @if($supportsSoftDeletes)
             <a href="{{ route('mfw.users.archived', $role) }}" class="nav-link tab @if($archived) active @endif">
-                {{ __('mfw.archived') }}
+                {{ __('mfw::mfw.archived') }}
             </a>
         @endif
     </div>
@@ -57,16 +57,16 @@
             <thead>
             <tr>
                 @if($columns['first_name'] && $columns['last_name'])
-                    <th>{{ __('mfw-users.users.first_name') }}</th>
-                    <th>{{ __('mfw-users.users.last_name') }}</th>
+                    <th>{{ __('mfw::mfw-users.users.first_name') }}</th>
+                    <th>{{ __('mfw::mfw-users.users.last_name') }}</th>
                 @elseif($columns['name'])
-                    <th>{{ __('mfw-users.users.name') }}</th>
+                    <th>{{ __('mfw::mfw-users.users.name') }}</th>
                 @endif
                 @if($columns['email'])
-                    <th>{{ __('mfw-users.users.email') }}</th>
+                    <th>{{ __('mfw::mfw-users.users.email') }}</th>
                 @endif
-                <th>{{ __('mfw-users.users.table_roles') }}</th>
-                <th>{{ __('mfw-users.users.last_login') }}</th>
+                <th>{{ __('mfw::mfw-users.users.table_roles') }}</th>
+                <th>{{ __('mfw::mfw-users.users.last_login') }}</th>
                 <th width="160"></th>
             </tr>
             </thead>
@@ -99,7 +99,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ $colspan }}" class="text-center text-muted">{{ __('mfw.no_data_provided') }}</td>
+                    <td colspan="{{ $colspan }}" class="text-center text-muted">{{ __('mfw::mfw.no_data_provided') }}</td>
                 </tr>
             @endforelse
             </tbody>

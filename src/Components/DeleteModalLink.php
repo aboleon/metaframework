@@ -20,11 +20,11 @@ class DeleteModalLink extends Component
         public ?string $title = null,
         public array $params = []
     ) {
-        $this->title = $this->title ?: __('mfw.delete');
+        $this->title = $this->title ?: __('mfw::mfw.delete');
 
         if ($this->params) {
             foreach ($this->params as $param => $setting) {
-                $this->params_as_string .= $param . '="' . $setting . '" ';
+                $this->params_as_string .= $param.'="'.$setting.'" ';
             }
         }
     }

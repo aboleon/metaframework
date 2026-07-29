@@ -22,7 +22,7 @@ class TranslatableActions
         $payloadItems = (array) request('payload', []);
         $availableLocales = config('mfw.translatable.locales', []);
 
-        if ($sourceLocale === '' || !in_array($sourceLocale, $availableLocales, true)) {
+        if ($sourceLocale === '' || ! in_array($sourceLocale, $availableLocales, true)) {
             $this->responseError(__('mfw-support::mfw-support.ajax.request_cannot_be_interpreted'));
 
             return $this;
@@ -54,7 +54,7 @@ class TranslatableActions
             return $this;
         }
 
-        if (!config('mfw-api.deepl')) {
+        if (! config('mfw-api.deepl')) {
             $this->responseError(__('mfw-support::mfw-support.errors.error'));
 
             return $this;
@@ -64,7 +64,7 @@ class TranslatableActions
         $translations = $translator->translations($payload, $sourceLocale, $targetLocales);
 
         $this->responseElement('translations', $translations);
-        $this->responseSuccess(__('mfw.translation_complete'));
+        $this->responseSuccess(__('mfw::mfw.translation_complete'));
 
         return $this;
     }

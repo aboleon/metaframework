@@ -33,7 +33,7 @@ class Role extends Model implements TranslatableInterface
     {
         return [
             'label' => [
-                'label' => 'mfw-users.roles.label',
+                'label' => 'mfw::mfw-users.roles.label',
                 'required',
                 'class' => 'col-12',
             ],

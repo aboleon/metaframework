@@ -27,7 +27,7 @@
         </div>
 
         <x-mfw::modal :route="route('mfw.nav.destroy', $item->id)"
-                 :question="__('mfw.should_i_delete_record')"
+                 :question="__('mfw::mfw.should_i_delete_record')"
                  reference="destroy_{{ $item->id }}"/>
     </td>
 </tr>

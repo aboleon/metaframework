@@ -24,7 +24,7 @@ trait ValidationModelPropertiesTrait
     public function getInvalidPropertyMessage(): string
     {
         if (is_null($this->message)) {
-            $this->message = __('mfw.errors.error');
+            $this->message = __('mfw::mfw.errors.error');
         }
 
         return $this->message;
