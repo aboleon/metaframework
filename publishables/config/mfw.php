@@ -10,6 +10,11 @@ return [
     'urls' => [
         'backend' => 'panel'
     ],
+    'navigation' => [
+        'users_role' => 'super-admin',
+        'messages_route' => 'publisher.mails.index',
+        'log_viewer_route' => 'panel.log-viewer.index',
+    ],
     'tables' => [
         'user' => 'users'
     ],

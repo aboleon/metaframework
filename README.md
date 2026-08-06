@@ -132,31 +132,42 @@ to set up the database and seed the admin user.
 
 ---
 
-### 6. **Development/Maintenance Nav View**
+### 6. **Development/Maintenance Navigation**
 
-MetaFramework includes a maintenance navigation view (`dev.blade.php`) for common development operations:
-- Database migrations / rollback
-- Application cache reset
+The back-office navigation is package-owned so updates are shared by every application:
 
-**Publish for customization:**
-```bash
-php artisan mfw views
-```
-
-Or:
-```bash
-php artisan vendor:publish --provider="MetaFramework\ServiceProvider" --tag="mfw-views"
-```
-
-Published to: `resources/views/vendor/mfw/nav/dev.blade.php`
-
-**Include in layout:**
 ```blade
-@include('vendor.mfw.nav.dev')  {{-- published version --}}
-@include('mfw::nav.dev')         {{-- package version --}}
+<x-mfw::nav-sidebar />
 ```
 
-**Note:** Uses `@role('dev|super-admin')` directive for role-based visibility.
+The component includes the dashboard, website link, administration links, and the role-protected development menu. Applications may place their own menu items in the component slot. Do not publish or override the package navigation views.
+
+Applications can add links inside a package section from their `AppServiceProvider` without replacing the package view:
+
+```php
+use MetaFramework\Navigation\NavigationItem;
+use MetaFramework\Navigation\PanelNavigation;
+
+public function boot(PanelNavigation $navigation): void
+{
+    $navigation->extend('administration', NavigationItem::link(
+        'audit-log',
+        __('app.nav.audit_log'),
+        'bi bi-list-check',
+        static fn (): string => route('panel.audit.index'),
+    ));
+}
+```
+
+The item is appended to the existing `Administration` section, after Users, Messages, and Log Viewer. Use `NavigationItem::section()` with `register()` for a new top-level application section. Visibility can be controlled with the optional visibility closure. If the section key is invalid, the extension is ignored and a visible navigation warning is added instead of interrupting the application.
+
+The navigation assets are published to `public/vendor/mfw`. Because published files are copies, applications should either run this after a package update:
+
+```bash
+php artisan vendor:publish --tag=mfw-navigation-assets --force
+```
+
+or add the same command to the consuming application's Composer `post-update-cmd` hook. The package cannot modify the root application's Composer scripts automatically. The broader `mfw-assets` tag remains available for an explicit full package-asset publish, but should not be used as an automatic update hook when an application has custom MFW CSS.
 
 ## Roles & Access Management
 

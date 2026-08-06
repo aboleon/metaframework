@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use MetaFramework\Components\TranslatableTabs;
 use MetaFramework\Console\Install;
+use MetaFramework\Navigation\PanelNavigation;
 use MetaFramework\Polyglote\Events\TranslationHasBeenSetEvent as MetaTranslationHasBeenSetEvent;
 use MetaFramework\Polyglote\Translatable as MetaTranslatable;
 use MetaFramework\Services\SqlQueryIndexFilterRegistry;
@@ -27,6 +28,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->bind('translatable', SpatieTranslatable::class);
         $this->app->singleton(SqlQueryIndexFilterRegistry::class);
         $this->app->scoped(SqlQueryService::class);
+        $this->app->singleton(PanelNavigation::class);
     }
 
     public function boot(): void
@@ -64,7 +66,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishAuth();
         $this->publishAssets();
         $this->publishLang();
-        $this->publishViews();
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -98,6 +99,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__.'/../publishables/public/vendor/' => public_path('vendor/'),
         ], 'mfw-assets');
+
+        $this->publishes([
+            __DIR__.'/../publishables/public/vendor/mfw/css/mfw-nav-sidebar.css' => public_path('vendor/mfw/css/mfw-nav-sidebar.css'),
+            __DIR__.'/../publishables/public/vendor/mfw/js/dev-menu.js' => public_path('vendor/mfw/js/dev-menu.js'),
+            __DIR__.'/../publishables/public/vendor/mfw/js/nav-sidebar.js' => public_path('vendor/mfw/js/nav-sidebar.js'),
+        ], 'mfw-navigation-assets');
     }
 
     private function publishLang(): void
@@ -107,10 +114,4 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         ], 'mfw-lang');
     }
 
-    private function publishViews(): void
-    {
-        $this->publishes([
-            __DIR__.'/Resources/views/nav/' => resource_path('views/vendor/mfw/nav'),
-        ], 'mfw-views');
-    }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MetaFramework\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use MetaFramework\Actions\DevMaintenanceActions;
 use MetaFramework\Actions\TranslatableActions;
 use MetaFramework\Services\Validation\ValidationTrait;
 use MetaFramework\Support\Traits\Ajax;
@@ -81,6 +82,16 @@ class AjaxController extends Controller
         }
 
         return new ArtisanController()->ajaxMode()->migrate((bool) request('rollback'), (bool) request('confirmed'));
+    }
+
+    public function restartQueueWorkers(): array
+    {
+        return (new DevMaintenanceActions)->ajaxMode()->restartQueueWorkers()->fetchResponse();
+    }
+
+    public function runArtisanCommand(): array
+    {
+        return (new DevMaintenanceActions)->ajaxMode()->runArtisanCommand()->fetchResponse();
     }
 
     public function composerUpdateDev(): array

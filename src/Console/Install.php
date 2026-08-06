@@ -359,14 +359,9 @@ return [
     private function views()
     {
         $this->newLine();
-        $this->comment('Publishing views...');
+        $this->comment('Navigation views are package-owned and are no longer published into the application.');
         $this->comment('------------------------------------------');
 
-        $this->call('vendor:publish', [
-            '--provider' => 'MetaFramework\ServiceProvider',
-            '--tag' => 'mfw-views',
-        ]);
-
-        $this->comment('Views published successfully.');
+        $this->info('Use <x-mfw::nav-sidebar /> in the back-office layout.');
     }
 }
