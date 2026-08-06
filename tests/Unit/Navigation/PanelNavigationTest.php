@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Navigation;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use MetaFramework\Navigation\NavigationItem;
 use MetaFramework\Navigation\PanelNavigation;
@@ -76,6 +77,20 @@ class PanelNavigationTest extends TestCase
             $navigation->items()[3]->key,
         );
         $this->assertTrue($navigation->items()[3]->isNotice());
+    }
+
+    public function test_administration_is_rendered_after_the_application_slot(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-mfw::nav-sidebar>
+                <li class="mfw-nav-item"><span>Application menu</span></li>
+            </x-mfw::nav-sidebar>
+            BLADE);
+
+        $this->assertLessThan(
+            strpos($html, __('mfw::mfw.nav.administration')),
+            strpos($html, 'Application menu'),
+        );
     }
 
     public function test_navigation_views_are_not_published_as_application_overrides(): void

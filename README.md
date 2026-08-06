@@ -140,7 +140,7 @@ The back-office navigation is package-owned so updates are shared by every appli
 <x-mfw::nav-sidebar />
 ```
 
-The component includes the dashboard, website link, administration links, and the role-protected development menu. Applications may place their own menu items in the component slot. Do not publish or override the package navigation views.
+The component includes the dashboard, website link, administration links, and the role-protected development menu. The package always renders `Administration` immediately before `Dev`; applications should extend the section rather than reorder these shared items. Applications may place their own menu items in the component slot. Do not publish or override the package navigation views.
 
 Applications can add links inside a package section from their `AppServiceProvider` without replacing the package view:
 
