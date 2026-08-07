@@ -92,7 +92,7 @@
                             -
                         @endif
                     </td>
-                    <td>{{ $user->last_login_at?->format('d.m.Y H:i') ?? '-' }}</td>
+                    <td>{{ \Illuminate\Support\Carbon::make($user->last_login_at)?->format('d.m.Y H:i') ?? '-' }}</td>
                     <td class="text-end">
                         @include('mfw::users.partials.actions', ['data' => $user, 'role' => $role, 'supportsSoftDeletes' => $supportsSoftDeletes])
                     </td>

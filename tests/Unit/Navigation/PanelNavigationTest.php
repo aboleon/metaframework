@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Navigation;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use MetaFramework\Navigation\NavigationItem;
 use MetaFramework\Navigation\PanelNavigation;
@@ -62,6 +64,22 @@ class PanelNavigationTest extends TestCase
         );
     }
 
+    public function test_applications_can_override_the_users_navigation_route(): void
+    {
+        Route::get('custom-users', static fn (): string => '')->name('custom.users');
+        config([
+            'mfw.navigation.users_route' => 'custom.users',
+            'mfw.navigation.users_route_parameters' => [],
+        ]);
+        Route::getRoutes()->refreshNameLookups();
+
+        $users = collect((new PanelNavigation)->items()[1]->visibleChildren())
+            ->firstWhere('key', 'users');
+
+        $this->assertNotNull($users);
+        $this->assertSame(route('custom.users'), $users->url());
+    }
+
     public function test_invalid_extensions_are_rendered_as_navigation_warnings(): void
     {
         $navigation = new PanelNavigation;
@@ -98,5 +116,25 @@ class PanelNavigationTest extends TestCase
         $paths = LaravelServiceProvider::pathsToPublish(ServiceProvider::class, 'mfw-views');
 
         $this->assertSame([], $paths);
+    }
+
+    public function test_dev_menu_does_not_include_role_management_links(): void
+    {
+        $view = File::get(dirname(__DIR__, 3).'/src/Resources/views/components/dev-menu.blade.php');
+
+        $this->assertStringNotContainsString("route('mfw.users.index'", $view);
+        $this->assertStringNotContainsString("route('mfw.role-groups.index'", $view);
+        $this->assertStringNotContainsString("route('mfw.roles.index'", $view);
+    }
+
+    public function test_dev_menu_starts_with_the_artisan_command(): void
+    {
+        $view = File::get(dirname(__DIR__, 3).'/src/Resources/views/components/dev-menu.blade.php');
+        $artisanPosition = strpos($view, 'id="mfw-nav-dev-artisan"');
+        $migrationPosition = strpos($view, 'id="mfw-nav-dev-migrate"');
+
+        $this->assertIsInt($artisanPosition);
+        $this->assertIsInt($migrationPosition);
+        $this->assertLessThan($migrationPosition, $artisanPosition);
     }
 }

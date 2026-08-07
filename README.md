@@ -140,7 +140,7 @@ The back-office navigation is package-owned so updates are shared by every appli
 <x-mfw::nav-sidebar />
 ```
 
-The component includes the dashboard, website link, administration links, and the role-protected development menu. The package always renders `Administration` immediately before `Dev`; applications should extend the section rather than reorder these shared items. Applications may place their own menu items in the component slot. Do not publish or override the package navigation views.
+The component includes the dashboard, website link, administration links, and the role-protected development menu. The package always renders `Administration` immediately before `Dev`; applications should extend the section rather than reorder these shared items. On desktop, the sidebar has auto height and remains in normal document flow; the page provides the only scrollbar, so expanded Administration content pushes Dev downward without clipping it. Applications may place their own menu items in the component slot. Do not publish or override the package navigation views.
 
 Applications can add links inside a package section from their `AppServiceProvider` without replacing the package view:
 
@@ -168,6 +168,8 @@ php artisan vendor:publish --tag=mfw-navigation-assets --force
 ```
 
 or add the same command to the consuming application's Composer `post-update-cmd` hook. The package cannot modify the root application's Composer scripts automatically. The broader `mfw-assets` tag remains available for an explicit full package-asset publish, but should not be used as an automatic update hook when an application has custom MFW CSS.
+
+The core Users item targets `mfw.users.index` with the `super-admin` parameter by default. Applications with an existing Users screen can preserve it by overriding `mfw.navigation.users_route` and `mfw.navigation.users_route_parameters` in their application configuration.
 
 ## Roles & Access Management
 

@@ -9,6 +9,19 @@
             <li class="mfw-nav-subitem">
                 <x-mfw::simple-modal
                     class="mfw-nav-sublink"
+                    id="mfw-nav-dev-artisan"
+                    :title="__('mfw::mfw.dev.artisan.title')"
+                    :text="'<i class=\'bi bi-terminal\'></i> '.__('mfw::mfw.dev.artisan.menu')"
+                    :body="e(view('mfw::components.dev-artisan-command-form')->render())"
+                    :confirm="__('mfw::mfw.dev.artisan.submit')"
+                    :cancel="__('mfw::mfw.cancel')"
+                    confirmclass="btn-warning mfw-nav-dev-artisan-confirm"
+                    callback="ajaxRunMfwDevArtisanCommand"
+                />
+            </li>
+            <li class="mfw-nav-subitem">
+                <x-mfw::simple-modal
+                    class="mfw-nav-sublink"
                     id="mfw-nav-dev-migrate"
                     :title="__('mfw::mfw.migrate_confirm_title')"
                     text="<i class='bi bi-database'></i> {{ __('mfw::mfw.nav.migration_db') }}"
@@ -42,21 +55,6 @@
                     <i class="bi bi-arrow-repeat"></i> {{ __('mfw::mfw.dev.queue_restart') }}
                 </a>
             </li>
-            <li class="mfw-nav-subitem">
-                <a href="{{ route('mfw.users.index', 'super-admin') }}" class="mfw-nav-sublink">
-                    <i class="bi bi-people"></i> {{ ucfirst(trans_choice('mfw::mfw.user', 2)) }}
-                </a>
-            </li>
-            <li class="mfw-nav-subitem">
-                <a href="{{ route('mfw.role-groups.index') }}" class="mfw-nav-sublink">
-                    <i class="bi bi-diagram-3"></i> {{ __('mfw::mfw.nav.role_groups') }}
-                </a>
-            </li>
-            <li class="mfw-nav-subitem">
-                <a href="{{ route('mfw.roles.index') }}" class="mfw-nav-sublink">
-                    <i class="bi bi-shield-lock"></i> {{ __('mfw::mfw.nav.roles') }}
-                </a>
-            </li>
             @if (app()->environment('local'))
                 <li class="mfw-nav-subitem">
                     <a href="#" data-action="composerUpdateDev" class="mfw-nav-dev-action mfw-nav-sublink">
@@ -80,19 +78,6 @@
                 <a href="#" data-action="composerDumpAutoload" class="mfw-nav-dev-action mfw-nav-sublink">
                     <i class="bi bi-gear-wide-connected"></i> {{ __('mfw::mfw.nav.composer_dump_autoload') }}
                 </a>
-            </li>
-            <li class="mfw-nav-subitem">
-                <x-mfw::simple-modal
-                    class="mfw-nav-sublink"
-                    id="mfw-nav-dev-artisan"
-                    :title="__('mfw::mfw.dev.artisan.title')"
-                    :text="'<i class=\'bi bi-terminal\'></i> '.__('mfw::mfw.dev.artisan.menu')"
-                    :body="e(view('mfw::components.dev-artisan-command-form')->render())"
-                    :confirm="__('mfw::mfw.dev.artisan.submit')"
-                    :cancel="__('mfw::mfw.cancel')"
-                    confirmclass="btn-warning mfw-nav-dev-artisan-confirm"
-                    callback="ajaxRunMfwDevArtisanCommand"
-                />
             </li>
             {{ $slot ?? '' }}
         </ul>

@@ -12,6 +12,8 @@ return [
     ],
     'navigation' => [
         'users_role' => 'super-admin',
+        'users_route' => 'mfw.users.index',
+        'users_route_parameters' => 'super-admin',
         'messages_route' => 'publisher.mails.index',
         'log_viewer_route' => 'panel.log-viewer.index',
     ],

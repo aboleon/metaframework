@@ -9,9 +9,9 @@
     font-family: 'Nunito', sans-serif;
     font-size: 16px;
     min-height: 100vh;
-    height: 100vh;
+    height: auto;
     padding: 0;
-    position: fixed;
+    position: static;
     top: 0;
     left: 0;
     z-index: 1020;
@@ -166,15 +166,58 @@
 /* ========================================
    STATE: EXPANDED (nav-md)
    ======================================== */
-.nav-md #mfw-nav-sidebar { width: 230px; display: flex; flex-direction: column; overflow: hidden; }
-.nav-md #mfw-nav-menu-wrap { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; }
+.nav-md #mfw-nav-sidebar {
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+.nav-md #mfw-nav-menu-wrap { flex: 0 0 auto; overflow: visible; }
 .nav-md .right_col { margin-left: 230px; padding: 10px 20px 0; }
 .nav-md #mfw-nav-logo { width: 230px; }
+
+/* Normal-flow desktop panel layout: one page scrollbar, no sidebar scrollbar. */
+@media (min-width: 992px) {
+    .nav-md .mfw-nav-layout,
+    .nav-sm .mfw-nav-layout {
+        align-items: start;
+        background: linear-gradient(to right, #010f1e 0 230px, transparent 230px);
+        background-repeat: no-repeat;
+        background-size: 230px 100%;
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+    }
+
+    .nav-md .mfw-nav-layout > #mfw-nav-sidebar,
+    .nav-sm .mfw-nav-layout > #mfw-nav-sidebar {
+        float: none;
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+    }
+
+    .nav-md .mfw-nav-layout > .right_col,
+    .nav-sm .mfw-nav-layout > .right_col {
+        grid-column: 2;
+        grid-row: 1;
+        margin-left: 0 !important;
+        min-width: 0;
+    }
+
+    .nav-sm .mfw-nav-layout {
+        background-size: 70px 100%;
+        grid-template-columns: 70px minmax(0, 1fr);
+    }
+}
 
 /* ========================================
    STATE: COLLAPSED (nav-sm)
    ======================================== */
-.nav-sm #mfw-nav-sidebar { width: 70px; overflow: visible; }
+.nav-sm #mfw-nav-sidebar {
+    width: 70px;
+    height: auto;
+    overflow: visible;
+}
 .nav-sm #mfw-nav-menu-wrap { overflow: visible; }
 .nav-sm .right_col { margin-left: 70px; padding: 10px 20px; }
 .nav-sm #mfw-nav-logo { width: 70px; text-align: center; }
@@ -285,7 +328,9 @@
         flex-direction: column;
         height: 100vh;
         min-height: 100vh !important;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: fixed;
         width: min(280px, calc(100vw - 56px));
         z-index: 1050;
     }
@@ -299,9 +344,8 @@
 
     .nav-sm #mfw-nav-logo img { max-width: 160px; }
     .nav-sm #mfw-nav-menu-wrap {
-        flex: 1 1 auto;
-        overflow-x: hidden;
-        overflow-y: auto;
+        flex: 0 0 auto;
+        overflow: visible;
     }
 
     .nav-sm .mfw-nav-mobile-close {

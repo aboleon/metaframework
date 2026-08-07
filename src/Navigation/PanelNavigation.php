@@ -83,8 +83,8 @@ final class PanelNavigation
                         'users',
                         ucfirst(trans_choice('mfw::mfw.user', 2)),
                         'bi bi-people',
-                        'mfw.users.index',
-                        config('mfw.navigation.users_role', 'super-admin'),
+                        config('mfw.navigation.users_route', 'mfw.users.index'),
+                        config('mfw.navigation.users_route_parameters', config('mfw.navigation.users_role', 'super-admin')),
                     ),
                     $this->routeItem(
                         'messages',
