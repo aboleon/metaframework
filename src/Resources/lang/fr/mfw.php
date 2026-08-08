@@ -104,8 +104,8 @@ return [
         'role_groups' => 'Groupes de rôles',
         'roles' => 'Rôles',
         'composer_update_dev' => 'Composer Update (dev)',
-        'composer_install_prod' => 'Composer Install (prod)',
-        'composer_update_prod' => 'Composer Update (prod)',
+        'composer_install_prod' => 'Composer Install',
+        'composer_update_prod' => 'Composer Update',
         'composer_dump_autoload' => 'Composer Dump Autoload',
     ],
     'dev' => [
