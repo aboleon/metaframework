@@ -12,7 +12,8 @@
         <div class="mfw-nav-section">
             @php
                 $administration = null;
-                $itemsBeforeAdministration = [];
+                $website = null;
+                $itemsBeforeWebsite = [];
 
                 foreach ($items as $item) {
                     if ($item->key === 'administration') {
@@ -21,15 +22,25 @@
                         continue;
                     }
 
-                    $itemsBeforeAdministration[] = $item;
+                    if ($item->key === 'website') {
+                        $website = $item;
+
+                        continue;
+                    }
+
+                    $itemsBeforeWebsite[] = $item;
                 }
             @endphp
             <ul id="mfw-nav-menu" class="mfw-nav-menu">
-                @foreach ($itemsBeforeAdministration as $item)
+                @foreach ($itemsBeforeWebsite as $item)
                     @include('mfw::components.nav-item', ['item' => $item])
                 @endforeach
 
                 {{ $slot }}
+
+                @if ($website !== null)
+                    @include('mfw::components.nav-item', ['item' => $website])
+                @endif
 
                 @if ($administration !== null)
                     @include('mfw::components.nav-item', ['item' => $administration])

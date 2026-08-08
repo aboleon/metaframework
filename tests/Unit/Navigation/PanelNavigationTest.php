@@ -111,6 +111,25 @@ class PanelNavigationTest extends TestCase
         );
     }
 
+    public function test_website_is_rendered_immediately_before_administration(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-mfw::nav-sidebar>
+                <li class="mfw-nav-item"><span>Application menu</span></li>
+            </x-mfw::nav-sidebar>
+            BLADE);
+
+        $applicationPosition = strpos($html, 'Application menu');
+        $websitePosition = strpos($html, __('mfw::mfw.nav.website'));
+        $administrationPosition = strpos($html, __('mfw::mfw.nav.administration'));
+
+        $this->assertIsInt($applicationPosition);
+        $this->assertIsInt($websitePosition);
+        $this->assertIsInt($administrationPosition);
+        $this->assertLessThan($websitePosition, $applicationPosition);
+        $this->assertLessThan($administrationPosition, $websitePosition);
+    }
+
     public function test_navigation_views_are_not_published_as_application_overrides(): void
     {
         $paths = LaravelServiceProvider::pathsToPublish(ServiceProvider::class, 'mfw-views');
