@@ -161,8 +161,8 @@ class PanelNavigationTest extends TestCase
     {
         $css = File::get(dirname(__DIR__, 3).'/publishables/public/vendor/mfw/css/mfw-nav-sidebar.css');
 
-        $this->assertStringContainsString('.mfw-nav-dev-menu > .mfw-nav-link', $css);
         $this->assertStringContainsString('.mfw-nav-dev-menu .mfw-nav-sublink', $css);
-        $this->assertStringContainsString('font-size: 12px;', $css);
+        $this->assertStringContainsString(".mfw-nav-dev-menu .mfw-nav-sublink {\n    font-size: 12px;\n}", $css);
+        $this->assertStringNotContainsString('.mfw-nav-dev-menu > .mfw-nav-link', $css);
     }
 }
