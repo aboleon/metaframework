@@ -16,7 +16,7 @@ class RunArtisanCommandRequest extends FormRequest
 
         return $user !== null
             && ((method_exists($user, 'isDev') && $user->isDev())
-                || (method_exists($user, 'hasRole') && $user->hasRole(UserRoles::CORE_DEV_KEY)));
+                || (method_exists($user, 'hasRole') && $user->hasRole([UserRoles::CORE_DEV_KEY, UserRoles::CORE_SUPER_ADMIN_KEY])));
     }
 
     /**
@@ -41,12 +41,12 @@ class RunArtisanCommandRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $command = Str::of((string) $this->input('command'))->trim();
+        $command = Str::of((string)$this->input('command'))->trim();
 
         if ($command->test('/^php\s+artisan(?:\s+|$)/i')) {
             $command = $command->replaceMatches('/^php\s+artisan\s*/i', '');
         }
 
-        $this->merge(['command' => (string) $command]);
+        $this->merge(['command' => (string)$command]);
     }
 }
