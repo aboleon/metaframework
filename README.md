@@ -118,6 +118,28 @@ Published auth files include:
 
 ---
 
+### 4.3 **Publish Updated Navigation and Veil Assets**
+
+Updating or pushing the package does not automatically replace published assets in consuming applications. After updating the package, run this command in each application to refresh navigation scripts, styles, and the shared AJAX veil assets:
+
+```bash
+php artisan vendor:publish --tag=mfw-navigation-assets --force
+```
+
+To refresh only the veil stylesheet, shared `common.js` handlers, and loading image (available since `2.1.8`):
+
+```bash
+php artisan vendor:publish --tag=mfw-veil-assets --force
+```
+
+These commands overwrite the corresponding published files. Keep application customizations outside those package assets.
+
+The dev-menu component loads the veil stylesheet through the layout's `@stack('js')`. Its actions call `setVeil()` before the request and `removeVeil()` through the AJAX callback. Keep `#mfw-messages` available even when a page provides custom feedback; without it, the dev-menu handlers do not initialize.
+
+Applications that already define their own veil CSS or override `setVeil()` / `removeVeil()` should remove those duplicates when adopting the package implementation. For layouts without the dev-menu component, load `vendor/mfw/css/veil.css` explicitly alongside `vendor/mfw/js/common.js`.
+
+---
+
 ### 5. **Admin User & Seeds**
 
 The installer can also generate an admin user seeder and enhanced user factory. When prompted, provide the admin’s first name, last name, email, and password (leave blank to auto-generate). You can choose which role should be assigned to that admin.
