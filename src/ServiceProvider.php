@@ -97,6 +97,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function publishAssets(): void
     {
         $this->publishes([
+            __DIR__.'/../publishables/public/vendor/mfw/css/veil.css' => public_path('vendor/mfw/css/veil.css'),
+            __DIR__.'/../publishables/public/vendor/mfw/js/common.js' => public_path('vendor/mfw/js/common.js'),
+            __DIR__.'/../publishables/public/system/loading.svg' => public_path('system/loading.svg'),
+        ], ['mfw-veil-assets', 'mfw-navigation-assets']);
+
+        $this->publishes([
             __DIR__.'/../publishables/public/vendor/' => public_path('vendor/'),
         ], 'mfw-assets');
 
@@ -113,5 +119,4 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__.'/Resources/lang/' => $this->app->langPath('vendor/mfw'),
         ], 'mfw-lang');
     }
-
 }

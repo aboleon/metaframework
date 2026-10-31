@@ -137,6 +137,23 @@ class PanelNavigationTest extends TestCase
         $this->assertSame([], $paths);
     }
 
+    public function test_veil_assets_can_be_published_without_overwriting_other_panel_styles(): void
+    {
+        $paths = LaravelServiceProvider::pathsToPublish(ServiceProvider::class, 'mfw-veil-assets');
+
+        $this->assertCount(3, $paths);
+        foreach ($paths as $source => $destination) {
+            $this->assertFileExists($source);
+            $this->assertStringStartsWith(public_path(), $destination);
+        }
+        $this->assertContains(public_path('vendor/mfw/css/veil.css'), $paths);
+        $this->assertContains(public_path('vendor/mfw/js/common.js'), $paths);
+        $this->assertNotContains(public_path('vendor/mfw/css/panel.css'), $paths);
+        $navigationPaths = LaravelServiceProvider::pathsToPublish(ServiceProvider::class, 'mfw-navigation-assets');
+        $this->assertContains(public_path('vendor/mfw/css/veil.css'), $navigationPaths);
+        $this->assertContains(public_path('vendor/mfw/js/common.js'), $navigationPaths);
+    }
+
     public function test_dev_menu_does_not_include_role_management_links(): void
     {
         $view = File::get(dirname(__DIR__, 3).'/src/Resources/views/components/dev-menu.blade.php');

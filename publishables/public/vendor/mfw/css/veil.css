@@ -1,0 +1,56 @@
+.veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: .9;
+    border-radius: 5px;
+    cursor: wait;
+    z-index: 9;
+}
+
+.veil .loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 120px !important;
+    height: 120px !important;
+    transform: translate(-50%, -50%);
+}
+
+html.mfw-veil-scroll-lock,
+body.mfw-veil-scroll-lock {
+    overflow: hidden;
+}
+
+.mfw-veil-scope--positioned {
+    position: relative;
+}
+
+body > .veil.mfw-veil--viewport {
+    position: fixed;
+    left: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    z-index: 1045;
+}
+
+body.nav-md > .veil.mfw-veil--viewport {
+    left: 230px;
+}
+
+body.nav-sm > .veil.mfw-veil--viewport {
+    left: 70px;
+}
+
+@media (max-width: 991px) {
+    body.nav-md > .veil.mfw-veil--viewport {
+        left: 0;
+    }
+
+    body.nav-sm > .veil.mfw-veil--viewport {
+        left: min(280px, calc(100vw - 56px));
+    }
+}

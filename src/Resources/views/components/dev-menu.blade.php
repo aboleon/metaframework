@@ -1,4 +1,7 @@
 @role('dev|super-admin')
+    @pushonce('js', 'mfw-veil')
+        <link rel="stylesheet" href="{{ asset('vendor/mfw/css/veil.css') }}">
+    @endpushonce
     <li class="mfw-nav-item mfw-nav-dev-menu" data-ajax="{{ route('mfw.ajax') }}">
         <a href="#" class="mfw-nav-link">
             <i class="bi bi-code-slash"></i>

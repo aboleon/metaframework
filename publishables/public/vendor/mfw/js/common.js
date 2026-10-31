@@ -1,9 +1,34 @@
 function setVeil(container) {
-    container.prepend('<div class="veil" style="border-radius:25px"><img class="loading" src="/system/loading.svg" width="40" alt="..."></div>');
+    const target = container && container.jquery ? container : $(container);
+
+    if (!target.length || target.children('.veil').length) {
+        return;
+    }
+
+    const isViewportVeil = target.is('body');
+
+    if (!isViewportVeil && target.css('position') === 'static') {
+        target.addClass('mfw-veil-scope--positioned');
+    }
+
+    target.attr('aria-busy', 'true');
+    target.prepend(
+        '<div class="veil ' + (isViewportVeil ? 'mfw-veil--viewport' : 'mfw-veil--scoped') + '">' +
+        '<img class="loading" src="/system/loading.svg" width="40" alt="..."></div>'
+    );
+
+    if (isViewportVeil) {
+        $('html, body').addClass('mfw-veil-scroll-lock');
+    }
 }
 
 function removeVeil() {
-    $('.veil').remove();
+    const veils = $('.veil');
+    const containers = veils.parent();
+
+    veils.remove();
+    containers.removeAttr('aria-busy').removeClass('mfw-veil-scope--positioned');
+    $('html, body').removeClass('mfw-veil-scroll-lock');
 }
 function sendMailFromModalResponse(result) {
     let myModal = $('#' + result.input.modal_id);
